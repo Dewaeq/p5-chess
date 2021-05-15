@@ -1,0 +1,396 @@
+class Board {
+    constructor(
+        // Add a blank piece for type hinting
+        pieces = [new Piece(-1, -1, true, "P")],
+        whKingIndex = 0,
+        blKingIndex = 0,
+        playerInCheck = 0,
+        lastMove = [],
+    ) {
+        this.pieces = pieces;
+        this.whKingInd = whKingIndex;
+        this.blKingInd = blKingIndex;
+        // -1 means black is in check, 1 means white is in check
+        this.playerInCheck = playerInCheck;
+        // Format is [piecInd, fromX, fromY, toX, toY, takenPieceInd?]
+        this.lastMove = lastMove;
+    }
+
+    show() {
+        background(0);
+        noStroke();
+        for (let i = 0; i < 8; i++) {
+            for (let j = 0; j < 8; j++) {
+                let isWhite = (i + j) % 2 === 0;
+
+                fill(isWhite ? "#F1D7C1" : "#BC5448");
+                rect(i * tileSize, j * tileSize, tileSize, tileSize);
+            }
+        }
+        this.pieces.forEach((piece) => {
+            piece.show();
+        });
+    }
+
+    undoLastMove() {
+        const [piecInd, fromX, fromY, toX, toY, takenPieceInd] = this.lastMove;
+        // Was it a castling move?
+        if (piecInd === this.whKingInd || piecInd === this.blKingInd) {
+
+            // Castle left
+            if (fromX - 2 === toX) {
+                let rookIndex = this.getIndexOfPieceAt(toX + 1, toY);
+                this.pieces[rookIndex].setPiecePosition([0, toY]);
+            }
+            // Castle right
+            else if (fromX + 2 === toX) {
+                let rookIndex = this.getIndexOfPieceAt(toX - 1, toY);
+                this.pieces[rookIndex].setPiecePosition([7, toY]);
+            }
+        }
+        // Did this move take a piece?
+        else if (takenPieceInd !== undefined && takenPieceInd !== null) {
+            this.pieces[takenPieceInd].setPiecePosition([toX, toY]);
+            this.pieces[takenPieceInd].taken = false;
+        }
+
+        this.pieces[piecInd].setPiecePosition([fromX, fromY]);
+    }
+
+    // Same as movePiece, except this doesnt show
+    // on the UI.
+    testMove(piecInd, toX, toY) {
+        if (piecInd < 0) return false;
+        if (this.pieces[piecInd].taken) return false;
+
+        let tookAPiece = false;
+        let indPiecTaken;
+
+        // Does this move take a piece?
+        if (this.pieces[piecInd].canTake(this, toX, toY)) {
+            indPiecTaken = this.getIndexOfPieceAt(toX, toY);
+            tookAPiece = true;
+
+            if (indPiecTaken === this.blKingInd || indPiecTaken === this.whKingInd) {
+                console.log("fuck");
+            }
+            this.pieces[indPiecTaken].taken = true;
+            this.pieces[indPiecTaken].hasMoved = true;
+            // console.log("tering");
+            this.pieces[indPiecTaken].x = -1;
+            this.pieces[indPiecTaken].y = -1;
+            console.assert(this.pieces[indPiecTaken].taken);
+        }
+
+        // Is this a castling move?
+        if (piecInd === this.whKingInd || piecInd === this.blKingInd) {
+            let king = this.pieces[piecInd];
+
+            // Castle left
+            if (toX === king.x - 2) {
+                let rookIndex = this.getIndexOfPieceAt(0, king.y);
+                console.log(rookIndex);
+                console.log(this.pieces);
+                this.pieces[rookIndex].moveTo(king.x - 1, king.y);
+            }
+            // Castle right
+            else if (toX === king.x + 2) {
+                let rookIndex = this.getIndexOfPieceAt(7, king.y);
+                console.log(rookIndex);
+                console.log(this.pieces);
+                this.pieces[rookIndex].moveTo(king.x + 1, king.y);
+            }
+        }
+
+        // Can this piece promote?
+        if (this.pieces[piecInd].type.toUpperCase() === "P") {
+            let promoteRank = this.pieces[piecInd].isWhite ? 0 : 7;
+
+            if (toY === promoteRank) {
+                let oldPiece = this.pieces[piecInd];
+
+                this.pieces[piecInd] = new Queen(
+                    toX,
+                    toY,
+                    oldPiece.isWhite,
+                    "Q",
+                    false,
+                    true
+                );
+            }
+        }
+
+        this.lastMove = [piecInd, this.pieces[piecInd].x, this.pieces[piecInd].y, toX, toY];
+        if (tookAPiece) this.lastMove.push(indPiecTaken);
+
+        this.pieces[piecInd].moveTo(toX, toY);
+
+        // Did this move fix our check?
+        if (this.playerInCheck === (this.pieces[piecInd].isWhite ? 1 : -1) && !this.isKingInCheck(this.pieces[piecInd].isWhite)) {
+            this.playerInCheck = 0;
+        }
+    }
+
+    movePiece(piecInd, toX, toY) {
+        this.testMove(piecInd, toX, toY);
+        this.show();
+    }
+
+    fenToBoard(fenString) {
+        this.pieces = [];
+
+        /// Get rid of the extra data included in fen strings
+        /// like if the player can castle of if an en-passsant
+        /// is possible.
+        /// TODO: Might want to add this functionality in the future
+        let firstSpaceIndex = fenString.indexOf(" ");
+        fenString = fenString.substring(
+            0,
+            firstSpaceIndex > 0 ? firstSpaceIndex : fenString.length
+        );
+        let fenRows = fenString.split("/");
+        // This represents the total amount of pieces when the loop
+        // is complete
+        let i = 0;
+        for (let y = 0; y < fenRows.length; y++) {
+            let row = fenRows[y].split("");
+
+            let x = 0;
+            row.forEach((char) => {
+                if (char === "8") return;
+
+                if (isNumeric(char)) {
+                    return (x += parseInt(char));
+                }
+
+                let isWhite = isUppercase(char);
+                let piece = new Pawn(x, y, isWhite, "P");
+
+                switch (char.toUpperCase()) {
+                    case "K":
+                        piece = new King(x, y, isWhite, char);
+
+                        if (isWhite) this.whKingInd = i;
+                        else this.blKingInd = i;
+                        break;
+                    case "Q":
+                        piece = new Queen(x, y, isWhite, char);
+                        break;
+                    case "R":
+                        piece = new Rook(x, y, isWhite, char);
+                        break;
+                    case "B":
+                        piece = new Bishop(x, y, isWhite, char);
+                        break;
+                    case "N":
+                        piece = new Knight(x, y, isWhite, char);
+                        break;
+                    case "P":
+                        piece = new Pawn(x, y, isWhite, char);
+                        break;
+                }
+
+                this.pieces.push(piece);
+                i++;
+                x += 1;
+            });
+        }
+        this.show();
+    }
+
+    highLightMoves(moves, color = [10]) {
+        if (moves === undefined || moves.length === 0) return;
+        moves.forEach((move) => {
+            this.highLightMove(move[0], move[1], color);
+        });
+    }
+
+    highLightMove(x, y, color) {
+        fill(...color);
+        ellipse(
+            x * tileSize + tileSize / 2,
+            y * tileSize + tileSize / 2,
+            tileSize / 2,
+            tileSize / 2
+        );
+    }
+
+    validateMoves(movingPiece, moves = []) {
+        const piecInd = this.getIndexOfPieceAt(movingPiece.x, movingPiece.y);
+        let result = new MoveModel();
+
+        for (let i = 0; i < moves.length; i++) {
+            // Add the pieces index to the move array if it isnt there already
+            if (moves[i].length < 3) {
+                moves[i].push(piecInd);
+            }
+            const move = moves[i];
+            const oldPos = this.pieces[piecInd].getPiecePosition();
+            this.pieces[piecInd].setPiecePosition(move);
+
+            if (this.isKingInCheck(movingPiece.isWhite)) {
+                // 'Fakely' take the piece to check if it
+                // fixes the check position
+                if (movingPiece.canTake(this, move[0], move[1])) {
+                    const takenPieceIndex = this.getIndexOfPieceAt(move[0], move[1]);
+                    this.pieces[takenPieceIndex].setPiecePosition([-1, -1]);
+
+                    if (this.isKingInCheck(movingPiece.isWhite)) {
+                        result.unAllowedMoves.push(move);
+                    } else result.allowedMoves.push(move);
+
+                    this.pieces[takenPieceIndex].setPiecePosition(move);
+                } else {
+                    result.unAllowedMoves.push(move);
+                }
+
+            } else {
+                result.allowedMoves.push(move);
+            }
+            this.pieces[piecInd].setPiecePosition(oldPos);
+        }
+
+        // We might be mated if there arent any allowed moves
+        if (result.allowedMoves.length === 0 && this.isKingInCheck(movingPiece.isWhite) && this.playerInCheck !== (movingPiece.isWhite ? 1 : -1)) {
+            this.playerInCheck = (movingPiece.isWhite ? 1 : -1);
+            if (engine.generateMoves(this, movingPiece.isWhite).length === 0) {
+                this.checkmate(!movingPiece.isWhite);
+            }
+        }
+
+        // TODO: replace this with a more efficient check
+        // Stalemate detection
+        // WARNING: dont use this or else engine.generateMoves(...)
+        // will cause an infinite loop
+        /* if(result.allowedMoves.length === 0 && !this.isKingInCheck(movingPiece.isWhite)) {
+            if(engine.generateMoves(this, movingPiece.isWhite).length === 0) {
+                alert("stalemate");
+            }
+        } */
+
+        return result;
+    }
+
+    /// Static-ish functions, no data is modified
+    ///-------------------------------------------------------------------
+
+
+    clone() {
+        let clone = new Board();
+        for (let i = 0; i < this.pieces.length; i++) {
+            clone.pieces[i] = this.pieces[i].clone();
+        }
+        clone.whKingInd = this.whKingInd;
+        clone.blKingInd = this.blKingInd;
+        clone.playerInCheck = this.playerInCheck;
+        clone.lastMove = this.lastMove;
+
+        return clone;
+    }
+
+    // Return the index of the piece at the given
+    // coordinates or -1 if there is no piece there
+    getIndexOfPieceAt(x, y) {
+        for (let i = 0; i < this.pieces.length; i++) {
+            let piece = this.pieces[i];
+
+            let piecePosition = piece.getPiecePosition();
+
+            if (arrayEquals([x, y], piecePosition) && !piece.taken) return i;
+        }
+        return -1;
+    }
+
+    // Provide a single number as pieceInd or an array or numbers.
+    // If an array is provided, the function returns true if one or
+    // more elements are of the required type
+    pieceWithIndexIsOfType(piecInd, type) {
+        if (piecInd === undefined || piecInd === null) return false;
+        if (type === undefined || type === null) return false;
+
+        if (!Array.isArray(piecInd)) {
+            return this.pieces[piecInd].type.toUpperCase() === type.toUpperCase();
+        }
+        for (let i = 0; i < piecInd.length; i++) {
+            let index = piecInd[i];
+
+            if (this.pieces[index].type === type.toUpperCase()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    isSquareFree(x, y) {
+        if (x < 0) return false;
+        if (x > 7) return false;
+        if (y < 0) return false;
+        if (y > 7) return false;
+
+        let pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
+        return pieceIndex < 0;
+    }
+
+    // Is this square attacked?
+    // `isWhite` represents the color of the defender.
+    // use `validate` to add check detection
+    isSquareAttacked(x, y, isWhite, validate = true) {
+
+        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "P", validate))
+            return true;
+        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "N", validate))
+            return true;
+        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "B", validate))
+            return true;
+        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "R", validate))
+            return true;
+        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "Q", validate))
+            return true;
+        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "K", validate))
+            return true;
+
+        return false;
+    }
+
+    isSquareAttackedByPieceOfType(x, y, isWhite, type, validate) {
+        let piece;
+
+        if (type === "P") piece = new Pawn(x, y, isWhite, type);
+        else if (type === "N") piece = new Knight(x, y, isWhite, type);
+        else if (type === "B") piece = new Bishop(x, y, isWhite, type);
+        else if (type === "R") piece = new Rook(x, y, isWhite, type);
+        else if (type === "Q") piece = new Queen(x, y, isWhite, type);
+        else if (type === "K") piece = new King(x, y, isWhite, type);
+        else return false;
+
+        let attackedPieces = getAttackedPiecesIndices(piece.getPossibleMoves(this, validate).allowedMoves, this, piece);
+
+        if (this.pieceWithIndexIsOfType(attackedPieces, type)) {
+            return true;
+        }
+        return false;
+    }
+
+    // Return true if the `isWhite` is in mated.
+    checkmate(isWhite) {
+        alert("Checkmate: " + (isWhite ? "White won" : "Black won"));
+        // window.location.reload();
+    }
+
+    // Return true if the king `isWhite` is in check.
+    isKingInCheck(isWhite) {
+        // Below code is inspired by an idea of reddit user 'Aswole'
+        /*
+        * "One technique that I found more performant than iterating through each
+        * opposing piece and checking to see whether it can capture your king is
+        * to flip the script: check to see if your king can capture an opposing
+        * piece were it the same piece. So basically: search diagonals from your
+        * king for an opposing bishop/queen, search horizontally/vertically for
+        * rook/queen, and do the same for knights and pawns."
+        * */
+
+        let defKing = this.pieces[isWhite ? this.whKingInd : this.blKingInd];
+        return this.isSquareAttacked(defKing.x, defKing.y, isWhite, false);
+    }
+}

@@ -1,0 +1,11 @@
+Game TODO:
+    x Piece promoting
+        - Done but you can only promote to a queen rn
+    - En Passant
+    X Castling
+        - Done
+    x Check/Checkmate detection
+        - Check detection is done, mate isnt
+
+Engine TODO:
+    - Calculate positional and material difference
