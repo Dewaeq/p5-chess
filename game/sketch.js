@@ -64,6 +64,8 @@ function mousePressed() {
         blackMoves.sort(() => Math.random() - 0.5);
         const move = blackMoves[0];
 
+        if(move === undefined || move === null) alert("Stalemate or checkmate, idk");
+
         mainBoard.movePiece(move[2], move[0], move[1]);
         whitesTurn = true;
         return;
