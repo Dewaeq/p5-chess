@@ -56,43 +56,17 @@ function setup() {
 
 function mousePressed() {
 
-    /*if(!mainBoard.whitesTurn) {
-        let blackMoves = engine.generateMoves(mainBoard, false);
-        const move = blackMoves[0];
-
-        if(move === undefined || move === null) {
-            alert("Stalemate or checkmate, idk");
-            return;
-        }
-        
-        let bestMove = null;
-        // Black wants to achieve the lowest score possible, so start with the highest
-        let bestMoveValue = Number.POSITIVE_INFINITY;
-        
-        for(let i = 0; i < blackMoves.length; i++) {
-            const curMove = blackMoves[i];
-            const curMoveValue = engine.evaluateMove(curMove, mainBoard);
-            if(curMoveValue < bestMoveValue) {
-                bestMove = curMove;
-                bestMoveValue = curMoveValue;
-            }
-        }
-
-        mainBoard.movePiece(bestMove[2], bestMove[0], bestMove[1]);
-        mainBoard.whitesTurn = true;
-        return;
-    }*/
-
     if (!mainBoard.whitesTurn) {
+        const [bestMove, moveValue] = engine.makeBestMove(mainBoard, 2, false);
 
-        const [bestMove, moveValue] = engine.minimaxRoot(mainBoard, 2, false);
-        console.log(bestMove);
+        
         if (bestMove === null || bestMove === undefined) {
             alert("Mate or error, idk and i really need to fix this");
             // window.location.reload();
             return;
         }
-
+        
+        console.log("Engines move: ", bestMove);
         mainBoard.movePiece(bestMove[2], bestMove[0], bestMove[1]);
         // mainBoard.show();
 

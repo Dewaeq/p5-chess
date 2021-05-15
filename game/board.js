@@ -6,7 +6,7 @@ class Board {
         whKingIndex = 0,
         blKingIndex = 0,
         playerInCheck = 0,
-        lastMove = [],
+        lastMove = []
     ) {
         this.whitesTurn = whitesTurn;
         this.pieces = pieces;
@@ -19,6 +19,10 @@ class Board {
     }
 
     show() {
+        // Very bad mate check
+        if (this.pieces[this.blKingInd].taken) return this.checkmate(true);
+        if (this.pieces[this.whKingInd].taken) return this.checkmate(false);
+
         background(0);
         noStroke();
         for (let i = 0; i < 8; i++) {
@@ -35,14 +39,13 @@ class Board {
     }
 
     undoLastMove() {
-        if(this.lastMove.length === 0) {
+        if (this.lastMove.length === 0) {
             throw "Cant undo last move, there are no moves saved in memory";
         }
 
         const [piecInd, fromX, fromY, toX, toY, takenPieceInd] = this.lastMove;
         // Was it a castling move?
         if (piecInd === this.whKingInd || piecInd === this.blKingInd) {
-
             // Castle left
             if (fromX - 2 === toX) {
                 let rookIndex = this.getIndexOfPieceAt(toX + 1, toY);
@@ -67,7 +70,9 @@ class Board {
     // on the UI.
     testMove(piecInd, toX, toY) {
         if (piecInd < 0) return false;
-        if (this.pieces[piecInd].taken) return false;
+        if (this.pieces[piecInd].taken) {
+            return false;
+        }
 
         let tookAPiece = false;
         let indPiecTaken;
@@ -77,7 +82,10 @@ class Board {
             indPiecTaken = this.getIndexOfPieceAt(toX, toY);
             tookAPiece = true;
 
-            if (indPiecTaken === this.blKingInd || indPiecTaken === this.whKingInd) {
+            if (
+                indPiecTaken === this.blKingInd ||
+                indPiecTaken === this.whKingInd
+            ) {
                 console.log("fuck");
             }
             this.pieces[indPiecTaken].taken = true;
@@ -120,13 +128,22 @@ class Board {
             }
         }
 
-        this.lastMove = [piecInd, this.pieces[piecInd].x, this.pieces[piecInd].y, toX, toY];
+        this.lastMove = [
+            piecInd,
+            this.pieces[piecInd].x,
+            this.pieces[piecInd].y,
+            toX,
+            toY,
+        ];
         if (tookAPiece) this.lastMove.push(indPiecTaken);
 
         this.pieces[piecInd].moveTo(toX, toY);
 
         // Did this move fix our check?
-        if (this.playerInCheck === (this.pieces[piecInd].isWhite ? 1 : -1) && !this.isKingInCheck(this.pieces[piecInd].isWhite)) {
+        if (
+            this.playerInCheck === (this.pieces[piecInd].isWhite ? 1 : -1) &&
+            !this.isKingInCheck(this.pieces[piecInd].isWhite)
+        ) {
             this.playerInCheck = 0;
         }
     }
@@ -232,7 +249,10 @@ class Board {
                 // 'Fakely' take the piece to check if it
                 // fixes the check position
                 if (movingPiece.canTake(this, move[0], move[1])) {
-                    const takenPieceIndex = this.getIndexOfPieceAt(move[0], move[1]);
+                    const takenPieceIndex = this.getIndexOfPieceAt(
+                        move[0],
+                        move[1]
+                    );
                     this.pieces[takenPieceIndex].setPiecePosition([-1, -1]);
 
                     if (this.isKingInCheck(movingPiece.isWhite)) {
@@ -243,7 +263,6 @@ class Board {
                 } else {
                     result.unAllowedMoves.push(move);
                 }
-
             } else {
                 result.allowedMoves.push(move);
             }
@@ -251,8 +270,12 @@ class Board {
         }
 
         // We might be mated if there arent any allowed moves
-        if (result.allowedMoves.length === 0 && this.isKingInCheck(movingPiece.isWhite) && this.playerInCheck !== (movingPiece.isWhite ? 1 : -1)) {
-            this.playerInCheck = (movingPiece.isWhite ? 1 : -1);
+        if (
+            result.allowedMoves.length === 0 &&
+            this.isKingInCheck(movingPiece.isWhite) &&
+            this.playerInCheck !== (movingPiece.isWhite ? 1 : -1)
+        ) {
+            this.playerInCheck = movingPiece.isWhite ? 1 : -1;
             if (engine.generateMoves(this, movingPiece.isWhite).length === 0) {
                 // this.checkmate(!movingPiece.isWhite);
                 console.log("this should be mate ?????");
@@ -274,7 +297,6 @@ class Board {
 
     /// Static-ish functions, no data is modified
     ///-------------------------------------------------------------------
-
 
     clone() {
         let clone = new Board();
@@ -311,7 +333,9 @@ class Board {
         if (type === undefined || type === null) return false;
 
         if (!Array.isArray(piecInd)) {
-            return this.pieces[piecInd].type.toUpperCase() === type.toUpperCase();
+            return (
+                this.pieces[piecInd].type.toUpperCase() === type.toUpperCase()
+            );
         }
         for (let i = 0; i < piecInd.length; i++) {
             let index = piecInd[i];
@@ -338,7 +362,6 @@ class Board {
     // `isWhite` represents the color of the defender.
     // use `validate` to add check detection
     isSquareAttacked(x, y, isWhite, validate = true) {
-
         if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "P", validate))
             return true;
         if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "N", validate))
@@ -366,7 +389,11 @@ class Board {
         else if (type === "K") piece = new King(x, y, isWhite, type);
         else return false;
 
-        let attackedPieces = getAttackedPiecesIndices(piece.getPossibleMoves(this, validate).allowedMoves, this, piece);
+        let attackedPieces = getAttackedPiecesIndices(
+            piece.getPossibleMoves(this, validate).allowedMoves,
+            this,
+            piece
+        );
 
         if (this.pieceWithIndexIsOfType(attackedPieces, type)) {
             return true;
@@ -384,13 +411,13 @@ class Board {
     isKingInCheck(isWhite) {
         // Below code is inspired by an idea of reddit user 'Aswole'
         /*
-        * "One technique that I found more performant than iterating through each
-        * opposing piece and checking to see whether it can capture your king is
-        * to flip the script: check to see if your king can capture an opposing
-        * piece were it the same piece. So basically: search diagonals from your
-        * king for an opposing bishop/queen, search horizontally/vertically for
-        * rook/queen, and do the same for knights and pawns."
-        * */
+         * "One technique that I found more performant than iterating through each
+         * opposing piece and checking to see whether it can capture your king is
+         * to flip the script: check to see if your king can capture an opposing
+         * piece were it the same piece. So basically: search diagonals from your
+         * king for an opposing bishop/queen, search horizontally/vertically for
+         * rook/queen, and do the same for knights and pawns."
+         * */
 
         let defKing = this.pieces[isWhite ? this.whKingInd : this.blKingInd];
         return this.isSquareAttacked(defKing.x, defKing.y, isWhite, false);
