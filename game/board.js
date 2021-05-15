@@ -56,7 +56,6 @@ class Board {
         }
         // Did this move take a piece?
         else if (takenPieceInd !== undefined && takenPieceInd !== null) {
-            console.log("undoing move that took a piece");
             this.pieces[takenPieceInd].setPiecePosition([toX, toY]);
             this.pieces[takenPieceInd].taken = false;
         }
@@ -83,10 +82,8 @@ class Board {
             }
             this.pieces[indPiecTaken].taken = true;
             this.pieces[indPiecTaken].hasMoved = true;
-            // console.log("tering");
             this.pieces[indPiecTaken].x = -1;
             this.pieces[indPiecTaken].y = -1;
-            console.assert(this.pieces[indPiecTaken].taken);
         }
 
         // Is this a castling move?
@@ -257,7 +254,8 @@ class Board {
         if (result.allowedMoves.length === 0 && this.isKingInCheck(movingPiece.isWhite) && this.playerInCheck !== (movingPiece.isWhite ? 1 : -1)) {
             this.playerInCheck = (movingPiece.isWhite ? 1 : -1);
             if (engine.generateMoves(this, movingPiece.isWhite).length === 0) {
-                this.checkmate(!movingPiece.isWhite);
+                // this.checkmate(!movingPiece.isWhite);
+                console.log("this should be mate ?????");
             }
         }
 

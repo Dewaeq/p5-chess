@@ -56,7 +56,7 @@ function setup() {
 
 function mousePressed() {
 
-    if(!mainBoard.whitesTurn) {
+    /*if(!mainBoard.whitesTurn) {
         let blackMoves = engine.generateMoves(mainBoard, false);
         const move = blackMoves[0];
 
@@ -81,24 +81,24 @@ function mousePressed() {
         mainBoard.movePiece(bestMove[2], bestMove[0], bestMove[1]);
         mainBoard.whitesTurn = true;
         return;
-    }
+    }*/
 
-    /* if (!mainBoard.whitesTurn) {
+    if (!mainBoard.whitesTurn) {
 
-        const [bestMove, moveValue] = engine.minimaxRoot(mainBoard, 3,false);
+        const [bestMove, moveValue] = engine.minimaxRoot(mainBoard, 2, false);
         console.log(bestMove);
-        if(bestMove === null || bestMove === undefined) {
+        if (bestMove === null || bestMove === undefined) {
             alert("Mate or error, idk and i really need to fix this");
             // window.location.reload();
             return;
         }
-        console.log(bestMove);
 
         mainBoard.movePiece(bestMove[2], bestMove[0], bestMove[1]);
+        // mainBoard.show();
 
         mainBoard.whitesTurn = true;
         return;
-    } */
+    }
 
     let x = floor(mouseX / tileSize);
     let y = floor(mouseY / tileSize);
