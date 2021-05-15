@@ -1,12 +1,14 @@
 class Board {
     constructor(
         // Add a blank piece for type hinting
+        whitesTurn = true,
         pieces = [new Piece(-1, -1, true, "P")],
         whKingIndex = 0,
         blKingIndex = 0,
         playerInCheck = 0,
         lastMove = [],
     ) {
+        this.whitesTurn = whitesTurn;
         this.pieces = pieces;
         this.whKingInd = whKingIndex;
         this.blKingInd = blKingIndex;
@@ -33,6 +35,10 @@ class Board {
     }
 
     undoLastMove() {
+        if(this.lastMove.length === 0) {
+            throw "Cant undo last move, there are no moves saved in memory";
+        }
+
         const [piecInd, fromX, fromY, toX, toY, takenPieceInd] = this.lastMove;
         // Was it a castling move?
         if (piecInd === this.whKingInd || piecInd === this.blKingInd) {
@@ -50,6 +56,7 @@ class Board {
         }
         // Did this move take a piece?
         else if (takenPieceInd !== undefined && takenPieceInd !== null) {
+            console.log("undoing move that took a piece");
             this.pieces[takenPieceInd].setPiecePosition([toX, toY]);
             this.pieces[takenPieceInd].taken = false;
         }
@@ -89,15 +96,11 @@ class Board {
             // Castle left
             if (toX === king.x - 2) {
                 let rookIndex = this.getIndexOfPieceAt(0, king.y);
-                console.log(rookIndex);
-                console.log(this.pieces);
                 this.pieces[rookIndex].moveTo(king.x - 1, king.y);
             }
             // Castle right
             else if (toX === king.x + 2) {
                 let rookIndex = this.getIndexOfPieceAt(7, king.y);
-                console.log(rookIndex);
-                console.log(this.pieces);
                 this.pieces[rookIndex].moveTo(king.x + 1, king.y);
             }
         }
@@ -280,6 +283,7 @@ class Board {
         for (let i = 0; i < this.pieces.length; i++) {
             clone.pieces[i] = this.pieces[i].clone();
         }
+        clone.whitesTurn = this.whitesTurn;
         clone.whKingInd = this.whKingInd;
         clone.blKingInd = this.blKingInd;
         clone.playerInCheck = this.playerInCheck;

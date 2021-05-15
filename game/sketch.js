@@ -8,8 +8,6 @@ let movingPiece = null;
 let moves;
 let engine;
 
-let whitesTurn = true;
-
 function preload() {
     let fileExt = ".png";
 
@@ -43,10 +41,9 @@ function setup() {
     mainBoard = new Board();
     engine = new Engine();
 
-    // mainBoard.show();
     mainBoard.fenToBoard(fenStartString);
 
-    /*let input = createInput(fenStartString);
+    let input = createInput(fenStartString);
     input.position((windowWidth - width * 0.85) / 2, windowHeight - 60);
     input.size(width * 0.85);
 
@@ -54,24 +51,39 @@ function setup() {
         let fenString =
             input.value().length > 0 ? input.value() : fenStartString;
         mainBoard.fenToBoard(fenString);
-    });*/
+    });
 }
 
 function mousePressed() {
 
-    if(!whitesTurn) {
+    if(!mainBoard.whitesTurn) {
         let blackMoves = engine.generateMoves(mainBoard, false);
-        blackMoves.sort(() => Math.random() - 0.5);
         const move = blackMoves[0];
 
-        if(move === undefined || move === null) alert("Stalemate or checkmate, idk");
+        if(move === undefined || move === null) {
+            alert("Stalemate or checkmate, idk");
+            return;
+        }
+        
+        let bestMove = null;
+        // Black wants to achieve the lowest score possible, so start with the highest
+        let bestMoveValue = Number.POSITIVE_INFINITY;
+        
+        for(let i = 0; i < blackMoves.length; i++) {
+            const curMove = blackMoves[i];
+            const curMoveValue = engine.evaluateMove(curMove, mainBoard);
+            if(curMoveValue < bestMoveValue) {
+                bestMove = curMove;
+                bestMoveValue = curMoveValue;
+            }
+        }
 
-        mainBoard.movePiece(move[2], move[0], move[1]);
-        whitesTurn = true;
+        mainBoard.movePiece(bestMove[2], bestMove[0], bestMove[1]);
+        mainBoard.whitesTurn = true;
         return;
     }
 
-    /* if (!whitesTurn) {
+    /* if (!mainBoard.whitesTurn) {
 
         const [bestMove, moveValue] = engine.minimaxRoot(mainBoard, 3,false);
         console.log(bestMove);
@@ -84,7 +96,7 @@ function mousePressed() {
 
         mainBoard.movePiece(bestMove[2], bestMove[0], bestMove[1]);
 
-        whitesTurn = true;
+        mainBoard.whitesTurn = true;
         return;
     } */
 
@@ -95,7 +107,7 @@ function mousePressed() {
         let pieceIndex = mainBoard.getIndexOfPieceAt(movingPiece.x, movingPiece.y);
         mainBoard.movePiece(pieceIndex, x, y);
 
-        whitesTurn = !whitesTurn;
+        mainBoard.whitesTurn = !mainBoard.whitesTurn;
         isMovingPiece = false;
         movingPiece = null;
         moves = null;
@@ -107,7 +119,7 @@ function mousePressed() {
     mainBoard.show();
 
     let pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
-    if (pieceIndex < 0 || mainBoard.pieces[pieceIndex].isWhite !== whitesTurn) {
+    if (pieceIndex < 0 || mainBoard.pieces[pieceIndex].isWhite !== mainBoard.whitesTurn) {
         isMovingPiece = false;
         return;
     }

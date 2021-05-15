@@ -27,7 +27,6 @@ class Engine {
             return Number.POSITIVE_INFINITY;
         }
 
-        let sum = 0;
         let blackMaterial = 0;
         let whiteMaterial = 0;
         let blackPositional = 0;
@@ -35,53 +34,36 @@ class Engine {
 
         for (let i = 0; i < board.pieces.length; i++) {
             const piece = board.pieces[i];
-            if (piece.taken || piece.x < 0 || piece.y < 0) {
+
+            if (piece.taken || piece.x < 0 || piece.y < 0) 
                 continue;
-            }
+            
 
-            blackMaterial += VALUE_MAP[piece.type] || 0;
-            whiteMaterial += VALUE_MAP[piece.type] || 0;
-            blackPositional += POSITIONAL_VALUE[false][piece.type][piece.y][piece.x];
-            whitePositional += POSITIONAL_VALUE[true][piece.type][piece.y][piece.x];
-
-            // Add the pieces value to the sum
-            /* if (piece.isWhite) sum += VALUE_MAP[piece.type];
-            else sum -= VALUE_MAP[piece.type];
-
-            // Add the positional values to the sum
             if (piece.isWhite) {
-                try {
-                    sum += POSITIONAL_VALUE[true][piece.type][piece.y][piece.x];
-                } catch(e) {
-                    console.error(e);
-                    console.log(board.pieces);
-                    console.log(piece);
-                }
+                whiteMaterial += VALUE_MAP[piece.type] ?? 0;
+                whitePositional += POSITIONAL_VALUE[true][piece.type][piece.y][piece.x] ?? 0;
             } else {
-                try {
-                    sum -= POSITIONAL_VALUE[false][piece.type][piece.y][piece.x];
-                } catch (e) {
-                    console.error(e);
-                    console.log(piece);
-                }
-            }*/
+                blackMaterial += VALUE_MAP[piece.type] ?? 0;
+                blackPositional += POSITIONAL_VALUE[false][piece.type][piece.y][piece.x] ?? 0;
+            }
         }
 
         const materialDifference = whiteMaterial - blackMaterial;
-
         const positionalDifference = whitePositional - blackPositional;
-
+        
         return materialDifference + positionalDifference;
-        return sum;
     }
 
     evaluateMove(move, board) {
-        board.movePiece(move[2], move[0], move[1]);
+        board.testMove(move[2], move[0], move[1]);
 
         if (board.pieces[board.blKingInd].taken) console.log("fking bs");
         if (board.pieces[board.whKingInd].taken) console.log("fking white bs");
 
-        return this.evaluateBoard(board);
+        const result = this.evaluateBoard(board);
+        board.undoLastMove();
+
+        return result;
     }
 
     minimaxRoot(board, depth, isMaximizing) {
@@ -106,8 +88,7 @@ class Engine {
 
     minimax(board, depth, alpha, beta, isMaximizing) {
         if (depth === 0) {
-            const sum = this.evaluateBoard(board);
-            return sum;
+            return this.evaluateBoard(board);
         }
 
         const moves = engine.generateMoves(board, false);
