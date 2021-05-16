@@ -35,7 +35,8 @@ function preload() {
 }
 
 function setup() {
-    createCanvas(tileSize * 8, tileSize * 8);
+    const canvas = createCanvas(tileSize * 8, tileSize * 8);
+    canvas.parent("#canvas");
     background(220);
 
     mainBoard = new Board();
@@ -43,7 +44,7 @@ function setup() {
 
     mainBoard.fenToBoard(fenStartString);
 
-    let input = createInput(fenStartString);
+    /* let input = createInput(fenStartString);
     input.position((windowWidth - width * 0.85) / 2, windowHeight - 60);
     input.size(width * 0.85);
 
@@ -51,26 +52,25 @@ function setup() {
         let fenString =
             input.value().length > 0 ? input.value() : fenStartString;
         mainBoard.fenToBoard(fenString);
-    });
+    }); */
 }
 
 function mousePressed() {
-
     if (!mainBoard.whitesTurn) {
         const [bestMove, moveValue] = engine.makeBestMove(mainBoard, 2, false);
 
-        
         if (bestMove === null || bestMove === undefined) {
             alert("Mate or error, idk and i really need to fix this");
             // window.location.reload();
             return;
         }
-        
-        console.log("Engines move: ", bestMove);
+
+        console.log("Engines move: ", bestMove, "with value: ", moveValue);
         mainBoard.movePiece(bestMove[2], bestMove[0], bestMove[1]);
         // mainBoard.show();
 
         mainBoard.whitesTurn = true;
+        setStatus();
         return;
     }
 
@@ -78,7 +78,10 @@ function mousePressed() {
     let y = floor(mouseY / tileSize);
 
     if (isMovingPiece && arrayContainsArray(moves.allowedMoves, [x, y], 2)) {
-        let pieceIndex = mainBoard.getIndexOfPieceAt(movingPiece.x, movingPiece.y);
+        let pieceIndex = mainBoard.getIndexOfPieceAt(
+            movingPiece.x,
+            movingPiece.y
+        );
         mainBoard.movePiece(pieceIndex, x, y);
 
         mainBoard.whitesTurn = !mainBoard.whitesTurn;
@@ -87,14 +90,19 @@ function mousePressed() {
         moves = null;
 
         mainBoard.show();
+        setStatus();
         return;
     }
 
     mainBoard.show();
 
     let pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
-    if (pieceIndex < 0 || mainBoard.pieces[pieceIndex].isWhite !== mainBoard.whitesTurn) {
+    if (
+        pieceIndex < 0 ||
+        mainBoard.pieces[pieceIndex].isWhite !== mainBoard.whitesTurn
+    ) {
         isMovingPiece = false;
+        setStatus();
         return;
     }
 
@@ -104,4 +112,16 @@ function mousePressed() {
     moves = mainBoard.pieces[pieceIndex].getPossibleMoves(mainBoard);
     mainBoard.highLightMoves(moves.allowedMoves, [10, 160, 50, 120]);
     mainBoard.highLightMoves(moves.unAllowedMoves, [140, 0, 20, 120]);
+    setStatus();
+}
+
+function setStatus() {
+    let globalSum = engine.evaluateBoard(mainBoard);
+    // map to a value between -1000 and 1000
+    console.log(globalSum);
+
+    $("#advantageBar").attr({
+        "aria-valuenow": `${globalSum}`,
+        style: `width: ${((globalSum + 2000) / 4000) * 100}%`,
+    });
 }

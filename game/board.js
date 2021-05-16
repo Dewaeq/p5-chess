@@ -38,6 +38,7 @@ class Board {
         });
     }
 
+    // TODO: restore the pieces `hasMoved` value
     undoLastMove() {
         if (this.lastMove.length === 0) {
             throw "Cant undo last move, there are no moves saved in memory";
@@ -45,7 +46,12 @@ class Board {
 
         const [piecInd, fromX, fromY, toX, toY, takenPieceInd] = this.lastMove;
         // Was it a castling move?
-        if (piecInd === this.whKingInd || piecInd === this.blKingInd) {
+        if (
+            (fromX - 2 === toX || fromX + 2 === toX) &&
+            (piecInd === this.whKingInd || piecInd === this.blKingInd)
+        ) {
+            console.log("this was a castling move");
+            console.log(this.lastMove);
             // Castle left
             if (fromX - 2 === toX) {
                 let rookIndex = this.getIndexOfPieceAt(toX + 1, toY);
@@ -70,9 +76,7 @@ class Board {
     // on the UI.
     testMove(piecInd, toX, toY) {
         if (piecInd < 0) return false;
-        if (this.pieces[piecInd].taken) {
-            return false;
-        }
+        if (this.pieces[piecInd].taken) return false;
 
         let tookAPiece = false;
         let indPiecTaken;

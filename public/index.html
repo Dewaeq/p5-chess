@@ -13,13 +13,26 @@
 
   <link rel="stylesheet" type="text/css" href="./style.css">
 
-  <!-- <script src="../libraries/p5.min.game"></script>
-    <script src="../libraries/p5.sound.min.game"></script> -->
+  <!-- P5 JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.3.1/p5.min.js" crossorigin="anonymous"></script>
 
-</head>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
-<body>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+    crossorigin="anonymous">
+    </script>
+
+
+  <!-- Bootstrap JS -->
+  <script defer src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"
+    integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous">
+    </script>
+
+  <!-- Custom JS -->
   <script src="../game/sketch.js"></script>
   <script src="../game/piece.js"></script>
   <script src="../game/board.js"></script>
@@ -27,7 +40,19 @@
   <script src="../game/move_model.js"></script>
   <script src="../engine/engine.js"></script>
   <script src="../engine/values.js"></script>
-  <h1>Chess AI With Minimax Algorithm</h1>
+</head>
+
+<body>
+  <div>
+
+    <h1>Chess AI With Minimax Algorithm</h1>
+    <div id="canvas"></div>
+    <div class="progress">
+      <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar"
+        aria-valuenow="0" style="width: 50%" aria-valuemin="-1000" aria-valuemax="1000" id='advantageBar'>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>

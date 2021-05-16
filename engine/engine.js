@@ -1,13 +1,15 @@
 class Engine {
     generateMoves(board, isWhite) {
         // let pieces = mainBoard.pieces.filter(piece => !piece.taken && piece.isWhite === isWhite);
-        const pieces = board.pieces;
         let moves = [];
 
-        for (let i = 0; i < pieces.length; i++) {
-            if (pieces[i].taken || pieces[i].isWhite !== isWhite) continue;
+        for (let i = 0; i < board.pieces.length; i++) {
+            if (board.pieces[i].taken || board.pieces[i].isWhite !== isWhite)
+                continue;
 
-            let pieceMoves = pieces[i].getPossibleMoves(board).allowedMoves;
+            let pieceMoves =
+                board.pieces[i].getPossibleMoves(board).allowedMoves;
+
             moves.push(...pieceMoves);
         }
 
@@ -67,125 +69,70 @@ class Engine {
 
         const result = this.evaluateBoard(board);
         board.undoLastMove();
+        board.lastMove = [];
 
         return result;
     }
 
     makeBestMove(board, depth, isWhite) {
-        let whitesTurn = isWhite;
-        let [bestMove, bestMoveValue] = engine.getBestMove(board, isWhite);
-
-        for (let i = 0; i < depth; i++) {
-            whitesTurn = !whitesTurn;
-
-            const newBoard = board.clone();
-            newBoard.testMove(bestMove[2], bestMove[0], bestMove[1]);
-
-            let [newBestMove, newBestMoveValue] = engine.getBestMove(
-                newBoard,
-                whitesTurn
-            );
-
-            if (!whitesTurn && newBestMoveValue < bestMoveValue) {
-                bestMove = newBestMove;
-                bestMoveValue = newBestMoveValue;
-            } else if (whitesTurn && newBestMoveValue > bestMoveValue) {
-                bestMove = newBestMove;
-                bestMoveValue = newBestMoveValue;
-            }
-        }
-
-        return [bestMove, bestMoveValue];
+        const [bestMove, moveValue] = this.getBestMove(
+            board.clone(),
+            depth,
+            Number.NEGATIVE_INFINITY,
+            Number.POSITIVE_INFINITY,
+            false
+        );
+        return [bestMove, moveValue];
     }
 
-    getBestMove(board, isWhite) {
-        const moves = engine.generateMoves(board, isWhite);
+    getBestMove(board, depth, alpha, beta, isMaximizer) {
+        const moves = this.generateMoves(board, isMaximizer);
 
-        if (moves === undefined || moves === null || moves.length === 0) {
-            throw "No moves found.... FUCK!";
+        if (depth === 0 || moves.length === 0) {
+            const value = this.evaluateBoard(board);
+            return [null, value];
         }
 
-        let bestMove = null;
-        // Use the inverse of what we actually want,
-        // otherwise every move would not be good enough
-        // PS: damn this is a bad explanation
-        let bestMoveValue = isWhite
-            ? Number.NEGATIVE_INFINITY
-            : Number.POSITIVE_INFINITY;
+        let maxValue = Number.NEGATIVE_INFINITY;
+        let minValue = Number.POSITIVE_INFINITY;
+        let bestMove;
 
         for (let i = 0; i < moves.length; i++) {
             const curMove = moves[i];
-            const curMoveValue = engine.evaluateMove(curMove, mainBoard);
-
-            if (isWhite) {
-                if (curMoveValue > bestMoveValue) {
-                    bestMove = curMove;
-                    bestMoveValue = curMoveValue;
-                }
-            } else {
-                if (curMoveValue < bestMoveValue) {
-                    bestMove = curMove;
-                    bestMoveValue = curMoveValue;
-                }
-            }
-        }
-
-        return [bestMove || moves[0], bestMoveValue];
-    }
-
-    minimaxRoot(board, depth, isMaximizing) {
-        const moves = this.generateMoves(board, false);
-        let bestMoveValue = -9999;
-        let bestMoveFound;
-
-        for (let i = 0; i < moves.length; i++) {
-            const move = moves[i];
-            board.testMove(move[2], move[0], move[1]);
-
-            const moveValue = this.minimax(
-                board,
-                depth - 1,
-                Number.NEGATIVE_INFINITY,
-                Number.POSITIVE_INFINITY,
-                !isMaximizing
-            );
-            board.undoLastMove();
-
-            if (moveValue >= bestMoveValue) {
-                bestMoveValue = moveValue;
-                bestMoveFound = move;
-            }
-        }
-        return [bestMoveFound, bestMoveValue];
-    }
-
-    minimax(board, depth, alpha, beta, isMaximizing) {
-        if (depth === 0) {
-            return this.evaluateBoard(board);
-        }
-
-        const moves = engine.generateMoves(board, isMaximizing);
-
-        let bestMoveValue = isMaximizing
-            ? Number.NEGATIVE_INFINITY
-            : Number.POSITIVE_INFINITY;
-        for (let i = 0; i < moves.length; i++) {
             const newBoard = board.clone();
-            newBoard.testMove(moves[i][2], moves[i][0], moves[i][1]);
-            bestMoveValue = Math.max(
-                bestMoveValue,
-                this.minimax(newBoard, depth - 1, alpha, beta, !isMaximizing)
+            newBoard.testMove(curMove[2], curMove[0], curMove[1]);
+            const [childBestMove, childBestMoveValue] = this.getBestMove(
+                newBoard,
+                depth - 1,
+                alpha,
+                beta,
+                !isMaximizer
             );
+
             newBoard.undoLastMove();
-            if (isMaximizing) {
-                alpha = Math.max(alpha, bestMoveValue);
+
+            if (isMaximizer) {
+                if (childBestMoveValue > maxValue) {
+                    maxValue = childBestMoveValue;
+                    bestMove = curMove;
+                }
+                if (childBestMoveValue > alpha) {
+                    alpha = childBestMoveValue;
+                }
             } else {
-                beta = Math.min(beta, bestMoveValue);
+                if (childBestMoveValue < minValue) {
+                    minValue = childBestMoveValue;
+                    bestMove = curMove;
+                }
+                if (childBestMoveValue < beta) {
+                    beta = childBestMoveValue;
+                }
             }
-            if (beta <= alpha) {
-                return bestMoveValue;
+            if (alpha >= beta) {
+                break;
             }
         }
-        return bestMoveValue;
+
+        return [bestMove, isMaximizer ? maxValue : minValue];
     }
 }

@@ -201,7 +201,7 @@ class Piece {
 
         if (this.type === "P") piece = new Pawn(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
         else if (this.type === "N") piece = new Knight(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
-        else if (this.type === "B") piece = new Bishop(this.x, this.y, this.isWhite, this.type), this.taken, this.hasMoved;
+        else if (this.type === "B") piece = new Bishop(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
         else if (this.type === "R") piece = new Rook(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
         else if (this.type === "Q") piece = new Queen(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
         else if (this.type === "K") piece = new King(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
