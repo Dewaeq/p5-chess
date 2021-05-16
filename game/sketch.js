@@ -56,23 +56,9 @@ function setup() {
 }
 
 function mousePressed() {
-    if (!mainBoard.whitesTurn) {
-        const [bestMove, moveValue] = engine.makeBestMove(mainBoard, 2, false);
-
-        if (bestMove === null || bestMove === undefined) {
-            alert("Mate or error, idk and i really need to fix this");
-            // window.location.reload();
-            return;
-        }
-
-        console.log("Engines move: ", bestMove, "with value: ", moveValue);
-        mainBoard.movePiece(bestMove[2], bestMove[0], bestMove[1]);
-        // mainBoard.show();
-
-        mainBoard.whitesTurn = true;
-        setStatus();
-        return;
-    }
+    /* if (!mainBoard.whitesTurn) {
+        aiMove();
+    } */
 
     let x = floor(mouseX / tileSize);
     let y = floor(mouseY / tileSize);
@@ -91,6 +77,8 @@ function mousePressed() {
 
         mainBoard.show();
         setStatus();
+
+        aiMove();
         return;
     }
 
@@ -115,13 +103,31 @@ function mousePressed() {
     setStatus();
 }
 
+function aiMove() {
+    if (mainBoard.whitesTurn) return;
+
+    const [bestMove, moveValue] = engine.makeBestMove(mainBoard, 2, false);
+
+    if (bestMove === null || bestMove === undefined) {
+        alert("Mate or error, idk and i really need to fix this");
+        // window.location.reload();
+        return;
+    }
+
+    console.log("Engines move: ", bestMove, "with value: ", moveValue);
+    mainBoard.movePiece(bestMove[2], bestMove[0], bestMove[1]);
+
+    mainBoard.whitesTurn = true;
+    setStatus();
+}
+
 function setStatus() {
-    let globalSum = engine.evaluateBoard(mainBoard);
-    // map to a value between -1000 and 1000
-    console.log(globalSum);
+    const globalSum = engine.evaluateBoard(mainBoard);
+    const fillWidth =
+        globalSum === 0 ? 50 : mapToRange(globalSum, -4000, 4000, 0, 100);
 
     $("#advantageBar").attr({
         "aria-valuenow": `${globalSum}`,
-        style: `width: ${((globalSum + 2000) / 4000) * 100}%`,
+        style: `width: ${fillWidth}%`,
     });
 }

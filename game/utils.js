@@ -6,6 +6,10 @@ function isUppercase(str) {
     return str === str.toUpperCase();
 }
 
+function mapToRange(number, inMin, inMax, outMin, outMax) {
+    return ((number - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+}
+
 function arrayEquals(arrayA, arrayB) {
     if (arrayA === undefined && arrayB !== undefined) return false;
     if (arrayA === null && arrayB !== null) return false;
