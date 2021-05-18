@@ -1,4 +1,6 @@
-const tileSize = 90;
+let tileSize = 90;
+let engineDepth = 3;
+const maxEngineDepth = 5;
 const fenStartString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
 let images = {};
@@ -8,7 +10,13 @@ let movingPiece = null;
 let moves;
 let engine;
 
+let posCount = 0;
+let calcTime = 0;
+
 function preload() {
+    if (displayWidth >= displayHeight) tileSize = (displayHeight * 0.6) / 8;
+    else tileSize = (displayWidth * 0.6) / 8;
+
     let fileExt = ".png";
 
     for (let i = 0; i < 2; i++) {
@@ -35,92 +43,49 @@ function preload() {
 }
 
 function setup() {
-    createCanvas(tileSize * 8, tileSize * 8);
+    initUI();
     background(220);
 
     mainBoard = new Board();
     engine = new Engine();
 
     mainBoard.fenToBoard(fenStartString);
-
-    let input = createInput(fenStartString);
-    input.position((windowWidth - width * 0.85) / 2, windowHeight - 60);
-    input.size(width * 0.85);
-
-    input.changed(() => {
-        let fenString =
-            input.value().length > 0 ? input.value() : fenStartString;
-        mainBoard.fenToBoard(fenString);
-    });
 }
 
 function mousePressed() {
-
-    if(!mainBoard.whitesTurn) {
-        let blackMoves = engine.generateMoves(mainBoard, false);
-        const move = blackMoves[0];
-
-        if(move === undefined || move === null) {
-            alert("Stalemate or checkmate, idk");
-            return;
-        }
-        
-        let bestMove = null;
-        // Black wants to achieve the lowest score possible, so start with the highest
-        let bestMoveValue = Number.POSITIVE_INFINITY;
-        
-        for(let i = 0; i < blackMoves.length; i++) {
-            const curMove = blackMoves[i];
-            const curMoveValue = engine.evaluateMove(curMove, mainBoard);
-            if(curMoveValue < bestMoveValue) {
-                bestMove = curMove;
-                bestMoveValue = curMoveValue;
-            }
-        }
-
-        mainBoard.movePiece(bestMove[2], bestMove[0], bestMove[1]);
-        mainBoard.whitesTurn = true;
-        return;
-    }
-
-    /* if (!mainBoard.whitesTurn) {
-
-        const [bestMove, moveValue] = engine.minimaxRoot(mainBoard, 3,false);
-        console.log(bestMove);
-        if(bestMove === null || bestMove === undefined) {
-            alert("Mate or error, idk and i really need to fix this");
-            // window.location.reload();
-            return;
-        }
-        console.log(bestMove);
-
-        mainBoard.movePiece(bestMove[2], bestMove[0], bestMove[1]);
-
-        mainBoard.whitesTurn = true;
-        return;
-    } */
+    if (!mainBoard.whitesTurn) return;
 
     let x = floor(mouseX / tileSize);
     let y = floor(mouseY / tileSize);
 
     if (isMovingPiece && arrayContainsArray(moves.allowedMoves, [x, y], 2)) {
-        let pieceIndex = mainBoard.getIndexOfPieceAt(movingPiece.x, movingPiece.y);
-        mainBoard.movePiece(pieceIndex, x, y);
+        let pieceIndex = mainBoard.getIndexOfPieceAt(
+            movingPiece.x,
+            movingPiece.y
+        );
 
         mainBoard.whitesTurn = !mainBoard.whitesTurn;
         isMovingPiece = false;
         movingPiece = null;
         moves = null;
 
+        mainBoard.movePiece(pieceIndex, x, y);
+
         mainBoard.show();
+        setStatus();
+
         return;
     }
 
     mainBoard.show();
 
     let pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
-    if (pieceIndex < 0 || mainBoard.pieces[pieceIndex].isWhite !== mainBoard.whitesTurn) {
+    if (
+        pieceIndex < 0 ||
+        mainBoard.pieces[pieceIndex].isWhite !== mainBoard.whitesTurn
+    ) {
         isMovingPiece = false;
+        setStatus();
         return;
     }
 
@@ -130,4 +95,89 @@ function mousePressed() {
     moves = mainBoard.pieces[pieceIndex].getPossibleMoves(mainBoard);
     mainBoard.highLightMoves(moves.allowedMoves, [10, 160, 50, 120]);
     mainBoard.highLightMoves(moves.unAllowedMoves, [140, 0, 20, 120]);
+    setStatus();
+}
+
+function aiMove() {
+    if (mainBoard.whitesTurn) return;
+
+    const [bestMove, moveValue, newPosCount, newCalcTime] = engine.makeBestMove(
+        mainBoard,
+        engineDepth,
+        false
+    );
+
+    if (bestMove === null || bestMove === undefined) {
+        alert("Mate or error, idk and i really need to fix this");
+        // window.location.reload();
+        return;
+    }
+
+    posCount = newPosCount;
+    calcTime = newCalcTime;
+
+    console.log(`Engines move: ${bestMove}`, `with value: ${moveValue}`);
+    console.log(
+        `Calculated ${newPosCount} moves`,
+        `in: ${newCalcTime / 1000} seconds`
+    );
+    mainBoard.movePiece(bestMove[2], bestMove[0], bestMove[1]);
+
+    mainBoard.whitesTurn = true;
+    setStatus();
+}
+
+function setStatus() {
+    const globalSum = engine.evaluateBoard(mainBoard);
+    const fillWidth =
+        globalSum === 0 ? 50 : mapToRange(globalSum, -4000, 4000, 0, 100);
+
+    $("#advantageBar").attr({
+        "aria-valuenow": `${globalSum}`,
+        style: `width: ${fillWidth}%`,
+    });
+
+    $("#posCountNumber").text(posCount);
+    $("#calcTimeNumber").text((calcTime / 1000).toFixed(4));
+    $("#calcSpeedNumber").text((posCount / calcTime * 1000).toFixed(4));
+
+    if (globalSum > 0) {
+        $("#advantageColor").text("White");
+        $("#advantageNumber").text(globalSum);
+    } else if (globalSum < 0) {
+        $("#advantageColor").text("Black");
+        $("#advantageNumber").text(-globalSum);
+    } else {
+        $("#advantageColor").text("Neither side");
+        $("#advantageNumber").text(globalSum);
+    }
+}
+
+function initUI() {
+    $("#engine-depth-input").on("input", function () {
+        const lastDepth = engineDepth ?? 3;
+        try {
+            let newDepth = parseInt($(this).val());
+
+            if (newDepth > maxEngineDepth || newDepth <= 0) {
+                newDepth = newDepth > maxEngineDepth ? maxEngineDepth : newDepth <= 0 ? 1 : 3;
+                $(this).val(newDepth);
+            }
+
+            engineDepth = newDepth;
+        } catch {
+            engineDepth = lastDepth;
+        }
+    });
+
+    $("#fen-string-input").val(fenStartString);
+
+    $("#fen-string-input").bind("input", function() {
+        const fenString = $(this).val();
+
+        mainBoard.fenToBoard(fenString);
+    });
+
+    const canvas = createCanvas(tileSize * 8, tileSize * 8);
+    canvas.parent("#canvas");
 }

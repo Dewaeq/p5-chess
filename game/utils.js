@@ -6,9 +6,21 @@ function isUppercase(str) {
     return str === str.toUpperCase();
 }
 
+function mapToRange(number, inMin, inMax, outMin, outMax) {
+    return ((number - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
+}
+
+function delay(n) {
+    return new Promise(function (resolve) {
+        setTimeout(resolve, n * 1000);
+    });
+}
+
 function arrayEquals(arrayA, arrayB) {
-    if (arrayA === undefined || arrayA === null) return false;
-    if (arrayB === undefined || arrayB === null) return false;
+    if (arrayA === undefined && arrayB !== undefined) return false;
+    if (arrayA === null && arrayB !== null) return false;
+    if (arrayB === null && arrayA !== null) return false;
+    if (arrayB === undefined && arrayA !== undefined) return false;
 
     if (arrayA.length !== arrayB.length) return false;
 
@@ -30,7 +42,6 @@ function arrayContainsArray(arrayA, arrayB, limit) {
     }
     return false;
 }
-
 
 // Return all the moves that attack an opponents piece.
 // All the moves provided in the input must be possible
@@ -70,4 +81,48 @@ function getAttackedPiecesIndices(moves, board, movingPiece) {
         }
     }
     return attackers;
+}
+
+// This doesnt check board.lastMove and piece.hasMoved
+// TODO: add this in the future, but we need to change board.undoLastMove for that
+// to work
+function areBoardsEqual(boardA, boardB) {
+    if (boardA.pieces.length !== boardB.pieces.length) {
+        return false;
+    }
+    if (boardA.whKingIndex !== boardB.whKingIndex) {
+        return false;
+    }
+    if (boardA.blKingIndex !== boardB.blKingIndex) {
+        return false;
+    }
+    if (boardA.whitesTurn !== boardB.whitesTurn) {
+        return false;
+    }
+    if (boardA.playerInCheck !== boardB.playerInCheck) {
+        return false;
+    }
+
+    for (let i = 0; i < boardA.pieces.length; i++) {
+        const pieceA = boardA.pieces[i];
+        const pieceB = boardB.pieces[i];
+
+        if (pieceA.x !== pieceB.x) {
+            return false;
+        }
+        if (pieceA.y !== pieceB.y) {
+            return false;
+        }
+        if (pieceA.isWhite !== pieceB.isWhite) {
+            return false;
+        }
+        if (pieceA.type !== pieceB.type) {
+            return false;
+        }
+        if (pieceA.taken !== pieceB.taken) {
+            return false;
+        }
+    }
+
+    return true;
 }

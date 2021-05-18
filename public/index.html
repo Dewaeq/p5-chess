@@ -13,13 +13,21 @@
 
   <link rel="stylesheet" type="text/css" href="./style.css">
 
-  <!-- <script src="../libraries/p5.min.game"></script>
-    <script src="../libraries/p5.sound.min.game"></script> -->
+  <!-- P5 JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.3.1/p5.min.js" crossorigin="anonymous"></script>
 
-</head>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
-<body>
+
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+    crossorigin="anonymous">
+    </script>
+
+
+  <!-- Custom JS -->
   <script src="../game/sketch.js"></script>
   <script src="../game/piece.js"></script>
   <script src="../game/board.js"></script>
@@ -27,7 +35,35 @@
   <script src="../game/move_model.js"></script>
   <script src="../engine/engine.js"></script>
   <script src="../engine/values.js"></script>
-  <h1>Chess AI With Minimax Algorithm</h1>
+</head>
+
+<body class="bg-dark">
+  <div class="main-container">
+
+    <h1 class="text-light title">Chess AI With Minimax Algorithm</h1>
+    <div id="canvas"></div>
+
+    <h2 class="text-light advantage-text">Advantage</h2>
+    <p class="text-light"><span id="advantageColor">Neither side</span> has the advantage
+      (+<span id="advantageNumber">0</span>).</p>
+    <div class="progress">
+      <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar"
+        aria-valuenow="0" style="width: 50%" aria-valuemin="-1000" aria-valuemax="1000" id='advantageBar'>
+      </div>
+    </div>
+  </div>
+
+  <div class="side-data">
+    <label class="text-light" for="fen-input">Fen String:</label>
+    <input id="fen-string-input" type="fen-input">
+    <br>
+    <label class="text-light" for="engine-depth">Search Depth: </label>
+    <input id="engine-depth-input" name="engine-depth" type="number" min="1" max="5" value="3">
+    <p class="text-light" id="pos-count-text">Calculated <span id="posCountNumber">0</span> positions.</p>
+    <p class="text-light" id="calc-time-text">Calculations took <span id="calcTimeNumber">0</span> seconds.</p>
+    <p class="text-light" id="calc-speed-text">That's <span id="calcSpeedNumber">0</span> moves/s.</p>
+  </div>
+
 </body>
 
 </html>

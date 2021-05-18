@@ -1,6 +1,45 @@
 html,
 body {
     height: 100%;
+    background-color: #181a1b;
+}
+
+body {
+    padding: 10px 5%;
+    margin: 0;
+    display: flex;
+
+    justify-content: center;
+
     align-items: center;
-    text-align: center;    
+    background-color: #181a1b;
+}
+
+h1,
+h2,
+p {
+    text-align: center;
+}
+
+.side-data {
+    margin-left: 40px;
+}
+
+.title {
+    padding-bottom: 20px;
+}
+
+.advantage-text {
+    padding-top: 20px;
+    padding-bottom: 10px;
+}
+
+#pos-count-text,
+#calc-time-text,
+#calc-speed-text {
+    text-align: left;
+}
+
+.progress {
+    margin: 0 10% 40px 10%;
 }

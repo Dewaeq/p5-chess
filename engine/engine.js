@@ -1,14 +1,15 @@
 class Engine {
-
     generateMoves(board, isWhite) {
         // let pieces = mainBoard.pieces.filter(piece => !piece.taken && piece.isWhite === isWhite);
-        const pieces = board.pieces;
         let moves = [];
 
-        for (let i = 0; i < pieces.length; i++) {
-            if (pieces[i].taken || pieces[i].isWhite !== isWhite) continue;
+        for (let i = 0; i < board.pieces.length; i++) {
+            if (board.pieces[i].taken || board.pieces[i].isWhite !== isWhite)
+                continue;
 
-            let pieceMoves = pieces[i].getPossibleMoves(board).allowedMoves;
+            const pieceMoves =
+                board.pieces[i].getPossibleMoves(board).allowedMoves;
+
             moves.push(...pieceMoves);
         }
 
@@ -19,11 +20,9 @@ class Engine {
     // negative mean black is
     evaluateBoard(board) {
         if (board.pieces[board.whKingInd].taken) {
-            console.log("oh ow");
             return Number.NEGATIVE_INFINITY;
         }
         if (board.pieces[board.blKingInd].taken) {
-            console.log("oh ow");
             return Number.POSITIVE_INFINITY;
         }
 
@@ -35,95 +34,115 @@ class Engine {
         for (let i = 0; i < board.pieces.length; i++) {
             const piece = board.pieces[i];
 
-            if (piece.taken || piece.x < 0 || piece.y < 0) 
-                continue;
-            
+            if (piece.taken || piece.x < 0 || piece.y < 0) continue;
 
             if (piece.isWhite) {
                 whiteMaterial += VALUE_MAP[piece.type] ?? 0;
-                whitePositional += POSITIONAL_VALUE[true][piece.type][piece.y][piece.x] ?? 0;
+                whitePositional +=
+                    POSITIONAL_VALUE[true][piece.type][piece.y][piece.x] ?? 0;
             } else {
                 blackMaterial += VALUE_MAP[piece.type] ?? 0;
-                blackPositional += POSITIONAL_VALUE[false][piece.type][piece.y][piece.x] ?? 0;
+                blackPositional +=
+                    POSITIONAL_VALUE[false][piece.type][piece.y][piece.x] ?? 0;
             }
         }
 
         const materialDifference = whiteMaterial - blackMaterial;
         const positionalDifference = whitePositional - blackPositional;
-        
+
         return materialDifference + positionalDifference;
     }
 
     evaluateMove(move, board) {
         board.testMove(move[2], move[0], move[1]);
 
-        if (board.pieces[board.blKingInd].taken) console.log("fking bs");
-        if (board.pieces[board.whKingInd].taken) console.log("fking white bs");
+        if (board.pieces[board.blKingInd].taken) {
+            return Number.POSITIVE_INFINITY;
+        }
+        if (board.pieces[board.whKingInd].taken) {
+            return Number.NEGATIVE_INFINITY;
+        }
 
         const result = this.evaluateBoard(board);
         board.undoLastMove();
+        board.lastMove = [];
 
         return result;
     }
 
-    minimaxRoot(board, depth, isMaximizing) {
-        const moves = this.generateMoves(board, false);
-        let bestMoveValue = -9999;
-        let bestMoveFound;
+    // returns [bestMove, bestMoveValue, positionCount, calculationTime]
+    makeBestMove(board, depth, isWhite) {
+        this.positionCount = 0;
 
-        for (let i = 0; i < moves.length; i++) {
-            const move = moves[i];
-            board.testMove(move[2], move[0], move[1]);
+        const startTime = performance.now();
+        const newBoard = board.clone();
 
-            const moveValue = this.minimax(board, depth - 1, -10000, 10000, !isMaximizing);
-            board.undoLastMove();
-
-            if (moveValue >= bestMoveValue) {
-                bestMoveValue = moveValue;
-                bestMoveFound = move;
-            }
-        }
-        return [bestMoveFound, bestMoveValue];
+        const [bestMove, moveValue] = this.getBestMove(
+            newBoard,
+            depth,
+            Number.NEGATIVE_INFINITY,
+            Number.POSITIVE_INFINITY,
+            false
+        );
+        const endTime = performance.now();
+        return [bestMove, moveValue, this.positionCount, endTime - startTime];
     }
 
-    minimax(board, depth, alpha, beta, isMaximizing) {
-        if (depth === 0) {
-            return this.evaluateBoard(board);
+    getBestMove(board, depth, alpha, beta, isMaximizer) {
+        const moves = this.generateMoves(board, isMaximizer);
+
+        if (depth === 0 || moves.length === 0) {
+            const value = this.evaluateBoard(board);
+            return [null, value];
         }
 
-        const moves = engine.generateMoves(board, false);
+        let maxValue = Number.NEGATIVE_INFINITY;
+        let minValue = Number.POSITIVE_INFINITY;
+        let bestMove;
 
+        for (let i = 0; i < moves.length; i++) {
+            this.positionCount++;
 
-        if (isMaximizing) {
-            let bestMoveValue = -9999;
-            for (let i = 0; i < moves.length; i++) {
-                board.testMove(moves[i][2], moves[i][0], moves[i][1]);
-                bestMoveValue = Math.max(
-                    bestMoveValue,
-                    this.minimax(board, depth - 1, alpha, beta, !isMaximizing)
+            const curMove = moves[i];
+            const newBoard = board.clone();
+            if (!areBoardsEqual(mainBoard, newBoard)) {
+                console.log(
+                    `mainBoard: ${mainBoard.pieces}\nthis board: ${newBoard.pieces}`
                 );
-                board.undoLastMove();
-                alpha = Math.max(alpha, bestMoveValue);
-                if (beta <= alpha) {
-                    return bestMoveValue;
+            }
+            newBoard.testMove(curMove[2], curMove[0], curMove[1]);
+            const [childBestMove, childBestMoveValue] = this.getBestMove(
+                newBoard,
+                depth - 1,
+                alpha,
+                beta,
+                !isMaximizer
+            );
+
+            newBoard.undoLastMove();
+
+            if (isMaximizer) {
+                if (childBestMoveValue > maxValue) {
+                    maxValue = childBestMoveValue;
+                    bestMove = curMove;
+                }
+                if (childBestMoveValue > alpha) {
+                    alpha = childBestMoveValue;
+                }
+            } else {
+                if (childBestMoveValue < minValue) {
+                    minValue = childBestMoveValue;
+                    bestMove = curMove;
+                }
+                if (childBestMoveValue < beta) {
+                    beta = childBestMoveValue;
                 }
             }
-            return bestMoveValue;
-        } else {
-            let bestMoveValue = 9999;
-            for (let i = 0; i < moves.length; i++) {
-                board.testMove(moves[i][2], moves[i][0], moves[i][1]);
-                bestMoveValue = Math.min(
-                    bestMoveValue,
-                    this.minimax(board, depth - 1, alpha, beta, !isMaximizing)
-                );
-                board.undoLastMove();
-                beta = Math.min(beta, bestMoveValue);
-                if (beta <= alpha) {
-                    return bestMoveValue;
-                }
+            if (alpha >= beta) {
+                break;
             }
-            return bestMoveValue;
         }
+
+        return [bestMove, isMaximizer ? maxValue : minValue];
     }
 }
