@@ -88,27 +88,18 @@ function getAttackedPiecesIndices(moves, board, movingPiece) {
 // to work
 function areBoardsEqual(boardA, boardB) {
     if (boardA.pieces.length !== boardB.pieces.length) {
-        console.log("ff");
         return false;
     }
     if (boardA.whKingIndex !== boardB.whKingIndex) {
-        console.log("ff");
         return false;
     }
     if (boardA.blKingIndex !== boardB.blKingIndex) {
-        console.log("ff");
         return false;
     }
-    /* if (!arrayEquals(boardA.lastMove, boardB.lastMove)) {
-        console.log("ff");
-        return false;
-    } */
     if (boardA.whitesTurn !== boardB.whitesTurn) {
-        console.log("ff");
         return false;
     }
     if (boardA.playerInCheck !== boardB.playerInCheck) {
-        console.log("ff");
         return false;
     }
 
@@ -117,35 +108,20 @@ function areBoardsEqual(boardA, boardB) {
         const pieceB = boardB.pieces[i];
 
         if (pieceA.x !== pieceB.x) {
-            console.log("f");
-            console.log(pieceA);
-            console.log(pieceB);
             return false;
         }
         if (pieceA.y !== pieceB.y) {
-            console.log("f");
             return false;
         }
         if (pieceA.isWhite !== pieceB.isWhite) {
-            console.log("f");
             return false;
         }
         if (pieceA.type !== pieceB.type) {
-            console.log("f");
             return false;
         }
         if (pieceA.taken !== pieceB.taken) {
-            console.log(pieceA);
-            console.log(pieceB);
-            console.log("f");
             return false;
         }
-        /* if (pieceA.hasMoved !== pieceB.hasMoved) {
-            console.log(pieceA);
-            console.log(pieceB);
-            console.log("f");
-            return false;
-        } */
     }
 
     return true;
