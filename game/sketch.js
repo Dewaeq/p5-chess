@@ -1,4 +1,6 @@
-const tileSize = 90;
+let tileSize = 90;
+let engineDepth = 3;
+const maxEngineDepth = 5;
 const fenStartString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
 let images = {};
@@ -8,7 +10,13 @@ let movingPiece = null;
 let moves;
 let engine;
 
+let posCount = 0;
+let calcTime = 0;
+
 function preload() {
+    if (displayWidth >= displayHeight) tileSize = (displayHeight * 0.6) / 8;
+    else tileSize = (displayWidth * 0.6) / 8;
+
     let fileExt = ".png";
 
     for (let i = 0; i < 2; i++) {
@@ -35,28 +43,17 @@ function preload() {
 }
 
 function setup() {
-    const canvas = createCanvas(tileSize * 8, tileSize * 8);
-    canvas.parent("#canvas");
+    initUI();
     background(220);
 
     mainBoard = new Board();
     engine = new Engine();
 
     mainBoard.fenToBoard(fenStartString);
-
-    /* let input = createInput(fenStartString);
-    input.position((windowWidth - width * 0.85) / 2, windowHeight - 60);
-    input.size(width * 0.85);
-
-    input.changed(() => {
-        let fenString =
-            input.value().length > 0 ? input.value() : fenStartString;
-        mainBoard.fenToBoard(fenString);
-    }); */
 }
 
 function mousePressed() {
-    if(!mainBoard.whitesTurn) return;
+    if (!mainBoard.whitesTurn) return;
 
     let x = floor(mouseX / tileSize);
     let y = floor(mouseY / tileSize);
@@ -104,7 +101,11 @@ function mousePressed() {
 function aiMove() {
     if (mainBoard.whitesTurn) return;
 
-    const [bestMove, moveValue] = engine.makeBestMove(mainBoard, 3, false);
+    const [bestMove, moveValue, newPosCount, newCalcTime] = engine.makeBestMove(
+        mainBoard,
+        engineDepth,
+        false
+    );
 
     if (bestMove === null || bestMove === undefined) {
         console.log(engine.generateMoves(mainBoard, false));
@@ -113,7 +114,14 @@ function aiMove() {
         return;
     }
 
-    console.log("Engines move: ", bestMove, "with value: ", moveValue);
+    posCount = newPosCount;
+    calcTime = newCalcTime;
+
+    console.log(`Engines move: ${bestMove}`, `with value: ${moveValue}`);
+    console.log(
+        `Calculated ${newPosCount} moves`,
+        `in: ${newCalcTime / 1000} seconds`
+    );
     mainBoard.movePiece(bestMove[2], bestMove[0], bestMove[1]);
 
     mainBoard.whitesTurn = true;
@@ -129,4 +137,48 @@ function setStatus() {
         "aria-valuenow": `${globalSum}`,
         style: `width: ${fillWidth}%`,
     });
+
+    $("#posCountNumber").text(posCount);
+    $("#calcTimeNumber").text((calcTime / 1000).toFixed(4));
+    $("#calcSpeedNumber").text((posCount / calcTime * 1000).toFixed(4));
+
+    if (globalSum > 0) {
+        $("#advantageColor").text("White");
+        $("#advantageNumber").text(globalSum);
+    } else if (globalSum < 0) {
+        $("#advantageColor").text("Black");
+        $("#advantageNumber").text(-globalSum);
+    } else {
+        $("#advantageColor").text("Neither side");
+        $("#advantageNumber").text(globalSum);
+    }
+}
+
+function initUI() {
+    $("#engine-depth-input").on("input", function () {
+        const lastDepth = engineDepth ?? 3;
+        try {
+            let newDepth = parseInt($(this).val());
+
+            if (newDepth > maxEngineDepth || newDepth <= 0) {
+                newDepth = newDepth > maxEngineDepth ? maxEngineDepth : newDepth <= 0 ? 1 : 3;
+                $(this).val(newDepth);
+            }
+
+            engineDepth = newDepth;
+        } catch {
+            engineDepth = lastDepth;
+        }
+    });
+
+    $("#fen-string-input").val(fenStartString);
+
+    $("#fen-string-input").bind("input", function() {
+        const fenString = $(this).val();
+
+        mainBoard.fenToBoard(fenString);
+    });
+
+    const canvas = createCanvas(tileSize * 8, tileSize * 8);
+    canvas.parent("#canvas");
 }

@@ -74,7 +74,10 @@ class Engine {
         return result;
     }
 
+    // returns [bestMove, bestMoveValue, positionCount, calculationTime]
     makeBestMove(board, depth, isWhite) {
+        this.positionCount = 0;
+        const startTime = performance.now();
         const [bestMove, moveValue] = this.getBestMove(
             board.clone(),
             depth,
@@ -82,7 +85,8 @@ class Engine {
             Number.POSITIVE_INFINITY,
             false
         );
-        return [bestMove, moveValue];
+        const endTime = performance.now();
+        return [bestMove, moveValue, this.positionCount, (endTime - startTime)];
     }
 
     getBestMove(board, depth, alpha, beta, isMaximizer) {
@@ -98,6 +102,8 @@ class Engine {
         let bestMove;
 
         for (let i = 0; i < moves.length; i++) {
+            this.positionCount++;
+
             const curMove = moves[i];
             const newBoard = board.clone();
             newBoard.testMove(curMove[2], curMove[0], curMove[1]);
