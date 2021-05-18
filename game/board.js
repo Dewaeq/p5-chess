@@ -159,7 +159,7 @@ class Board {
         const isWhite = this.pieces[piecInd].isWhite;
         if (engine.generateMoves(this, !isWhite).length === 0) {
             if (this.isKingInCheck(!isWhite)) this.checkmate(isWhite);
-            else this.stalemate(isWhite);
+            else this.stalemate();
         } else {
             if (isWhite === true) {
                 aiMove();
@@ -295,16 +295,6 @@ class Board {
             }
         }
 
-        // TODO: replace this with a more efficient check
-        // Stalemate detection
-        // WARNING: dont use this or else engine.generateMoves(...)
-        // will cause an infinite loop
-        /* if(result.allowedMoves.length === 0 && !this.isKingInCheck(movingPiece.isWhite)) {
-            if(engine.generateMoves(this, movingPiece.isWhite).length === 0) {
-                alert("stalemate");
-            }
-        } */
-
         return result;
     }
 
@@ -418,8 +408,8 @@ class Board {
         alert("Checkmate: " + (isWhite ? "White won" : "Black won"));
         // window.location.reload();
     }
-    stalemate(isWhite) {
-        alert("Stalemate: " + (isWhite ? "White won" : "Black won"));
+    stalemate() {
+        alert("Stalemate");
     }
 
     // Return true if the king `isWhite` is in check.
