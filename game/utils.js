@@ -10,6 +10,12 @@ function mapToRange(number, inMin, inMax, outMin, outMax) {
     return ((number - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 }
 
+function delay(n) {
+    return new Promise(function (resolve) {
+        setTimeout(resolve, n * 1000);
+    });
+}
+
 function arrayEquals(arrayA, arrayB) {
     if (arrayA === undefined && arrayB !== undefined) return false;
     if (arrayA === null && arrayB !== null) return false;

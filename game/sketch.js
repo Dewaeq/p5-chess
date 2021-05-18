@@ -56,9 +56,7 @@ function setup() {
 }
 
 function mousePressed() {
-    /* if (!mainBoard.whitesTurn) {
-        aiMove();
-    } */
+    if(!mainBoard.whitesTurn) return;
 
     let x = floor(mouseX / tileSize);
     let y = floor(mouseY / tileSize);
@@ -68,17 +66,17 @@ function mousePressed() {
             movingPiece.x,
             movingPiece.y
         );
-        mainBoard.movePiece(pieceIndex, x, y);
 
         mainBoard.whitesTurn = !mainBoard.whitesTurn;
         isMovingPiece = false;
         movingPiece = null;
         moves = null;
 
+        mainBoard.movePiece(pieceIndex, x, y);
+
         mainBoard.show();
         setStatus();
 
-        aiMove();
         return;
     }
 
@@ -106,9 +104,10 @@ function mousePressed() {
 function aiMove() {
     if (mainBoard.whitesTurn) return;
 
-    const [bestMove, moveValue] = engine.makeBestMove(mainBoard, 2, false);
+    const [bestMove, moveValue] = engine.makeBestMove(mainBoard, 3, false);
 
     if (bestMove === null || bestMove === undefined) {
+        console.log(engine.generateMoves(mainBoard, false));
         alert("Mate or error, idk and i really need to fix this");
         // window.location.reload();
         return;

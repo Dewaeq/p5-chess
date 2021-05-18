@@ -51,7 +51,6 @@ class Board {
             (piecInd === this.whKingInd || piecInd === this.blKingInd)
         ) {
             console.log("this was a castling move");
-            console.log(this.lastMove);
             // Castle left
             if (fromX - 2 === toX) {
                 let rookIndex = this.getIndexOfPieceAt(toX + 1, toY);
@@ -155,6 +154,17 @@ class Board {
     movePiece(piecInd, toX, toY) {
         this.testMove(piecInd, toX, toY);
         this.show();
+
+        // TODO: replace with more efficient check
+        const isWhite = this.pieces[piecInd].isWhite;
+        if (engine.generateMoves(this, !isWhite).length === 0) {
+            if (this.isKingInCheck(!isWhite)) this.checkmate(isWhite);
+            else this.stalemate(isWhite);
+        } else {
+            if (isWhite === true) {
+                aiMove();
+            }
+        }
     }
 
     fenToBoard(fenString) {
@@ -281,8 +291,7 @@ class Board {
         ) {
             this.playerInCheck = movingPiece.isWhite ? 1 : -1;
             if (engine.generateMoves(this, movingPiece.isWhite).length === 0) {
-                // this.checkmate(!movingPiece.isWhite);
-                console.log("this should be mate ?????");
+                console.log("this should be mate/engine predicts mate ?????");
             }
         }
 
@@ -405,10 +414,12 @@ class Board {
         return false;
     }
 
-    // Return true if the `isWhite` is in mated.
     checkmate(isWhite) {
         alert("Checkmate: " + (isWhite ? "White won" : "Black won"));
         // window.location.reload();
+    }
+    stalemate(isWhite) {
+        alert("Stalemate: " + (isWhite ? "White won" : "Black won"));
     }
 
     // Return true if the king `isWhite` is in check.
