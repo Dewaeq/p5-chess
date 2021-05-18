@@ -9,3 +9,4 @@ Game TODO:
 
 Engine TODO:
     - Calculate positional and material difference
+    - Validate moves sometimes doesnt work on a clone of a board

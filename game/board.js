@@ -89,7 +89,7 @@ class Board {
                 indPiecTaken === this.blKingInd ||
                 indPiecTaken === this.whKingInd
             ) {
-                console.log("fuck");
+                // TODO: this isnt allowed to happen...
             }
             this.pieces[indPiecTaken].taken = true;
             this.pieces[indPiecTaken].hasMoved = true;

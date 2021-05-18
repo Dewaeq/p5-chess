@@ -7,7 +7,7 @@ class Engine {
             if (board.pieces[i].taken || board.pieces[i].isWhite !== isWhite)
                 continue;
 
-            let pieceMoves =
+            const pieceMoves =
                 board.pieces[i].getPossibleMoves(board).allowedMoves;
 
             moves.push(...pieceMoves);
@@ -20,11 +20,9 @@ class Engine {
     // negative mean black is
     evaluateBoard(board) {
         if (board.pieces[board.whKingInd].taken) {
-            console.log("oh ow");
             return Number.NEGATIVE_INFINITY;
         }
         if (board.pieces[board.blKingInd].taken) {
-            console.log("oh ow");
             return Number.POSITIVE_INFINITY;
         }
 
@@ -59,11 +57,9 @@ class Engine {
         board.testMove(move[2], move[0], move[1]);
 
         if (board.pieces[board.blKingInd].taken) {
-            console.log("fking black bs");
             return Number.POSITIVE_INFINITY;
         }
         if (board.pieces[board.whKingInd].taken) {
-            console.log("fking white bs");
             return Number.NEGATIVE_INFINITY;
         }
 
@@ -77,16 +73,19 @@ class Engine {
     // returns [bestMove, bestMoveValue, positionCount, calculationTime]
     makeBestMove(board, depth, isWhite) {
         this.positionCount = 0;
+
         const startTime = performance.now();
+        const newBoard = board.clone();
+
         const [bestMove, moveValue] = this.getBestMove(
-            board.clone(),
+            newBoard,
             depth,
             Number.NEGATIVE_INFINITY,
             Number.POSITIVE_INFINITY,
             false
         );
         const endTime = performance.now();
-        return [bestMove, moveValue, this.positionCount, (endTime - startTime)];
+        return [bestMove, moveValue, this.positionCount, endTime - startTime];
     }
 
     getBestMove(board, depth, alpha, beta, isMaximizer) {
@@ -106,6 +105,11 @@ class Engine {
 
             const curMove = moves[i];
             const newBoard = board.clone();
+            if (!areBoardsEqual(mainBoard, newBoard)) {
+                console.log(
+                    `mainBoard: ${mainBoard.pieces}\nthis board: ${newBoard.pieces}`
+                );
+            }
             newBoard.testMove(curMove[2], curMove[0], curMove[1]);
             const [childBestMove, childBestMoveValue] = this.getBestMove(
                 newBoard,

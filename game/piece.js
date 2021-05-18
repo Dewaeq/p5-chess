@@ -197,17 +197,13 @@ class Piece {
     //-----------------------------------------------------------------------------------------------
 
     clone() {
-        let piece;
-
-        if (this.type === "P") piece = new Pawn(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
-        else if (this.type === "N") piece = new Knight(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
-        else if (this.type === "B") piece = new Bishop(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
-        else if (this.type === "R") piece = new Rook(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
-        else if (this.type === "Q") piece = new Queen(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
-        else if (this.type === "K") piece = new King(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
-        else return false;
-
-        return piece;
+        if (this.type === "P") return new Pawn(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
+        else if (this.type === "N") return new Knight(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
+        else if (this.type === "B") return new Bishop(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
+        else if (this.type === "R") return new Rook(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
+        else if (this.type === "Q") return new Queen(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
+        else if (this.type === "K") return new King(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
+        else throw "Failed to copy piece: " + this;
     }
 
     // Check if piece A can take piece B

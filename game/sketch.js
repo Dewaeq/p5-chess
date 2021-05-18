@@ -108,7 +108,6 @@ function aiMove() {
     );
 
     if (bestMove === null || bestMove === undefined) {
-        console.log(engine.generateMoves(mainBoard, false));
         alert("Mate or error, idk and i really need to fix this");
         // window.location.reload();
         return;
