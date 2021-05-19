@@ -9,6 +9,7 @@ Game TODO:
     - En Passant
     X Castling
     X Check/Checkmate detection
+    X highlight the last played move
 
 Engine TODO:
     X Calculate positional and material difference

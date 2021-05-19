@@ -6,7 +6,8 @@ class Board {
         whKingIndex = 0,
         blKingIndex = 0,
         playerInCheck = 0,
-        lastMove = []
+        lastMove = [],
+        moveHistory = []
     ) {
         this.whitesTurn = whitesTurn;
         this.pieces = pieces;
@@ -16,6 +17,7 @@ class Board {
         this.playerInCheck = playerInCheck;
         // Format is [piecInd, fromX, fromY, toX, toY, takenPieceInd?]
         this.lastMove = lastMove;
+        this.moveHistory = moveHistory;
     }
 
     show() {
@@ -31,6 +33,7 @@ class Board {
 
         background(0);
         noStroke();
+
         for (let i = 0; i < 8; i++) {
             for (let j = 0; j < 8; j++) {
                 let isWhite = (i + j) % 2 === 0;
@@ -39,6 +42,25 @@ class Board {
                 rect(i * tileSize, j * tileSize, tileSize, tileSize);
             }
         }
+        let moveDepthLimit = 0;
+        if (this.moveHistory.length >= 2) {
+            moveDepthLimit = 2;
+        } else if (this.moveHistory.length > 0) {
+            moveDepthLimit = 1;
+        }
+
+        for (let i = 0; i < moveDepthLimit; i++) {
+            const [piecInd, fromX, fromY, toX, toY, takenPieceInd] =
+                this.moveHistory[this.moveHistory.length - i - 1];
+            if (piecInd !== undefined && piecInd !== null) {
+                fill("#FFCE88");
+                rect(fromX * tileSize, fromY * tileSize, tileSize, tileSize);
+
+                fill("#DBA671");
+                rect(toX * tileSize, toY * tileSize, tileSize, tileSize);
+            }
+        }
+
         this.pieces.forEach((piece) => {
             piece.show();
         });
@@ -61,19 +83,25 @@ class Board {
             if (fromX - 2 === toX) {
                 let rookIndex = this.getIndexOfPieceAt(toX + 1, toY);
                 this.pieces[rookIndex].setPiecePosition([0, toY]);
+                this.pieces[rookIndex].hasMoved = false;
             }
             // Castle right
             else if (fromX + 2 === toX) {
                 let rookIndex = this.getIndexOfPieceAt(toX - 1, toY);
                 this.pieces[rookIndex].setPiecePosition([7, toY]);
+                this.pieces[rookIndex].hasMoved = false;
             }
         }
         // Did this move take a piece?
         else if (takenPieceInd !== undefined && takenPieceInd !== null) {
             this.pieces[takenPieceInd].setPiecePosition([toX, toY]);
             this.pieces[takenPieceInd].taken = false;
-        }
 
+            if (!this.didPieceMoveInHistory(takenPieceInd))
+                this.pieces[takenPieceInd].hasMoved = false;
+        }
+        if (!this.didPieceMoveInHistory(piecInd))
+            this.pieces[piecInd].hasMoved = false;
         this.pieces[piecInd].setPiecePosition([fromX, fromY]);
     }
 
@@ -159,6 +187,7 @@ class Board {
 
     async movePiece(piecInd, toX, toY) {
         this.testMove(piecInd, toX, toY);
+        this.moveHistory.push(this.lastMove);
         this.show();
 
         // TODO: replace with more efficient check
@@ -171,6 +200,8 @@ class Board {
 
     fenToBoard(fenString) {
         this.pieces = [];
+        this.moveHistory = [];
+        this.lastMove = [];
 
         /// Get rid of the extra data included in fen strings
         /// like if the player can castle of if an en-passsant
@@ -305,6 +336,17 @@ class Board {
 
     clone() {
         return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
+    }
+
+    didPieceMoveInHistory(piecInd) {
+        if (piecInd < 0) return false;
+
+        for (let i = 0; i < this.moveHistory.length; i++) {
+            const movingPieceInd = this.moveHistory[i][0];
+
+            if (piecInd === movingPieceInd) return true;
+        }
+        return false;
     }
 
     // Return the index of the piece at the given

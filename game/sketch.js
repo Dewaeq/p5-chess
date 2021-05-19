@@ -206,7 +206,6 @@ function initUI() {
         const fenString = $(this).val();
         gameOver = false;
         mainBoard.whitesTurn = true;
-        mainBoard.lastMove = [];
         isMovingPiece = false;
         movingPiece = null;
         mainBoard.fenToBoard(fenString);
