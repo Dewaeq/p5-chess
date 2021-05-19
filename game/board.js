@@ -151,7 +151,7 @@ class Board {
         }
     }
 
-    movePiece(piecInd, toX, toY) {
+    async movePiece(piecInd, toX, toY) {
         this.testMove(piecInd, toX, toY);
         this.show();
 
@@ -160,10 +160,6 @@ class Board {
         if (engine.generateMoves(this, !isWhite).length === 0) {
             if (this.isKingInCheck(!isWhite)) this.checkmate(isWhite);
             else this.stalemate();
-        } else {
-            if (isWhite === true) {
-                aiMove();
-            }
         }
     }
 

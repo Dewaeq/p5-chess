@@ -52,6 +52,14 @@ function setup() {
     mainBoard.fenToBoard(fenStartString);
 }
 
+async function draw() {
+    if (mainBoard.whitesTurn) return;
+
+    mainBoard.whitesTurn = true;
+    await delay(0.1);
+    aiMove();
+}
+
 function mousePressed() {
     if (!mainBoard.whitesTurn) return;
 
@@ -99,8 +107,6 @@ function mousePressed() {
 }
 
 function aiMove() {
-    if (mainBoard.whitesTurn) return;
-
     const [bestMove, moveValue, newPosCount, newCalcTime] = engine.makeBestMove(
         mainBoard,
         engineDepth,
@@ -139,7 +145,7 @@ function setStatus() {
 
     $("#posCountNumber").text(posCount);
     $("#calcTimeNumber").text((calcTime / 1000).toFixed(4));
-    $("#calcSpeedNumber").text((posCount / calcTime * 1000).toFixed(4));
+    $("#calcSpeedNumber").text(((posCount / calcTime) * 1000).toFixed(4));
 
     if (globalSum > 0) {
         $("#advantageColor").text("White");
@@ -160,7 +166,12 @@ function initUI() {
             let newDepth = parseInt($(this).val());
 
             if (newDepth > maxEngineDepth || newDepth <= 0) {
-                newDepth = newDepth > maxEngineDepth ? maxEngineDepth : newDepth <= 0 ? 1 : 3;
+                newDepth =
+                    newDepth > maxEngineDepth
+                        ? maxEngineDepth
+                        : newDepth <= 0
+                        ? 1
+                        : 3;
                 $(this).val(newDepth);
             }
 
@@ -172,7 +183,7 @@ function initUI() {
 
     $("#fen-string-input").val(fenStartString);
 
-    $("#fen-string-input").bind("input", function() {
+    $("#fen-string-input").bind("input", function () {
         const fenString = $(this).val();
 
         mainBoard.fenToBoard(fenString);
