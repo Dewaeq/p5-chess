@@ -1,12 +1,15 @@
+- = todo
+x = busy
+X = done
+
+
 Game TODO:
     x Piece promoting
         - Done but you can only promote to a queen rn
     - En Passant
     X Castling
-        - Done
-    x Check/Checkmate detection
-        - Check detection is done, mate isnt
+    X Check/Checkmate detection
 
 Engine TODO:
-    - Calculate positional and material difference
-    - Validate moves sometimes doesnt work on a clone of a board
+    X Calculate positional and material difference
+    X Validate moves sometimes doesnt work on a clone of a board
