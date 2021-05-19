@@ -7,6 +7,7 @@ let images = {};
 let mainBoard;
 let isMovingPiece = false;
 let movingPiece = null;
+let gameOver = false;
 let moves;
 let engine;
 
@@ -53,6 +54,7 @@ function setup() {
 }
 
 async function draw() {
+    if (gameOver) return;
     if (mainBoard.whitesTurn) return;
 
     mainBoard.whitesTurn = true;
@@ -61,10 +63,24 @@ async function draw() {
 }
 
 function mousePressed() {
-    if (!mainBoard.whitesTurn) return;
-
     let x = floor(mouseX / tileSize);
     let y = floor(mouseY / tileSize);
+
+    if (gameOver) {
+        mainBoard.show();
+
+        let pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
+        if (pieceIndex < 0) {
+            return;
+        }
+
+        moves = mainBoard.pieces[pieceIndex].getPossibleMoves(mainBoard);
+        mainBoard.highLightMoves(moves.allowedMoves, [10, 160, 50, 120]);
+        mainBoard.highLightMoves(moves.unAllowedMoves, [140, 0, 20, 120]);
+        return;
+    }
+
+    if (!mainBoard.whitesTurn) return;
 
     if (isMovingPiece && arrayContainsArray(moves.allowedMoves, [x, y], 2)) {
         let pieceIndex = mainBoard.getIndexOfPieceAt(
@@ -107,6 +123,8 @@ function mousePressed() {
 }
 
 function aiMove() {
+    if (gameOver) return;
+
     const [bestMove, moveValue, newPosCount, newCalcTime] = engine.makeBestMove(
         mainBoard,
         engineDepth,
@@ -114,8 +132,9 @@ function aiMove() {
     );
 
     if (bestMove === null || bestMove === undefined) {
-        alert("Mate or error, idk and i really need to fix this");
+        // alert("Mate or error, idk and i really need to fix this");
         // window.location.reload();
+        gameOver = true;
         return;
     }
 
@@ -185,7 +204,11 @@ function initUI() {
 
     $("#fen-string-input").bind("input", function () {
         const fenString = $(this).val();
-
+        gameOver = false;
+        mainBoard.whitesTurn = true;
+        mainBoard.lastMove = [];
+        isMovingPiece = false;
+        movingPiece = null;
         mainBoard.fenToBoard(fenString);
     });
 

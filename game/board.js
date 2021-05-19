@@ -398,10 +398,12 @@ class Board {
 
     checkmate(isWhite) {
         alert("Checkmate: " + (isWhite ? "White won" : "Black won"));
+        gameOver = true;
         // window.location.reload();
     }
     stalemate() {
         alert("Stalemate");
+        gameOver = true;
     }
 
     // Return true if the king `isWhite` is in check.
