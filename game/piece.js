@@ -196,16 +196,6 @@ class Piece {
     /// Static-ish functions, no data is modified
     //-----------------------------------------------------------------------------------------------
 
-    clone() {
-        if (this.type === "P") return new Pawn(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
-        else if (this.type === "N") return new Knight(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
-        else if (this.type === "B") return new Bishop(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
-        else if (this.type === "R") return new Rook(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
-        else if (this.type === "Q") return new Queen(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
-        else if (this.type === "K") return new King(this.x, this.y, this.isWhite, this.type, this.taken, this.hasMoved);
-        else throw "Failed to copy piece: " + this;
-    }
-
     // Check if piece A can take piece B
     canTakePiece(pieceA, pieceB) {
         return (

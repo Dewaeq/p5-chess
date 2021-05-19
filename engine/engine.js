@@ -105,11 +105,7 @@ class Engine {
 
             const curMove = moves[i];
             const newBoard = board.clone();
-            if (!areBoardsEqual(mainBoard, newBoard)) {
-                console.log(
-                    `mainBoard: ${mainBoard.pieces}\nthis board: ${newBoard.pieces}`
-                );
-            }
+
             newBoard.testMove(curMove[2], curMove[0], curMove[1]);
             const [childBestMove, childBestMoveValue] = this.getBestMove(
                 newBoard,

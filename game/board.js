@@ -20,8 +20,14 @@ class Board {
 
     show() {
         // Very bad mate check
-        if (this.pieces[this.blKingInd].taken) return this.checkmate(true);
-        if (this.pieces[this.whKingInd].taken) return this.checkmate(false);
+        if (this.pieces[this.blKingInd].taken) {
+            console.trace();
+            return this.checkmate(true);
+        }
+        if (this.pieces[this.whKingInd].taken) {
+            console.trace();
+            return this.checkmate(false);
+        }
 
         background(0);
         noStroke();
@@ -298,17 +304,7 @@ class Board {
     ///-------------------------------------------------------------------
 
     clone() {
-        let clone = new Board();
-        for (let i = 0; i < this.pieces.length; i++) {
-            clone.pieces[i] = this.pieces[i].clone();
-        }
-        clone.whitesTurn = this.whitesTurn;
-        clone.whKingInd = this.whKingInd;
-        clone.blKingInd = this.blKingInd;
-        clone.playerInCheck = this.playerInCheck;
-        clone.lastMove = this.lastMove;
-
-        return clone;
+        return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
     }
 
     // Return the index of the piece at the given
