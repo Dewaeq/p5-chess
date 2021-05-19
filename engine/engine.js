@@ -82,7 +82,7 @@ class Engine {
             depth,
             Number.NEGATIVE_INFINITY,
             Number.POSITIVE_INFINITY,
-            false
+            isWhite
         );
         const endTime = performance.now();
         return [bestMove, moveValue, this.positionCount, endTime - startTime];
