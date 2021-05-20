@@ -7,7 +7,8 @@ class Board {
         blKingIndex = 0,
         playerInCheck = 0,
         lastMove = [],
-        moveHistory = []
+        moveHistory = [],
+        didPromote = false,
     ) {
         this.whitesTurn = whitesTurn;
         this.pieces = pieces;
@@ -18,6 +19,7 @@ class Board {
         // Format is [piecInd, fromX, fromY, toX, toY, takenPieceInd?]
         this.lastMove = lastMove;
         this.moveHistory = moveHistory;
+        this.didPromote = didPromote;
     }
 
     show() {
@@ -66,7 +68,6 @@ class Board {
         });
     }
 
-    // TODO: restore the pieces `hasMoved` value
     undoLastMove() {
         if (this.lastMove.length === 0) {
             throw "Cant undo last move, there are no moves saved in memory";
@@ -100,6 +101,12 @@ class Board {
             if (!this.didPieceMoveInHistory(takenPieceInd))
                 this.pieces[takenPieceInd].hasMoved = false;
         }
+        // Was this move a promotion?
+        if(this.didPromote) {
+            const oldPiece = this.pieces[piecInd];
+            this.pieces[piecInd] = new Pawn(fromX, fromY, oldPiece.isWhite, "P", false, true);
+        }
+
         if (!this.didPieceMoveInHistory(piecInd))
             this.pieces[piecInd].hasMoved = false;
         this.pieces[piecInd].setPiecePosition([fromX, fromY]);
@@ -110,6 +117,8 @@ class Board {
     testMove(piecInd, toX, toY) {
         if (piecInd < 0) return false;
         if (this.pieces[piecInd].taken) return false;
+
+        this.didPromote = false;
 
         let tookAPiece = false;
         let indPiecTaken;
@@ -149,14 +158,15 @@ class Board {
 
         // Can this piece promote?
         if (this.pieces[piecInd].type.toUpperCase() === "P") {
-            let promoteRank = this.pieces[piecInd].isWhite ? 0 : 7;
+            const promoteRank = this.pieces[piecInd].isWhite ? 0 : 7;
+            this.didPromote = true;
 
             if (toY === promoteRank) {
-                let oldPiece = this.pieces[piecInd];
+                const oldPiece = this.pieces[piecInd];
 
                 this.pieces[piecInd] = new Queen(
-                    toX,
-                    toY,
+                    oldPiece.x,
+                    oldPiece.y,
                     oldPiece.isWhite,
                     "Q",
                     false,
