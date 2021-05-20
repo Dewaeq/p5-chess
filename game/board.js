@@ -8,7 +8,8 @@ class Board {
         playerInCheck = 0,
         lastMove = [],
         moveHistory = [],
-        didPromote = false,
+        enPassantSquare = [],
+        didPromote = false
     ) {
         this.whitesTurn = whitesTurn;
         this.pieces = pieces;
@@ -19,6 +20,8 @@ class Board {
         // Format is [piecInd, fromX, fromY, toX, toY, takenPieceInd?]
         this.lastMove = lastMove;
         this.moveHistory = moveHistory;
+        // Format is [piecInd, x, y]
+        this.enPassantSquare = enPassantSquare;
         this.didPromote = didPromote;
     }
 
@@ -102,9 +105,33 @@ class Board {
                 this.pieces[takenPieceInd].hasMoved = false;
         }
         // Was this move a promotion?
-        if(this.didPromote) {
+        if (this.didPromote) {
             const oldPiece = this.pieces[piecInd];
-            this.pieces[piecInd] = new Pawn(fromX, fromY, oldPiece.isWhite, "P", false, true);
+            this.pieces[piecInd] = new Pawn(
+                fromX,
+                fromY,
+                oldPiece.isWhite,
+                "P",
+                false,
+                true
+            );
+        }
+
+        // Was this an en passant move?
+        if (
+            this.pieces[piecInd].type === "P" &&
+            arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3))
+        ) {
+            const takenPieceRank = this.pieces[piecInd].isWhite ? 3 : 4;
+            const indPiecTaken = this.enPassantSquare[0];
+            this.pieces[indPiecTaken].taken = false;
+            this.pieces[indPiecTaken].setPiecePosition([toX, takenPieceRank]);
+
+            this.enPassantSquare = [
+                indPiecTaken,
+                toX,
+                this.pieces[indPiecTaken].isWhite ? 5 : 2,
+            ];
         }
 
         if (!this.didPieceMoveInHistory(piecInd))
@@ -122,6 +149,16 @@ class Board {
 
         let tookAPiece = false;
         let indPiecTaken;
+
+        // Does this move remove the ability to en passant?
+        if (
+            this.enPassantSquare.length !== 0 &&
+            (this.pieces[piecInd].isWhite ===
+                this.pieces[this.enPassantSquare[0]].isWhite ||
+                !arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3)))
+        ) {
+            this.enPassantSquare = [];
+        }
 
         // Does this move take a piece?
         if (this.pieces[piecInd].canTake(this, toX, toY)) {
@@ -157,7 +194,23 @@ class Board {
         }
 
         // Can this piece promote?
+        // Is/leads this move to en passant?
         if (this.pieces[piecInd].type.toUpperCase() === "P") {
+            /// En passant
+            if (arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3))) {
+                const indPiecTaken = this.enPassantSquare[0];
+                this.pieces[indPiecTaken].taken = true;
+                this.pieces[indPiecTaken].x = -1;
+                this.pieces[indPiecTaken].y = -1;
+            } else if (
+                toY === this.pieces[piecInd].y + 2 ||
+                toY === this.pieces[piecInd].y - 2
+            ) {
+                const pawnDir = this.pieces[piecInd].isWhite ? -1 : 1;
+                this.enPassantSquare = [piecInd, toX, toY - pawnDir];
+            }
+
+            /// Promotion
             const promoteRank = this.pieces[piecInd].isWhite ? 0 : 7;
             this.didPromote = true;
 
@@ -403,6 +456,16 @@ class Board {
 
         let pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
         return pieceIndex < 0;
+    }
+
+    canEnPassant(piece, x, y) {
+        if (this.enPassantSquare.length === 0) return false;
+        if (!arrayEquals([x, y], this.enPassantSquare.slice(1, 3)))
+            return false;
+        if (piece.isWhite === this.pieces[this.enPassantSquare[0]].isWhite)
+            return false;
+
+        return true;
     }
 
     // Is this square attacked?

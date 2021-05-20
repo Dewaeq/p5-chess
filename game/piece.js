@@ -301,8 +301,7 @@ class King extends Piece {
         if (this.canGoToSquare(board, this.x - 1, this.y - 1))
             moves.push([this.x - 1, this.y - 1]);
 
-        if (validate)
-            return board.validateMoves(this, moves);
+        if (validate) return board.validateMoves(this, moves);
 
         return new MoveModel(moves);
     }
@@ -326,9 +325,12 @@ class King extends Piece {
         if (board.getIndexOfPieceAt(3, this.y) >= 0) return false;
 
         // Check if any of the passing squares is attacked
-        if (board.isSquareAttacked(1, this.y, this.isWhite, false)) return false;
-        if (board.isSquareAttacked(2, this.y, this.isWhite, false)) return false;
-        if (board.isSquareAttacked(3, this.y, this.isWhite, false)) return false;
+        if (board.isSquareAttacked(1, this.y, this.isWhite, false))
+            return false;
+        if (board.isSquareAttacked(2, this.y, this.isWhite, false))
+            return false;
+        if (board.isSquareAttacked(3, this.y, this.isWhite, false))
+            return false;
 
         // Youre not allowed to castle when in check
         if (board.isKingInCheck(this.isWhite)) return false;
@@ -354,8 +356,10 @@ class King extends Piece {
         if (board.getIndexOfPieceAt(5, this.y) >= 0) return false;
 
         // Check if any of the passing squares is attacked
-        if (board.isSquareAttacked(6, this.y, this.isWhite, false)) return false;
-        if (board.isSquareAttacked(5, this.y, this.isWhite, false)) return false;
+        if (board.isSquareAttacked(6, this.y, this.isWhite, false))
+            return false;
+        if (board.isSquareAttacked(5, this.y, this.isWhite, false))
+            return false;
 
         // Youre not allowed to castle when in check
         if (board.isKingInCheck(this.isWhite)) return false;
@@ -392,8 +396,7 @@ class Queen extends Piece {
         moves.push(...this.getDiagonalRightDownMoves(board));
         moves.push(...this.getDiagonalLeftDownMoves(board));
 
-        if (validate)
-            return board.validateMoves(this, moves);
+        if (validate) return board.validateMoves(this, moves);
 
         return new MoveModel(moves);
     }
@@ -412,8 +415,7 @@ class Rook extends Piece {
         moves.push(...this.getStraightDownMoves(board));
         moves.push(...this.getStraightLeftMoves(board));
 
-        if (validate)
-            return board.validateMoves(this, moves);
+        if (validate) return board.validateMoves(this, moves);
 
         return new MoveModel(moves);
     }
@@ -432,8 +434,7 @@ class Bishop extends Piece {
         moves.push(...this.getDiagonalRightDownMoves(board));
         moves.push(...this.getDiagonalLeftDownMoves(board));
 
-        if (validate)
-            return board.validateMoves(this, moves);
+        if (validate) return board.validateMoves(this, moves);
 
         return new MoveModel(moves);
     }
@@ -465,7 +466,7 @@ class Knight extends Piece {
         }
         // Left down
         if (this.canMoveTo(board, this.x - 1, this.y + 2)) {
-            moves.push([this.x - 1, this.y + 2])
+            moves.push([this.x - 1, this.y + 2]);
         }
         // Middle left down
         if (this.canMoveTo(board, this.x - 2, this.y + 1)) {
@@ -480,8 +481,7 @@ class Knight extends Piece {
             moves.push([this.x - 1, this.y - 2]);
         }
 
-        if (validate)
-            return board.validateMoves(this, moves);
+        if (validate) return board.validateMoves(this, moves);
 
         return new MoveModel(moves);
     }
@@ -497,8 +497,7 @@ class Pawn extends Piece {
         const direction = this.getPawnDirection();
 
         // Check if there's a piece in front of us
-        if (this.canForward(board))
-            moves.push([this.x, this.y + direction]);
+        if (this.canForward(board)) moves.push([this.x, this.y + direction]);
 
         // Check if we can go 2 squares forward
         if (this.canDoubleForward(board))
@@ -511,8 +510,13 @@ class Pawn extends Piece {
         if (this.canTake(board, this.x - 1, this.y + direction))
             moves.push([this.x - 1, this.y + direction]);
 
-        if (validate)
-            return board.validateMoves(this, moves);
+        // Can we en passant capture?
+        if (board.canEnPassant(this, this.x - 1, this.y + direction))
+            moves.push([this.x - 1, this.y + direction]);
+        if (board.canEnPassant(this, this.x + 1, this.y + direction))
+            moves.push([this.x + 1, this.y + direction]);
+
+        if (validate) return board.validateMoves(this, moves);
 
         return new MoveModel(moves);
     }
@@ -526,7 +530,10 @@ class Pawn extends Piece {
         const inStartPos = this.isWhite ? this.y === 6 : this.y === 1;
         const direction = this.getPawnDirection();
         const onePlaceAhead = this.canForward(board);
-        const twoPlacesAhead = board.isSquareFree(this.x, this.y + direction * 2);
+        const twoPlacesAhead = board.isSquareFree(
+            this.x,
+            this.y + direction * 2
+        );
 
         return inStartPos && onePlaceAhead && twoPlacesAhead;
     }
