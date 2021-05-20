@@ -133,6 +133,16 @@ class Board {
                 this.pieces[indPiecTaken].isWhite ? 5 : 2,
             ];
         }
+        // Did this move create the ability to en passant?
+        const enPassantRank = this.pieces[piecInd].isWhite ? 4 : 3;
+        const pawnStart = this.pieces[piecInd].isWhite ? 6 : 1;
+        if (
+            this.pieces[piecInd].type === "P" &&
+            fromY === pawnStart &&
+            toY === enPassantRank
+        ) {
+            this.enPassantSquare = [];
+        }
 
         if (!this.didPieceMoveInHistory(piecInd))
             this.pieces[piecInd].hasMoved = false;
