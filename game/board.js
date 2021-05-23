@@ -1,7 +1,7 @@
 class Board {
     constructor(
-        // Add a blank piece for type hinting
         whitesTurn = true,
+        // Add a blank piece for type hinting
         pieces = [new Piece(-1, -1, true, "P")],
         whKingIndex = 0,
         blKingIndex = 0,
@@ -12,6 +12,16 @@ class Board {
         didPromote = false
     ) {
         this.whitesTurn = whitesTurn;
+        this.squares = [
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+        ];
         this.pieces = pieces;
         this.whKingInd = whKingIndex;
         this.blKingInd = blKingIndex;
@@ -85,15 +95,23 @@ class Board {
             console.log("this was a castling move");
             // Castle left
             if (fromX - 2 === toX) {
-                let rookIndex = this.getIndexOfPieceAt(toX + 1, toY);
+                const rookIndex = this.getIndexOfPieceAt(toX + 1, toY);
                 this.pieces[rookIndex].setPiecePosition([0, toY]);
                 this.pieces[rookIndex].hasMoved = false;
+
+                this.squares[toY][toX] = -1;
+                this.squares[toY][toX + 1] = -1;
+                this.squares[toY][0] = rookIndex;
             }
             // Castle right
             else if (fromX + 2 === toX) {
-                let rookIndex = this.getIndexOfPieceAt(toX - 1, toY);
+                const rookIndex = this.getIndexOfPieceAt(toX - 1, toY);
                 this.pieces[rookIndex].setPiecePosition([7, toY]);
                 this.pieces[rookIndex].hasMoved = false;
+
+                this.squares[toY][toX] = -1;
+                this.squares[toY][toX - 1] = -1;
+                this.squares[toY][7] = rookIndex;
             }
         }
         // Did this move take a piece?
@@ -101,8 +119,13 @@ class Board {
             this.pieces[takenPieceInd].setPiecePosition([toX, toY]);
             this.pieces[takenPieceInd].taken = false;
 
-            if (!this.didPieceMoveInHistory(takenPieceInd))
+            this.squares[toY][toX] = takenPieceInd;
+
+            if (!this.didPieceMoveInHistory(takenPieceInd)) {
                 this.pieces[takenPieceInd].hasMoved = false;
+            }
+        } else {
+            this.squares[toY][toX] = -1;
         }
         // Was this move a promotion?
         if (this.didPromote) {
@@ -127,6 +150,8 @@ class Board {
             this.pieces[indPiecTaken].taken = false;
             this.pieces[indPiecTaken].setPiecePosition([toX, takenPieceRank]);
 
+            this.squares[takenPieceRank][toX] = indPiecTaken;
+
             this.enPassantSquare = [
                 indPiecTaken,
                 toX,
@@ -144,9 +169,12 @@ class Board {
             this.enPassantSquare = [];
         }
 
-        if (!this.didPieceMoveInHistory(piecInd))
+        if (!this.didPieceMoveInHistory(piecInd)) {
             this.pieces[piecInd].hasMoved = false;
+        }
+
         this.pieces[piecInd].setPiecePosition([fromX, fromY]);
+        this.squares[fromY][fromX] = piecInd;
     }
 
     // Same as movePiece, except this doesnt show
@@ -156,6 +184,8 @@ class Board {
         if (this.pieces[piecInd].taken) return false;
 
         this.didPromote = false;
+        const movingPiece = this.pieces[piecInd];
+        const oldPos = movingPiece.getPiecePosition();
 
         let tookAPiece = false;
         let indPiecTaken;
@@ -163,7 +193,7 @@ class Board {
         // Does this move remove the ability to en passant?
         if (
             this.enPassantSquare.length !== 0 &&
-            (this.pieces[piecInd].isWhite ===
+            (movingPiece.isWhite ===
                 this.pieces[this.enPassantSquare[0]].isWhite ||
                 !arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3)))
         ) {
@@ -171,7 +201,7 @@ class Board {
         }
 
         // Does this move take a piece?
-        if (this.pieces[piecInd].canTake(this, toX, toY)) {
+        if (movingPiece.canTake(this, toX, toY)) {
             indPiecTaken = this.getIndexOfPieceAt(toX, toY);
             tookAPiece = true;
 
@@ -189,48 +219,47 @@ class Board {
 
         // Is this a castling move?
         if (piecInd === this.whKingInd || piecInd === this.blKingInd) {
-            let king = this.pieces[piecInd];
-
             // Castle left
-            if (toX === king.x - 2) {
-                let rookIndex = this.getIndexOfPieceAt(0, king.y);
-                this.pieces[rookIndex].moveTo(king.x - 1, king.y);
+            if (toX === movingPiece.x - 2) {
+                const rookIndex = this.getIndexOfPieceAt(0, movingPiece.y);
+                this.pieces[rookIndex].moveTo(movingPiece.x - 1, movingPiece.y);
+
+                this.squares[movingPiece.y][0] = -1;
+                this.squares[movingPiece.y][movingPiece.x - 1] = rookIndex;
             }
             // Castle right
-            else if (toX === king.x + 2) {
-                let rookIndex = this.getIndexOfPieceAt(7, king.y);
-                this.pieces[rookIndex].moveTo(king.x + 1, king.y);
+            else if (toX === movingPiece.x + 2) {
+                const rookIndex = this.getIndexOfPieceAt(7, movingPiece.y);
+                this.pieces[rookIndex].moveTo(movingPiece.x + 1, movingPiece.y);
+
+                this.squares[movingPiece.y][7] = -1;
+                this.squares[movingPiece.y][movingPiece.x + 1] = rookIndex;
             }
         }
 
         // Can this piece promote?
         // Is/leads this move to en passant?
-        if (this.pieces[piecInd].type.toUpperCase() === "P") {
+        if (movingPiece.type === "P") {
             /// En passant
             if (arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3))) {
                 const indPiecTaken = this.enPassantSquare[0];
                 this.pieces[indPiecTaken].taken = true;
                 this.pieces[indPiecTaken].x = -1;
                 this.pieces[indPiecTaken].y = -1;
-            } else if (
-                toY === this.pieces[piecInd].y + 2 ||
-                toY === this.pieces[piecInd].y - 2
-            ) {
-                const pawnDir = this.pieces[piecInd].isWhite ? -1 : 1;
+            } else if (toY === oldPos[1] + 2 || toY === oldPos[1] - 2) {
+                const pawnDir = movingPiece.isWhite ? -1 : 1;
                 this.enPassantSquare = [piecInd, toX, toY - pawnDir];
             }
 
             /// Promotion
-            const promoteRank = this.pieces[piecInd].isWhite ? 0 : 7;
+            const promoteRank = movingPiece.isWhite ? 0 : 7;
             this.didPromote = true;
 
             if (toY === promoteRank) {
-                const oldPiece = this.pieces[piecInd];
-
                 this.pieces[piecInd] = new Queen(
-                    oldPiece.x,
-                    oldPiece.y,
-                    oldPiece.isWhite,
+                    movingPiece.x,
+                    movingPiece.y,
+                    movingPiece.isWhite,
                     "Q",
                     false,
                     true
@@ -238,21 +267,18 @@ class Board {
             }
         }
 
-        this.lastMove = [
-            piecInd,
-            this.pieces[piecInd].x,
-            this.pieces[piecInd].y,
-            toX,
-            toY,
-        ];
+        this.lastMove = [piecInd, movingPiece.x, movingPiece.y, toX, toY];
         if (tookAPiece) this.lastMove.push(indPiecTaken);
 
         this.pieces[piecInd].moveTo(toX, toY);
 
+        this.squares[toY][toX] = piecInd;
+        this.squares[oldPos[1]][oldPos[0]] = -1;
+
         // Did this move fix our check?
         if (
-            this.playerInCheck === (this.pieces[piecInd].isWhite ? 1 : -1) &&
-            !this.isKingInCheck(this.pieces[piecInd].isWhite)
+            this.playerInCheck === (movingPiece.isWhite ? 1 : -1) &&
+            !this.isKingInCheck(movingPiece.isWhite)
         ) {
             this.playerInCheck = 0;
         }
@@ -300,7 +326,7 @@ class Board {
                     return (x += parseInt(char));
                 }
 
-                let isWhite = isUppercase(char);
+                const isWhite = isUppercase(char);
                 let piece = new Pawn(x, y, isWhite, "P");
 
                 switch (char.toUpperCase()) {
@@ -326,7 +352,7 @@ class Board {
                         piece = new Pawn(x, y, isWhite, char);
                         break;
                 }
-
+                this.squares[y][x] = i;
                 this.pieces.push(piece);
                 i++;
                 x += 1;
@@ -363,23 +389,24 @@ class Board {
             }
             const move = moves[i];
             const oldPos = this.pieces[piecInd].getPiecePosition();
+
+            const toSquareOldIndex = this.squares[move[1]][move[0]];
+
             this.pieces[piecInd].setPiecePosition(move);
+            this.squares[move[1]][move[0]] = piecInd;
+            this.squares[oldPos[1]][oldPos[0]] = -1;
 
             if (this.isKingInCheck(movingPiece.isWhite)) {
                 // 'Fakely' take the piece to check if it
                 // fixes the check position
                 if (movingPiece.canTake(this, move[0], move[1])) {
-                    const takenPieceIndex = this.getIndexOfPieceAt(
-                        move[0],
-                        move[1]
-                    );
-                    this.pieces[takenPieceIndex].setPiecePosition([-1, -1]);
+                    this.pieces[toSquareOldIndex].setPiecePosition([-1, -1]);
 
                     if (this.isKingInCheck(movingPiece.isWhite)) {
                         result.unAllowedMoves.push(move);
                     } else result.allowedMoves.push(move);
 
-                    this.pieces[takenPieceIndex].setPiecePosition(move);
+                    this.pieces[toSquareOldIndex].setPiecePosition(move);
                 } else {
                     result.unAllowedMoves.push(move);
                 }
@@ -387,20 +414,9 @@ class Board {
                 result.allowedMoves.push(move);
             }
             this.pieces[piecInd].setPiecePosition(oldPos);
+            this.squares[oldPos[1]][oldPos[0]] = piecInd;
+            this.squares[move[1]][move[0]] = toSquareOldIndex;
         }
-
-        // We might be mated if there arent any allowed moves
-        if (
-            result.allowedMoves.length === 0 &&
-            this.isKingInCheck(movingPiece.isWhite) &&
-            this.playerInCheck !== (movingPiece.isWhite ? 1 : -1)
-        ) {
-            this.playerInCheck = movingPiece.isWhite ? 1 : -1;
-            if (engine.generateMoves(this, movingPiece.isWhite).length === 0) {
-                console.log("this should be mate/engine predicts mate ?????");
-            }
-        }
-
         return result;
     }
 
@@ -425,14 +441,9 @@ class Board {
     // Return the index of the piece at the given
     // coordinates or -1 if there is no piece there
     getIndexOfPieceAt(x, y) {
-        for (let i = 0; i < this.pieces.length; i++) {
-            let piece = this.pieces[i];
-
-            let piecePosition = piece.getPiecePosition();
-
-            if (arrayEquals([x, y], piecePosition) && !piece.taken) return i;
-        }
-        return -1;
+        if(x > 7 || x < 0) console.trace();
+        if(y > 7 || y < 0) console.trace();
+        return this.squares[y][x];
     }
 
     // Provide a single number as pieceInd or an array or numbers.
@@ -464,7 +475,7 @@ class Board {
         if (y < 0) return false;
         if (y > 7) return false;
 
-        let pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
+        const pieceIndex = this.getIndexOfPieceAt(x, y);
         return pieceIndex < 0;
     }
 
@@ -526,6 +537,7 @@ class Board {
         gameOver = true;
         // window.location.reload();
     }
+
     stalemate() {
         alert("Stalemate");
         gameOver = true;

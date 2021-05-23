@@ -103,7 +103,10 @@ function mousePressed() {
 
     mainBoard.show();
 
-    let pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
+    const pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
+    if(pieceIndex === undefined) {
+        console.log(x, y);
+    }
     if (
         pieceIndex < 0 ||
         mainBoard.pieces[pieceIndex].isWhite !== mainBoard.whitesTurn
