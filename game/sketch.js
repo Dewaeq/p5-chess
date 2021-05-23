@@ -1,6 +1,6 @@
 let tileSize = 90;
 let engineDepth = 3;
-const maxEngineDepth = 5;
+const maxEngineDepth = 15;
 const fenStartString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
 let images = {};

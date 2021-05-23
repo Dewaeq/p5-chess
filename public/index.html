@@ -44,8 +44,6 @@
 
 <body class="bg-dark">
   <div class="main-container">
-
-    <h1 class="text-light title">Chess Engine With Minimax Algorithm</h1>
     <div id="canvas"></div>
 
     <h2 class="text-light advantage-text">Advantage</h2>
@@ -63,7 +61,7 @@
     <input id="fen-string-input" type="fen-input">
     <br>
     <label class="text-light" for="engine-depth">Search Depth: </label>
-    <input id="engine-depth-input" name="engine-depth" type="number" min="1" max="5" value="3">
+    <input id="engine-depth-input" name="engine-depth" type="number" min="1" max="15" value="3">
     <p class="text-light" id="pos-count-text">Calculated <span id="posCountNumber">0</span> positions.</p>
     <p class="text-light" id="calc-time-text">Calculations took <span id="calcTimeNumber">0</span> seconds.</p>
     <p class="text-light" id="calc-speed-text">That's <span id="calcSpeedNumber">0</span> moves/s.</p>
