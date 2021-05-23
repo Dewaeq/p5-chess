@@ -66,6 +66,9 @@ function mousePressed() {
     let x = floor(mouseX / tileSize);
     let y = floor(mouseY / tileSize);
 
+    if(x > 7 || x < 0) return;
+    if(y > 7 || y < 0) return;
+
     if (gameOver) {
         mainBoard.show();
 
