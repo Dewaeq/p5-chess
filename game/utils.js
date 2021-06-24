@@ -35,7 +35,7 @@ function arrayContainsArray(arrayA, arrayB, limit) {
         limit = arrayA.length + 1;
     }
 
-    for (let i = 0; i < arrayA.length; i++) {
+    for (let i = 0, n = arrayA.length; i < n; i++) {
         if (arrayEquals(arrayA[i].slice(0, limit), arrayB.slice(0, limit))) {
             return true;
         }
@@ -53,7 +53,7 @@ function getAttackingMoves(moves, board, piece) {
 
     let attackers = [];
 
-    for (let i = 0; i < moves.length; i++) {
+    for (let i = 0, n = moves.length; i < n; i++) {
         let moveX = moves[i][0];
         let moveY = moves[i][1];
 
@@ -71,7 +71,7 @@ function getAttackedPiecesIndices(moves, board, movingPiece) {
 
     let attackers = [];
 
-    for (let i = 0; i < moves.length; i++) {
+    for (let i = 0, n = moves.length; i < n; i++) {
         let moveX = moves[i][0];
         let moveY = moves[i][1];
 
@@ -103,7 +103,7 @@ function areBoardsEqual(boardA, boardB) {
         return false;
     }
 
-    for (let i = 0; i < boardA.pieces.length; i++) {
+    for (let i = 0, n = boardA.pieces.length; i < n; i++) {
         const pieceA = boardA.pieces[i];
         const pieceB = boardB.pieces[i];
 

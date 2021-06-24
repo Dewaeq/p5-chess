@@ -3,12 +3,15 @@ class Engine {
         // let pieces = mainBoard.pieces.filter(piece => !piece.taken && piece.isWhite === isWhite);
         let moves = [];
 
-        for (let i = 0; i < board.pieces.length; i++) {
+        for (let i = 0, n = board.pieces.length; i < n; i++) {
             if (board.pieces[i].taken || board.pieces[i].isWhite !== isWhite)
                 continue;
 
-            const pieceMoves =
+            let pieceMoves =
                 board.pieces[i].getPossibleMoves(board).allowedMoves;
+            for (let j = 0, m = pieceMoves.length; j < m; j++) {
+                pieceMoves[j].push(i);
+            }
 
             moves.push(...pieceMoves);
         }
@@ -33,7 +36,7 @@ class Engine {
         let blackPositional = 0;
         let whitePositional = 0;
 
-        for (let i = 0; i < board.pieces.length; i++) {
+        for (let i = 0, n = board.pieces.length; i < n; i++) {
             const piece = board.pieces[i];
 
             if (piece.taken || piece.x < 0 || piece.y < 0) continue;
@@ -95,7 +98,13 @@ class Engine {
     getBestMove(board, depth, alpha, beta, isMaximizer) {
         const moves = this.generateMoves(board, isMaximizer);
 
-        if (depth === 0 || moves.length === 0) {
+        if (moves.length === 0) {
+            console.log("this could be (stale)mate!!!!!");
+            if (isMaximizer) return [null, -(8 * VALUE_MAP['Q'] + 6 * VALUE_MAP['R'] + VALUE_MAP['K'] + depth)];
+            else return [null, 8 * VALUE_MAP['Q'] + 6 * VALUE_MAP['R'] + VALUE_MAP['K'] + depth];
+        }
+
+        if (depth === 0) {
             const value = this.evaluateBoard(board);
             return [null, value];
         }
@@ -104,7 +113,7 @@ class Engine {
         let minValue = Number.POSITIVE_INFINITY;
         let bestMove;
 
-        for (let i = 0; i < moves.length; i++) {
+        for (let i = 0, n = moves.length; i < n; i++) {
             this.positionCount++;
 
             const curMove = moves[i];

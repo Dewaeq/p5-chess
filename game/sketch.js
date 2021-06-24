@@ -214,6 +214,7 @@ function initUI() {
         mainBoard.whitesTurn = true;
         isMovingPiece = false;
         movingPiece = null;
+        moves = [];
         mainBoard.fenToBoard(fenString);
     });
 

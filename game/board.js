@@ -36,16 +36,6 @@ class Board {
     }
 
     show() {
-        // Very bad mate check
-        if (this.pieces[this.blKingInd].taken) {
-            console.trace();
-            return this.checkmate(true);
-        }
-        if (this.pieces[this.whKingInd].taken) {
-            console.trace();
-            return this.checkmate(false);
-        }
-
         background(0);
         noStroke();
 
@@ -57,16 +47,10 @@ class Board {
                 rect(i * tileSize, j * tileSize, tileSize, tileSize);
             }
         }
-        let moveDepthLimit = 0;
-        if (this.moveHistory.length >= 2) {
-            moveDepthLimit = 2;
-        } else if (this.moveHistory.length > 0) {
-            moveDepthLimit = 1;
-        }
 
-        for (let i = 0; i < moveDepthLimit; i++) {
+        if (this.moveHistory.length > 0) {
             const [piecInd, fromX, fromY, toX, toY, takenPieceInd] =
-                this.moveHistory[this.moveHistory.length - i - 1];
+                this.moveHistory[this.moveHistory.length - 1];
             if (piecInd !== undefined && piecInd !== null) {
                 fill("#FFCE88");
                 rect(fromX * tileSize, fromY * tileSize, tileSize, tileSize);
@@ -298,6 +282,16 @@ class Board {
 
     fenToBoard(fenString) {
         this.pieces = [];
+        this.squares = [
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+        ];
         this.moveHistory = [];
         this.lastMove = [];
 
@@ -378,10 +372,22 @@ class Board {
     }
 
     validateMoves(movingPiece, moves = []) {
-        const piecInd = this.getIndexOfPieceAt(movingPiece.x, movingPiece.y);
         let result = new MoveModel();
+        const piecInd = this.getIndexOfPieceAt(movingPiece.x, movingPiece.y);
 
-        for (let i = 0; i < moves.length; i++) {
+        if (piecInd < 0) {
+            console.trace();
+            console.error("Negative piece index in validate moves!");
+            console.log("board=", this);
+            console.log("movingPiece=", movingPiece);
+            console.log("move=", move);
+            console.log("board pieces=", this.pieces);
+            console.log("board squares=", this.squares);
+
+            throw ("Negative piece index error!");
+        }
+
+        for (let i = 0, n = moves.length; i < n; i++) {
             // Add the pieces index to the move array if it isnt there already
             if (moves[i].length < 3) {
                 moves[i].push(piecInd);
@@ -390,21 +396,33 @@ class Board {
             const oldPos = [movingPiece.x, movingPiece.y];
             const toSquareOldIndex = this.squares[move[1]][move[0]];
 
-            this.pieces[piecInd].setPiecePosition(move);
-            this.squares[move[1]][move[0]] = piecInd;
-            this.squares[oldPos[1]][oldPos[0]] = -1;
+            try {
+                this.pieces[piecInd].setPiecePosition(move);
+                this.squares[move[1]][move[0]] = piecInd;
+                this.squares[oldPos[1]][oldPos[0]] = -1;
+            } catch (e) {
+                console.error(e);
+                console.log("piece index=", piecInd);
+                console.log("movingPiece=", movingPiece);
+                console.log("move=", move);
+                console.log("board pieces=", this.pieces);
+                console.log("board squares=", this.squares);
+            }
 
             if (this.isKingInCheck(movingPiece.isWhite)) {
                 // 'Fakely' take the piece to check if it
                 // fixes the check position
                 if (movingPiece.canTake(this, move[0], move[1])) {
-                    this.pieces[toSquareOldIndex].setPiecePosition([-1, -1]);
+                    if (toSquareOldIndex > 0)
+                        this.pieces[toSquareOldIndex].setPiecePosition([-1, -1]);
 
                     if (this.isKingInCheck(movingPiece.isWhite)) {
                         result.unAllowedMoves.push(move);
-                    } else result.allowedMoves.push(move);
-
-                    this.pieces[toSquareOldIndex].setPiecePosition(move);
+                    } else {
+                        result.allowedMoves.push(move);
+                    }
+                    if (toSquareOldIndex > 0)
+                        this.pieces[toSquareOldIndex].setPiecePosition(move);
                 } else {
                     result.unAllowedMoves.push(move);
                 }
@@ -428,7 +446,7 @@ class Board {
     didPieceMoveInHistory(piecInd) {
         if (piecInd < 0) return false;
 
-        for (let i = 0; i < this.moveHistory.length; i++) {
+        for (let i = 0, n = this.moveHistory.length; i < n; i++) {
             const movingPieceInd = this.moveHistory[i][0];
 
             if (piecInd === movingPieceInd) return true;
@@ -444,6 +462,12 @@ class Board {
         return this.squares[y][x];
     }
 
+    getPieceAt(x, y) {
+        const index = this.getIndexOfPieceAt(x, y);
+        if (index < 0) return null;
+        return this.pieces[index];
+    }
+
     // Provide a single number as pieceInd or an array or numbers.
     // If an array is provided, the function returns true if one or
     // more elements are of the required type
@@ -456,7 +480,7 @@ class Board {
                 this.pieces[piecInd].type.toUpperCase() === type.toUpperCase()
             );
         }
-        for (let i = 0; i < piecInd.length; i++) {
+        for (let i = 0, n = piecInd.length; i < n; i++) {
             let index = piecInd[i];
 
             if (this.pieces[index].type === type.toUpperCase()) {
@@ -488,7 +512,7 @@ class Board {
     }
 
     // Is this square attacked?
-    // `isWhite` represents the color of the defender.
+    // `isWhite` represents the color of the attacker.
     // use `validate` to add check detection
     isSquareAttacked(x, y, isWhite, validate = true) {
         if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "P", validate))
@@ -506,28 +530,138 @@ class Board {
 
         return false;
     }
+    // Is this square attacked by a piece of the provided type?
+    // `isWhite` represents the color of the attacker.
+    // use `validate` to add check detection
+    isSquareAttackedByPieceOfType(x, y, isWhite, type, validate = false, verbose = false) {
+        switch (type) {
+            case "P": {
+                const upDir = isWhite ? 1 : -1;
+                const dir = [[1, upDir], [-1, upDir]];
 
-    isSquareAttackedByPieceOfType(x, y, isWhite, type, validate = false) {
-        let piece;
+                for (let i = 0; i < dir.length; i++) {
+                    const newX = x + dir[i][0];
+                    const newY = y + dir[i][1];
 
-        if (type === "P") piece = new Pawn(x, y, isWhite, type);
-        else if (type === "N") piece = new Knight(x, y, isWhite, type);
-        else if (type === "B") piece = new Bishop(x, y, isWhite, type);
-        else if (type === "R") piece = new Rook(x, y, isWhite, type);
-        else if (type === "Q") piece = new Queen(x, y, isWhite, type);
-        else if (type === "K") piece = new King(x, y, isWhite, type);
-        else return false;
+                    if (newX > 7 || newX < 0) continue;
+                    if (newY > 7 || newY < 0) continue;
 
-        const attackedPieces = getAttackedPiecesIndices(
-            piece.getPossibleMoves(this, validate).allowedMoves,
-            this,
-            piece
-        );
+                    const index = this.getIndexOfPieceAt(newX, newY);
+                    if (index < 0)
+                        continue;
+                    if (this.pieces[index].isWhite !== isWhite)
+                        continue;
+                    if (this.pieces[index].type === type)
+                        return true;
+                }
+                return false;
+            }
+            case "N": {
+                const dir = [[1, -2], [2, -1], [2, 1], [1, 2], [-1, 2], [-2, 1], [-2, -1], [-1, -2]];
+                for (let i = 0; i < dir.length; i++) {
+                    const newX = x + dir[i][0];
+                    const newY = y + dir[i][1];
 
-        if (this.pieceWithIndexIsOfType(attackedPieces, type)) {
-            return true;
+                    if (newX > 7 || newX < 0) continue;
+                    if (newY > 7 || newY < 0) continue;
+
+                    const index = this.getIndexOfPieceAt(newX, newY);
+                    if (index < 0)
+                        continue;
+                    if (this.pieces[index].isWhite !== isWhite)
+                        continue;
+                    if (this.pieces[index].type === type)
+                        return true;
+                }
+                return false;
+            }
+            case "B": {
+                const dir = [[1, -1], [1, 1], [-1, 1], [-1, -1]];
+                for (let i = 0; i < dir.length; i++) {
+                    for (let j = 1; j < 9; j++) {
+                        const newX = x + dir[i][0] * j;
+                        const newY = y + dir[i][1] * j;
+
+                        if (newX > 7 || newX < 0) break;
+                        if (newY > 7 || newY < 0) break;
+
+                        const index = this.getIndexOfPieceAt(newX, newY);
+                        if (index < 0)
+                            continue;
+                        // Stop sliding if there's a piece in between
+                        if (this.pieces[index].isWhite !== isWhite || this.pieces[index].type !== type)
+                            break;
+                        if (this.pieces[index].type === type)
+                            return true;
+                    }
+                }
+                return false;
+            }
+            case "R": {
+                const dir = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+                for (let i = 0; i < dir.length; i++) {
+                    for (let j = 1; j < 9; j++) {
+                        const newX = x + dir[i][0] * j;
+                        const newY = y + dir[i][1] * j;
+
+                        if (newX > 7 || newX < 0) break;
+                        if (newY > 7 || newY < 0) break;
+
+                        const index = this.getIndexOfPieceAt(newX, newY);
+                        if (index < 0)
+                            continue;
+                        if (this.pieces[index].isWhite !== isWhite || this.pieces[index].type !== type)
+                            break;
+                        if (this.pieces[index].type === type)
+                            return true;
+
+                    }
+                }
+                return false;
+            }
+            case "Q": {
+                const dir = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
+                for (let i = 0; i < dir.length; i++) {
+                    for (let j = 1; j < 9; j++) {
+                        const newX = x + dir[i][0] * j;
+                        const newY = y + dir[i][1] * j;
+
+                        if (newX > 7 || newX < 0) break;
+                        if (newY > 7 || newY < 0) break;
+
+                        const index = this.getIndexOfPieceAt(newX, newY);
+                        if (index < 0)
+                            continue;
+                        if (this.pieces[index].isWhite !== isWhite || this.pieces[index].type !== type)
+                            break;
+                        if (this.pieces[index].type === type)
+                            return true;
+                    }
+                }
+                return false;
+            }
+            case "K": {
+                const dir = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
+                for (let i = 0; i < dir.length; i++) {
+                    const newX = x + dir[i][0];
+                    const newY = y + dir[i][1];
+
+                    if (newX > 7 || newX < 0) continue;
+                    if (newY > 7 || newY < 0) continue;
+
+                    const index = this.getIndexOfPieceAt(newX, newY);
+                    if (index < 0)
+                        continue;
+                    if (this.pieces[index].isWhite !== isWhite)
+                        continue;
+                    if (this.pieces[index].type === type)
+                        return true;
+                }
+                return false;
+            }
+            default:
+                return false;
         }
-        return false;
     }
 
     checkmate(isWhite) {
@@ -553,7 +687,7 @@ class Board {
          * rook/queen, and do the same for knights and pawns."
          * */
 
-        let defKing = this.pieces[isWhite ? this.whKingInd : this.blKingInd];
-        return this.isSquareAttacked(defKing.x, defKing.y, isWhite, false);
+        const defKing = this.pieces[isWhite ? this.whKingInd : this.blKingInd];
+        return this.isSquareAttacked(defKing.x, defKing.y, !isWhite, false);
     }
 }

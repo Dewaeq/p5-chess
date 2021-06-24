@@ -325,11 +325,11 @@ class King extends Piece {
         if (board.getIndexOfPieceAt(3, this.y) >= 0) return false;
 
         // Check if any of the passing squares is attacked
-        if (board.isSquareAttacked(1, this.y, this.isWhite, false))
+        if (board.isSquareAttacked(1, this.y, !this.isWhite, false))
             return false;
-        if (board.isSquareAttacked(2, this.y, this.isWhite, false))
+        if (board.isSquareAttacked(2, this.y, !this.isWhite, false))
             return false;
-        if (board.isSquareAttacked(3, this.y, this.isWhite, false))
+        if (board.isSquareAttacked(3, this.y, !this.isWhite, false))
             return false;
 
         // Youre not allowed to castle when in check
@@ -356,9 +356,9 @@ class King extends Piece {
         if (board.getIndexOfPieceAt(5, this.y) >= 0) return false;
 
         // Check if any of the passing squares is attacked
-        if (board.isSquareAttacked(6, this.y, this.isWhite, false))
+        if (board.isSquareAttacked(6, this.y, !this.isWhite, false))
             return false;
-        if (board.isSquareAttacked(5, this.y, this.isWhite, false))
+        if (board.isSquareAttacked(5, this.y, !this.isWhite, false))
             return false;
 
         // Youre not allowed to castle when in check
