@@ -92,7 +92,6 @@ class Board {
             (fromX - 2 === toX || fromX + 2 === toX) &&
             (piecInd === this.whKingInd || piecInd === this.blKingInd)
         ) {
-            console.log("this was a castling move");
             // Castle left
             if (fromX - 2 === toX) {
                 const rookIndex = this.getIndexOfPieceAt(toX + 1, toY);
@@ -388,8 +387,7 @@ class Board {
                 moves[i].push(piecInd);
             }
             const move = moves[i];
-            const oldPos = this.pieces[piecInd].getPiecePosition();
-
+            const oldPos = [movingPiece.x, movingPiece.y];
             const toSquareOldIndex = this.squares[move[1]][move[0]];
 
             this.pieces[piecInd].setPiecePosition(move);
@@ -441,8 +439,8 @@ class Board {
     // Return the index of the piece at the given
     // coordinates or -1 if there is no piece there
     getIndexOfPieceAt(x, y) {
-        if(x > 7 || x < 0) console.trace();
-        if(y > 7 || y < 0) console.trace();
+        if (x > 7 || x < 0) return -1;
+        if (y > 7 || y < 0) return -1;
         return this.squares[y][x];
     }
 
@@ -509,7 +507,7 @@ class Board {
         return false;
     }
 
-    isSquareAttackedByPieceOfType(x, y, isWhite, type, validate) {
+    isSquareAttackedByPieceOfType(x, y, isWhite, type, validate = false) {
         let piece;
 
         if (type === "P") piece = new Pawn(x, y, isWhite, type);
@@ -520,7 +518,7 @@ class Board {
         else if (type === "K") piece = new King(x, y, isWhite, type);
         else return false;
 
-        let attackedPieces = getAttackedPiecesIndices(
+        const attackedPieces = getAttackedPiecesIndices(
             piece.getPossibleMoves(this, validate).allowedMoves,
             this,
             piece

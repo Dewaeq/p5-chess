@@ -20,9 +20,11 @@ class Engine {
     // negative mean black is
     evaluateBoard(board) {
         if (board.pieces[board.whKingInd].taken) {
+            console.log("hi");
             return Number.NEGATIVE_INFINITY;
         }
         if (board.pieces[board.blKingInd].taken) {
+            console.log("hi");
             return Number.POSITIVE_INFINITY;
         }
 
@@ -57,9 +59,11 @@ class Engine {
         board.testMove(move[2], move[0], move[1]);
 
         if (board.pieces[board.blKingInd].taken) {
+            console.log("hi");
             return Number.POSITIVE_INFINITY;
         }
         if (board.pieces[board.whKingInd].taken) {
+            console.log("hi");
             return Number.NEGATIVE_INFINITY;
         }
 
