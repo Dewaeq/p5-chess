@@ -99,9 +99,12 @@ class Engine {
         const moves = this.generateMoves(board, isMaximizer);
 
         if (moves.length === 0) {
-            console.log("this could be (stale)mate!!!!!");
-            if (isMaximizer) return [null, -(8 * VALUE_MAP['Q'] + 6 * VALUE_MAP['R'] + VALUE_MAP['K'] + depth)];
-            else return [null, 8 * VALUE_MAP['Q'] + 6 * VALUE_MAP['R'] + VALUE_MAP['K'] + depth];
+            // Stalemate is evaluated as equal
+            if (!board.isKingInCheck(isMaximizer))
+                return 0;
+            if (isMaximizer)
+                return [null, -(8 * VALUE_MAP['Q'] + 6 * VALUE_MAP['R'] + VALUE_MAP['K'] + depth)];
+            return [null, 8 * VALUE_MAP['Q'] + 6 * VALUE_MAP['R'] + VALUE_MAP['K'] + depth];
         }
 
         if (depth === 0) {
