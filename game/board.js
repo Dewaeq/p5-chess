@@ -354,6 +354,78 @@ class Board {
         this.show();
     }
 
+    boardToFen() {
+        let fenString = "";
+        for (let y = 0; y < 8; y++) {
+            let i = 0;
+            for (let x = 0; x < 8; x++) {
+                if (this.squares[y][x] < 0) {
+                    i++;
+                    continue;
+                }
+                if (i > 0) {
+                    fenString += i;
+                    i = 0;
+                }
+                const piece = this.pieces[this.squares[y][x]];
+                fenString += piece.isWhite ? piece.type : piece.type.toLowerCase();
+            }
+            if (i > 0)
+                fenString += i;
+
+            if (y < 7)
+                fenString += "/";
+        }
+
+        if (this.whitesTurn) fenString += " w";
+        else fenString += " b";
+
+        // Castling
+        // "A move that temporarily prevents castling does not negate this notation."
+        [this.pieces[this.whKingInd], this.pieces[this.blKingInd]].forEach(king => {
+            if (king.hasMoved) {
+                fenString += " --"
+            }
+            else {
+                let rightRookInd = this.squares[king.isWhite ? 7 : 0][0];
+                if (rightRookInd < 0)
+                    fenString += " -";
+                else if (this.pieces[rightRookInd].type !== "R")
+                    fenString += " -";
+                else if (this.pieces[rightRookInd].isWhite !== king.isWhite)
+                    fenString += " -";
+                else
+                    fenString += ` ${king.isWhite ? "K" : "k"}`;
+
+                let leftRookInd = this.squares[king.isWhite ? 7 : 0][7];
+                if (leftRookInd < 0)
+                    fenString += "-";
+                else if (this.pieces[leftRookInd].type !== "R")
+                    fenString += "-";
+                else if (this.pieces[leftRookInd].isWhite !== king.isWhite)
+                    fenString += "-";
+                else
+                    fenString += `${king.isWhite ? "Q" : "q"}`;
+            }
+        });
+
+        // In FEN notation, the en-passant square is the square behind the pawn
+        // Our en-passant square is the square the pawn is standing on
+        if (this.enPassantSquare.length > 0) {
+            let x = this.enPassantSquare[1];
+            let y = this.enPassantSquare[2];
+
+            let rank = String.fromCharCode(x + 97);
+            let file = 8 - y;
+
+            fenString += ` ${rank}${file}`;
+        } else {
+            fenString += " -";
+        }
+
+        return fenString;
+    }
+
     highLightMoves(moves, color = [10]) {
         if (moves === undefined || moves.length === 0) return;
         moves.forEach((move) => {
