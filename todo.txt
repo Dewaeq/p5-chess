@@ -14,3 +14,4 @@ Game TODO:
 Engine TODO:
     X Calculate positional and material difference
     X Validate moves sometimes doesnt work on a clone of a board
+    - Transposition tables
