@@ -72,10 +72,7 @@ class Board {
 
         const [piecInd, fromX, fromY, toX, toY, takenPieceInd] = this.lastMove;
         // Was it a castling move?
-        if (
-            (fromX - 2 === toX || fromX + 2 === toX) &&
-            (piecInd === this.whKingInd || piecInd === this.blKingInd)
-        ) {
+        if ((fromX - 2 === toX || fromX + 2 === toX) && (piecInd === this.whKingInd || piecInd === this.blKingInd)) {
             // Castle left
             if (fromX - 2 === toX) {
                 const rookIndex = this.getIndexOfPieceAt(toX + 1, toY);
@@ -124,10 +121,7 @@ class Board {
         }
 
         // Was this an en passant move?
-        if (
-            this.pieces[piecInd].type === "P" &&
-            arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3))
-        ) {
+        if (this.pieces[piecInd].type === "P" && arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3))) {
             const takenPieceRank = this.pieces[piecInd].isWhite ? 3 : 4;
             const indPiecTaken = this.enPassantSquare[0];
             this.pieces[indPiecTaken].taken = false;
@@ -144,11 +138,7 @@ class Board {
         // Did this move create the ability to en passant?
         const enPassantRank = this.pieces[piecInd].isWhite ? 4 : 3;
         const pawnStart = this.pieces[piecInd].isWhite ? 6 : 1;
-        if (
-            this.pieces[piecInd].type === "P" &&
-            fromY === pawnStart &&
-            toY === enPassantRank
-        ) {
+        if (this.pieces[piecInd].type === "P" && fromY === pawnStart && toY === enPassantRank) {
             this.enPassantSquare = [];
         }
 
@@ -163,8 +153,12 @@ class Board {
     // Same as movePiece, except this doesnt show
     // on the UI.
     testMove(piecInd, toX, toY) {
-        if (piecInd < 0) return false;
-        if (this.pieces[piecInd].taken) return false;
+        if (piecInd < 0) {
+            throw ("Negative piece index");
+        }
+        if (this.pieces[piecInd].taken) {
+            throw ("Cant move a taken piece")
+        }
 
         this.didPromote = false;
         const movingPiece = this.pieces[piecInd];
@@ -188,10 +182,7 @@ class Board {
             indPiecTaken = this.getIndexOfPieceAt(toX, toY);
             tookAPiece = true;
 
-            if (
-                indPiecTaken === this.blKingInd ||
-                indPiecTaken === this.whKingInd
-            ) {
+            if (indPiecTaken === this.blKingInd || indPiecTaken === this.whKingInd) {
                 // TODO: this isnt allowed to happen...
             }
             this.pieces[indPiecTaken].taken = true;
@@ -259,12 +250,9 @@ class Board {
         this.squares[oldPos[1]][oldPos[0]] = -1;
 
         // Did this move fix our check?
-        if (
-            this.playerInCheck === (movingPiece.isWhite ? 1 : -1) &&
-            !this.isKingInCheck(movingPiece.isWhite)
-        ) {
+        /* if (this.playerInCheck === (movingPiece.isWhite ? 1 : -1) && !this.isKingInCheck(movingPiece.isWhite)) {
             this.playerInCheck = 0;
-        }
+        } */
     }
 
     async movePiece(piecInd, toX, toY) {
@@ -452,9 +440,6 @@ class Board {
             console.error("Negative piece index in validate moves!");
             console.log("board=", this);
             console.log("movingPiece=", movingPiece);
-            console.log("move=", move);
-            console.log("board pieces=", this.pieces);
-            console.log("board squares=", this.squares);
 
             throw ("Negative piece index error!");
         }

@@ -9,9 +9,6 @@ class Engine {
 
             let pieceMoves =
                 board.pieces[i].getPossibleMoves(board).allowedMoves;
-            for (let j = 0, m = pieceMoves.length; j < m; j++) {
-                pieceMoves[j].push(i);
-            }
 
             moves.push(...pieceMoves);
         }
@@ -23,11 +20,9 @@ class Engine {
     // negative mean black is
     evaluateBoard(board) {
         if (board.pieces[board.whKingInd].taken) {
-            console.log("hi");
             return Number.NEGATIVE_INFINITY;
         }
         if (board.pieces[board.blKingInd].taken) {
-            console.log("hi");
             return Number.POSITIVE_INFINITY;
         }
 
@@ -39,16 +34,15 @@ class Engine {
         for (let i = 0, n = board.pieces.length; i < n; i++) {
             const piece = board.pieces[i];
 
-            if (piece.taken || piece.x < 0 || piece.y < 0) continue;
+            if (piece.taken || piece.x < 0 || piece.y < 0)
+                continue;
 
             if (piece.isWhite) {
                 whiteMaterial += VALUE_MAP[piece.type] ?? 0;
-                whitePositional +=
-                    POSITIONAL_VALUE[true][piece.type][piece.y][piece.x] ?? 0;
+                whitePositional += POSITIONAL_VALUE[true][piece.type][piece.y][piece.x] ?? 0;
             } else {
                 blackMaterial += VALUE_MAP[piece.type] ?? 0;
-                blackPositional +=
-                    POSITIONAL_VALUE[false][piece.type][piece.y][piece.x] ?? 0;
+                blackPositional += POSITIONAL_VALUE[false][piece.type][piece.y][piece.x] ?? 0;
             }
         }
 
@@ -62,11 +56,9 @@ class Engine {
         board.testMove(move[2], move[0], move[1]);
 
         if (board.pieces[board.blKingInd].taken) {
-            console.log("hi");
             return Number.POSITIVE_INFINITY;
         }
         if (board.pieces[board.whKingInd].taken) {
-            console.log("hi");
             return Number.NEGATIVE_INFINITY;
         }
 
