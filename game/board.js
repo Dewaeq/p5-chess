@@ -189,6 +189,7 @@ class Board {
             this.pieces[indPiecTaken].hasMoved = true;
             this.pieces[indPiecTaken].x = -1;
             this.pieces[indPiecTaken].y = -1;
+            this.squares[toY][toX] = -1;
         }
 
         // Is this a castling move?
