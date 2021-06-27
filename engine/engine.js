@@ -1,5 +1,7 @@
+import { engine } from "../game/sketch.js";
+
 class Engine {
-    generateMoves(board, isWhite) {
+    generateMoves = function (board, isWhite) {
         // let pieces = mainBoard.pieces.filter(piece => !piece.taken && piece.isWhite === isWhite);
         let moves = [];
 
@@ -18,7 +20,7 @@ class Engine {
 
     // Positive values mean white is in the advantage,
     // negative mean black is
-    evaluateBoard(board) {
+    evaluateBoard = function (board) {
         if (board.pieces[board.whKingInd].taken) {
             return Number.NEGATIVE_INFINITY;
         }
@@ -52,7 +54,7 @@ class Engine {
         return materialDifference + positionalDifference;
     }
 
-    evaluateMove(move, board) {
+    evaluateMove = function (move, board) {
         board.testMove(move[2], move[0], move[1]);
 
         if (board.pieces[board.blKingInd].taken) {
@@ -62,7 +64,7 @@ class Engine {
             return Number.NEGATIVE_INFINITY;
         }
 
-        const result = this.evaluateBoard(board);
+        const result = engine.evaluateBoard(board);
         board.undoLastMove();
         board.lastMove = [];
 
@@ -70,13 +72,13 @@ class Engine {
     }
 
     // returns [bestMove, bestMoveValue, positionCount, calculationTime]
-    makeBestMove(board, depth, isWhite) {
-        this.positionCount = 0;
+    makeBestMove = function (board, depth, isWhite) {
+        engine.positionCount = 0;
 
         const startTime = performance.now();
         const newBoard = board.clone();
 
-        const [bestMove, moveValue] = this.getBestMove(
+        const [bestMove, moveValue] = engine.getBestMove(
             newBoard,
             depth,
             Number.NEGATIVE_INFINITY,
@@ -84,11 +86,11 @@ class Engine {
             isWhite
         );
         const endTime = performance.now();
-        return [bestMove, moveValue, this.positionCount, endTime - startTime];
+        return [bestMove, moveValue, engine.positionCount, endTime - startTime];
     }
 
-    getBestMove(board, depth, alpha, beta, isMaximizer) {
-        const moves = this.generateMoves(board, isMaximizer);
+    getBestMove = function (board, depth, alpha, beta, isMaximizer) {
+        const moves = engine.generateMoves(board, isMaximizer);
 
         if (moves.length === 0) {
             // Stalemate is evaluated as equal
@@ -100,7 +102,7 @@ class Engine {
         }
 
         if (depth === 0) {
-            const value = this.evaluateBoard(board);
+            const value = engine.evaluateBoard(board);
             return [null, value];
         }
 
@@ -109,13 +111,13 @@ class Engine {
         let bestMove;
 
         for (let i = 0, n = moves.length; i < n; i++) {
-            this.positionCount++;
+            engine.positionCount++;
 
             const curMove = moves[i];
             const newBoard = board.clone();
 
             newBoard.testMove(curMove[2], curMove[0], curMove[1]);
-            const [childBestMove, childBestMoveValue] = this.getBestMove(
+            const [childBestMove, childBestMoveValue] = engine.getBestMove(
                 newBoard,
                 depth - 1,
                 alpha,
@@ -150,3 +152,4 @@ class Engine {
         return [bestMove, isMaximizer ? maxValue : minValue];
     }
 }
+export { Engine };

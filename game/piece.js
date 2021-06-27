@@ -1,3 +1,5 @@
+import { images, tileSize } from "./sketch.js";
+
 class Piece {
     constructor(x, y, isWhite, type, taken = false, hasMoved = false) {
         this.x = x;
@@ -9,11 +11,11 @@ class Piece {
         this.pic = this.typeToPic();
     }
 
-    show() {
+    show(p5) {
         if (this.taken) return;
 
-        fill(this.isWhite ? "#F8F8F8" : "#565352");
-        image(
+        p5.fill(this.isWhite ? "#F8F8F8" : "#565352");
+        p5.image(
             this.pic,
             this.x * tileSize,
             this.y * tileSize,
@@ -542,3 +544,5 @@ class Pawn extends Piece {
         return this.isWhite ? -1 : 1;
     }
 }
+
+export { Piece, King, Queen, Rook, Bishop, Knight, Pawn }

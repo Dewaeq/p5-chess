@@ -1,5 +1,9 @@
+import { Piece, King, Queen, Rook, Bishop, Knight, Pawn } from "./piece.js";
+import { tileSize, engine, gameOver } from "./sketch.js";
+
 class Board {
     constructor(
+        p5,
         whitesTurn = true,
         // Add a blank piece for type hinting
         pieces = [new Piece(-1, -1, true, "P")],
@@ -11,6 +15,7 @@ class Board {
         enPassantSquare = [],
         didPromote = false
     ) {
+        this.p5 = p5;
         this.whitesTurn = whitesTurn;
         this.squares = [
             [-1, -1, -1, -1, -1, -1, -1, -1],
@@ -36,15 +41,15 @@ class Board {
     }
 
     show() {
-        background(0);
-        noStroke();
+        this.p5.background(0);
+        this.p5.noStroke();
 
         for (let i = 0; i < 8; i++) {
             for (let j = 0; j < 8; j++) {
                 let isWhite = (i + j) % 2 === 0;
 
-                fill(isWhite ? "#F1D7C1" : "#BC5448");
-                rect(i * tileSize, j * tileSize, tileSize, tileSize);
+                this.p5.fill(isWhite ? "#F1D7C1" : "#BC5448");
+                this.p5.rect(i * tileSize, j * tileSize, tileSize, tileSize);
             }
         }
 
@@ -52,16 +57,16 @@ class Board {
             const [piecInd, fromX, fromY, toX, toY, takenPieceInd] =
                 this.moveHistory[this.moveHistory.length - 1];
             if (piecInd !== undefined && piecInd !== null) {
-                fill("#FFCE88");
-                rect(fromX * tileSize, fromY * tileSize, tileSize, tileSize);
+                this.p5.fill("#FFCE88");
+                this.p5.rect(fromX * tileSize, fromY * tileSize, tileSize, tileSize);
 
-                fill("#DBA671");
-                rect(toX * tileSize, toY * tileSize, tileSize, tileSize);
+                this.p5.fill("#DBA671");
+                this.p5.rect(toX * tileSize, toY * tileSize, tileSize, tileSize);
             }
         }
 
         this.pieces.forEach((piece) => {
-            piece.show();
+            piece.show(this.p5);
         });
     }
 
@@ -255,7 +260,7 @@ class Board {
         } */
     }
 
-    async movePiece(piecInd, toX, toY) {
+    movePiece(piecInd, toX, toY) {
         this.testMove(piecInd, toX, toY);
         this.moveHistory.push(this.lastMove);
         this.show();
@@ -263,8 +268,10 @@ class Board {
         // TODO: replace with more efficient check
         const isWhite = this.pieces[piecInd].isWhite;
         if (engine.generateMoves(this, !isWhite).length === 0) {
-            if (this.isKingInCheck(!isWhite)) this.checkmate(isWhite);
-            else this.stalemate();
+            if (this.isKingInCheck(!isWhite))
+                this.checkmate(isWhite);
+            else
+                this.stalemate();
         }
     }
 
@@ -422,8 +429,8 @@ class Board {
     }
 
     highLightMove(x, y, color) {
-        fill(...color);
-        ellipse(
+        this.p5.fill(...color);
+        this.p5.ellipse(
             x * tileSize + tileSize / 2,
             y * tileSize + tileSize / 2,
             tileSize / 2,
@@ -748,3 +755,5 @@ class Board {
         return this.isSquareAttacked(defKing.x, defKing.y, !isWhite, false);
     }
 }
+
+export { Board }

@@ -1,132 +1,134 @@
-let tileSize = 90;
-let engineDepth = 3;
-const maxEngineDepth = 15;
+import { Engine } from "../engine/engine.js";
+import { Board } from "./board.js";
+
+export let tileSize = 90;
+export let engineDepth = 3;
+export const maxEngineDepth = 15;
+export const engine = new Engine();
 const fenStartString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
-let images = {};
-let mainBoard;
-let isMovingPiece = false;
-let movingPiece = null;
-let gameOver = false;
-let moves;
-let engine;
+export let images = {};
+export let mainBoard;
+export let isMovingPiece = false;
+export let movingPiece = null;
+export let gameOver = false;
+export let moves;
 
 let posCount = 0;
 let calcTime = 0;
 
-function preload() {
-    if (displayWidth >= displayHeight) tileSize = (displayHeight * 0.6) / 8;
-    else tileSize = (displayWidth * 0.6) / 8;
 
-    let fileExt = ".png";
+const sketch = new p5(function (p5) {
+    p5.preload = function () {
+        if (p5.displayWidth >= p5.displayHeight) tileSize = (p5.displayHeight * 0.6) / 8;
+        else tileSize = (p5.displayWidth * 0.6) / 8;
 
-    for (let i = 0; i < 2; i++) {
-        let pieceColor = i === 0 ? "white" : "black";
-        images[`${pieceColor}-king`] = loadImage(
-            `../assets/images/${pieceColor}/${pieceColor}-king${fileExt}`
-        );
-        images[`${pieceColor}-queen`] = loadImage(
-            `../assets/images/${pieceColor}/${pieceColor}-queen${fileExt}`
-        );
-        images[`${pieceColor}-rook`] = loadImage(
-            `../assets/images/${pieceColor}/${pieceColor}-rook${fileExt}`
-        );
-        images[`${pieceColor}-bishop`] = loadImage(
-            `../assets/images/${pieceColor}/${pieceColor}-bishop${fileExt}`
-        );
-        images[`${pieceColor}-knight`] = loadImage(
-            `../assets/images/${pieceColor}/${pieceColor}-knight${fileExt}`
-        );
-        images[`${pieceColor}-pawn`] = loadImage(
-            `../assets/images/${pieceColor}/${pieceColor}-pawn${fileExt}`
-        );
+        let fileExt = ".png";
+
+        for (let i = 0; i < 2; i++) {
+            let pieceColor = i === 0 ? "white" : "black";
+            images[`${pieceColor}-king`] = p5.loadImage(
+                `../assets/images/${pieceColor}/${pieceColor}-king${fileExt}`
+            );
+            images[`${pieceColor}-queen`] = p5.loadImage(
+                `../assets/images/${pieceColor}/${pieceColor}-queen${fileExt}`
+            );
+            images[`${pieceColor}-rook`] = p5.loadImage(
+                `../assets/images/${pieceColor}/${pieceColor}-rook${fileExt}`
+            );
+            images[`${pieceColor}-bishop`] = p5.loadImage(
+                `../assets/images/${pieceColor}/${pieceColor}-bishop${fileExt}`
+            );
+            images[`${pieceColor}-knight`] = p5.loadImage(
+                `../assets/images/${pieceColor}/${pieceColor}-knight${fileExt}`
+            );
+            images[`${pieceColor}-pawn`] = p5.loadImage(
+                `../assets/images/${pieceColor}/${pieceColor}-pawn${fileExt}`
+            );
+        }
     }
-}
 
-function setup() {
-    initUI();
-    background(220);
+    p5.setup = function () {
+        initUI(p5);
 
-    mainBoard = new Board();
-    engine = new Engine();
+        mainBoard = new Board(p5);
 
-    mainBoard.fenToBoard(fenStartString);
-}
+        mainBoard.fenToBoard(fenStartString);
+    }
 
-async function draw() {
-    if (gameOver) return;
-    if (mainBoard.whitesTurn) return;
+    p5.draw = async function () {
+        if (gameOver) return;
+        if (mainBoard.whitesTurn) return;
 
-    mainBoard.whitesTurn = true;
-    await delay(0.1);
-    aiMove();
-}
+        mainBoard.whitesTurn = true;
+        await delay(0.1);
+        aiMove();
+    }
 
-function mousePressed() {
-    let x = floor(mouseX / tileSize);
-    let y = floor(mouseY / tileSize);
+    p5.mousePressed = function () {
+        let x = p5.floor(p5.mouseX / tileSize);
+        let y = p5.floor(p5.mouseY / tileSize);
 
-    if(x > 7 || x < 0) return;
-    if(y > 7 || y < 0) return;
+        if (x > 7 || x < 0) return;
+        if (y > 7 || y < 0) return;
 
-    if (gameOver) {
-        mainBoard.show();
+        if (gameOver) {
+            mainBoard.show();
 
-        let pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
-        if (pieceIndex < 0) {
+            let pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
+            if (pieceIndex < 0) {
+                return;
+            }
+
+            moves = mainBoard.pieces[pieceIndex].getPossibleMoves(mainBoard);
+            mainBoard.highLightMoves(moves.allowedMoves, [10, 160, 50, 120]);
+            mainBoard.highLightMoves(moves.unAllowedMoves, [140, 0, 20, 120]);
             return;
         }
+
+        if (!mainBoard.whitesTurn) return;
+
+        if (isMovingPiece && arrayContainsArray(moves.allowedMoves, [x, y], 2)) {
+            let pieceIndex = mainBoard.getIndexOfPieceAt(
+                movingPiece.x,
+                movingPiece.y
+            );
+
+            mainBoard.whitesTurn = !mainBoard.whitesTurn;
+            isMovingPiece = false;
+            movingPiece = null;
+            moves = null;
+
+            mainBoard.movePiece(pieceIndex, x, y);
+
+            mainBoard.show();
+            setStatus();
+
+            return;
+        }
+
+        mainBoard.show();
+
+        const pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
+        if (pieceIndex === undefined) {
+            console.log(x, y);
+        }
+        if (pieceIndex < 0 || mainBoard.pieces[pieceIndex].isWhite !== mainBoard.whitesTurn) {
+            isMovingPiece = false;
+            setStatus();
+            return;
+        }
+
+        movingPiece = mainBoard.pieces[pieceIndex];
+        isMovingPiece = true;
 
         moves = mainBoard.pieces[pieceIndex].getPossibleMoves(mainBoard);
         mainBoard.highLightMoves(moves.allowedMoves, [10, 160, 50, 120]);
         mainBoard.highLightMoves(moves.unAllowedMoves, [140, 0, 20, 120]);
-        return;
-    }
-
-    if (!mainBoard.whitesTurn) return;
-
-    if (isMovingPiece && arrayContainsArray(moves.allowedMoves, [x, y], 2)) {
-        let pieceIndex = mainBoard.getIndexOfPieceAt(
-            movingPiece.x,
-            movingPiece.y
-        );
-
-        mainBoard.whitesTurn = !mainBoard.whitesTurn;
-        isMovingPiece = false;
-        movingPiece = null;
-        moves = null;
-
-        mainBoard.movePiece(pieceIndex, x, y);
-
-        mainBoard.show();
         setStatus();
-
-        return;
     }
+});
 
-    mainBoard.show();
-
-    const pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
-    if(pieceIndex === undefined) {
-        console.log(x, y);
-    }
-    if (
-        pieceIndex < 0 ||
-        mainBoard.pieces[pieceIndex].isWhite !== mainBoard.whitesTurn
-    ) {
-        isMovingPiece = false;
-        setStatus();
-        return;
-    }
-
-    movingPiece = mainBoard.pieces[pieceIndex];
-    isMovingPiece = true;
-
-    moves = mainBoard.pieces[pieceIndex].getPossibleMoves(mainBoard);
-    mainBoard.highLightMoves(moves.allowedMoves, [10, 160, 50, 120]);
-    mainBoard.highLightMoves(moves.unAllowedMoves, [140, 0, 20, 120]);
-    setStatus();
-}
 
 function aiMove() {
     if (gameOver) return;
@@ -184,7 +186,7 @@ function setStatus() {
     }
 }
 
-function initUI() {
+function initUI(p5) {
     $("#engine-depth-input").on("input", function () {
         const lastDepth = engineDepth ?? 3;
         try {
@@ -195,8 +197,8 @@ function initUI() {
                     newDepth > maxEngineDepth
                         ? maxEngineDepth
                         : newDepth <= 0
-                        ? 1
-                        : 3;
+                            ? 1
+                            : 3;
                 $(this).val(newDepth);
             }
 
@@ -218,6 +220,8 @@ function initUI() {
         mainBoard.fenToBoard(fenString);
     });
 
-    const canvas = createCanvas(tileSize * 8, tileSize * 8);
+    const canvas = p5.createCanvas(tileSize * 8, tileSize * 8);
     canvas.parent("#canvas");
+
+    p5.background(220);
 }
