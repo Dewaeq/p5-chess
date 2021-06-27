@@ -173,11 +173,7 @@ class Board {
         let indPiecTaken;
 
         // Does this move remove the ability to en passant?
-        if (
-            this.enPassantSquare.length !== 0 &&
-            (movingPiece.isWhite ===
-                this.pieces[this.enPassantSquare[0]].isWhite ||
-                !arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3)))
+        if (this.enPassantSquare.length !== 0 && (movingPiece.isWhite === this.pieces[this.enPassantSquare[0]].isWhite || !arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3)))
         ) {
             this.enPassantSquare = [];
         }
@@ -194,6 +190,7 @@ class Board {
             this.pieces[indPiecTaken].hasMoved = true;
             this.pieces[indPiecTaken].x = -1;
             this.pieces[indPiecTaken].y = -1;
+            this.squares[toY][toX] = -1;
         }
 
         // Is this a castling move?
