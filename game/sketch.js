@@ -44,6 +44,9 @@ function preload() {
 }
 
 function setup() {
+
+    frameRate(1);
+
     initUI();
     background(220);
 
