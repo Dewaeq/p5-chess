@@ -44,7 +44,7 @@ class Piece {
     /**
      * This function is piece-specific
      * @param {Board} board 
-     * @param {boolean} validate 
+     * @param {boolean} [validate] 
      * @returns {MoveModel}
      */
     getPossibleMoves(board, validate = true) {
