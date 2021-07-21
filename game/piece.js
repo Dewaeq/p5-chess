@@ -29,21 +29,35 @@ class Piece {
         this.y = y;
     }
 
-    // Set the pieces position to the first 2 values
-    // of the given array [x, y]
+
+    /**
+     * Set the pieces position to the first 2 values of the given array [x, y]
+     * @param {Array<number>} position 
+     */
     setPiecePosition(position) {
-        if (position?.length < 2) return;
+        if (position.length < 2) return;
 
         this.x = position[0];
         this.y = position[1];
     }
 
-    // Override this function
+    /**
+     * This function is piece-specific
+     * @param {Board} board 
+     * @param {boolean} [validate] 
+     * @returns {MoveModel}
+     */
     getPossibleMoves(board, validate = true) {
         return new MoveModel();
     }
 
     // Straight moves
+    // ------------------------------------------------------------------
+    /**
+     * 
+     * @param {Board} board 
+     * @returns {Array<Array<number>>}
+     */
     getStraightUpMoves(board) {
         let moves = [];
         let moveX = this.x;
@@ -63,6 +77,11 @@ class Piece {
         return moves;
     }
 
+    /**
+     * 
+     * @param {Board} board 
+     * @returns {Array<Array<number>>}
+     */
     getStraightRightMoves(board) {
         let moves = [];
         let moveY = this.y;
@@ -82,6 +101,11 @@ class Piece {
         return moves;
     }
 
+    /**
+     * 
+     * @param {Board} board 
+     * @returns {Array<Array<number>>}
+     */
     getStraightDownMoves(board) {
         let moves = [];
         let moveX = this.x;
@@ -101,6 +125,11 @@ class Piece {
         return moves;
     }
 
+    /**
+     * 
+     * @param {Board} board 
+     * @returns {Array<Array<number>>}
+     */
     getStraightLeftMoves(board) {
         let moves = [];
         let moveY = this.y;
@@ -121,6 +150,13 @@ class Piece {
     }
 
     // Diagonal moves
+    // --------------------------------------------------------------
+
+    /**
+     * 
+     * @param {Board} board 
+     * @returns {Array<Array<number>>}
+     */
     getDiagonalRightUpMoves(board) {
         let moves = [];
         for (let i = 1; i < 7 - this.x + 1; i++) {
@@ -139,6 +175,11 @@ class Piece {
         return moves;
     }
 
+    /**
+     * 
+     * @param {Board} board 
+     * @returns {Array<Array<number>>}
+     */
     getDiagonalRightDownMoves(board) {
         let moves = [];
         for (let i = 1; i < 7 - this.x + 1; i++) {
@@ -157,6 +198,11 @@ class Piece {
         return moves;
     }
 
+    /**
+     * 
+     * @param {Board} board 
+     * @returns {Array<Array<number>>}
+     */
     getDiagonalLeftDownMoves(board) {
         let moves = [];
         for (let i = 1; i < this.x + 1; i++) {
@@ -175,6 +221,11 @@ class Piece {
         return moves;
     }
 
+    /**
+     * 
+     * @param {Board} board 
+     * @returns {Array<Array<number>>}
+     */
     getDiagonalLeftUpMoves(board) {
         let moves = [];
         for (let i = 1; i < this.x + 1; i++) {
@@ -196,15 +247,24 @@ class Piece {
     /// Static-ish functions, no data is modified
     //-----------------------------------------------------------------------------------------------
 
-    // Check if piece A can take piece B
+    /**
+     * Check if piece A can take piece B
+     * @param {Piece} pieceA 
+     * @param {Piece} pieceB 
+     * @returns {boolean}
+     */
     canTakePiece(pieceA, pieceB) {
-        return (
-            pieceA.isWhite !== pieceB.isWhite && !pieceA.taken && !pieceB.taken
-        );
+        return (pieceA.isWhite !== pieceB.isWhite && !pieceA.taken && !pieceB.taken);
     }
 
-    // Check if there is a piece we can take at
-    // the provided coordinates
+    /**
+     * Check if there is a piece we can take at
+       the provided coordinates
+     * @param {Board} board 
+     * @param {number} takeX 
+     * @param {number} takeY 
+     * @returns {boolean}
+     */
     canTake(board, takeX, takeY) {
         if (!this.withinBounds(takeX, takeY)) return false;
 
@@ -219,8 +279,15 @@ class Piece {
         return false;
     }
 
-    // Can we got to this square whether it is by taking
-    // or if the square if free
+    
+    /**
+     * Can we go to this square whether it is by taking
+       or if the square if free
+     * @param {Board} board 
+     * @param {number} toX 
+     * @param {number} toY 
+     * @returns 
+     */
     canMoveTo(board, toX, toY) {
         return this.canTake(board, toX, toY) || board.isSquareFree(toX, toY);
     }

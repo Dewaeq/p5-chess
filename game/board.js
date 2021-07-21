@@ -150,8 +150,12 @@ class Board {
         this.squares[fromY][fromX] = piecInd;
     }
 
-    // Same as movePiece, except this doesnt show
-    // on the UI.
+    /**
+     * Same as movePiece, except this doesnt show on the UI
+     * @param {number} piecInd the index of the piece to move
+     * @param {number} toX move to this x coord
+     * @param {number} toY move to this y coord
+     */
     testMove(piecInd, toX, toY) {
         if (piecInd < 0) {
             throw ("Negative piece index");
@@ -189,6 +193,7 @@ class Board {
             this.pieces[indPiecTaken].hasMoved = true;
             this.pieces[indPiecTaken].x = -1;
             this.pieces[indPiecTaken].y = -1;
+            this.squares[toY][toX] = -1;
         }
 
         // Is this a castling move?
@@ -255,7 +260,13 @@ class Board {
         } */
     }
 
-    async movePiece(piecInd, toX, toY) {
+    /**
+     * This calls `testMove`, checks for (stale)mate and updates the UI
+     * @param {number} piecInd the index of the piece to move
+     * @param {number} toX move to this x coord
+     * @param {number} toY move to this y coord
+     */
+    movePiece(piecInd, toX, toY) {
         this.testMove(piecInd, toX, toY);
         this.moveHistory.push(this.lastMove);
         this.show();
@@ -263,8 +274,12 @@ class Board {
         // TODO: replace with more efficient check
         const isWhite = this.pieces[piecInd].isWhite;
         if (engine.generateMoves(this, !isWhite).length === 0) {
-            if (this.isKingInCheck(!isWhite)) this.checkmate(isWhite);
-            else this.stalemate();
+            if (this.isKingInCheck(!isWhite)) {
+                this.checkmate(isWhite);
+            }
+            else {
+                this.stalemate();
+            }
         }
     }
 
@@ -365,27 +380,32 @@ class Board {
                 fenString += "/";
         }
 
-        if (this.whitesTurn) fenString += " w";
-        else fenString += " b";
+        if (this.whitesTurn)
+            fenString += " w";
+        else
+            fenString += " b";
+
+        fenString += " ";
 
         // Castling
         // "A move that temporarily prevents castling does not negate this notation."
+        // TODO: this should be "-" when neither side can castle
         [this.pieces[this.whKingInd], this.pieces[this.blKingInd]].forEach(king => {
             if (king.hasMoved) {
-                fenString += " --"
+                fenString += "--"
             }
             else {
-                let rightRookInd = this.squares[king.isWhite ? 7 : 0][0];
+                const rightRookInd = this.squares[king.isWhite ? 7 : 0][0];
                 if (rightRookInd < 0)
-                    fenString += " -";
+                    fenString += "-";
                 else if (this.pieces[rightRookInd].type !== "R")
-                    fenString += " -";
+                    fenString += "-";
                 else if (this.pieces[rightRookInd].isWhite !== king.isWhite)
-                    fenString += " -";
+                    fenString += "-";
                 else
-                    fenString += ` ${king.isWhite ? "K" : "k"}`;
+                    fenString += `${king.isWhite ? "K" : "k"}`;
 
-                let leftRookInd = this.squares[king.isWhite ? 7 : 0][7];
+                const leftRookInd = this.squares[king.isWhite ? 7 : 0][7];
                 if (leftRookInd < 0)
                     fenString += "-";
                 else if (this.pieces[leftRookInd].type !== "R")
@@ -400,11 +420,11 @@ class Board {
         // In FEN notation, the en-passant square is the square behind the pawn
         // Our en-passant square is the square the pawn is standing on
         if (this.enPassantSquare.length > 0) {
-            let x = this.enPassantSquare[1];
-            let y = this.enPassantSquare[2];
+            const x = this.enPassantSquare[1];
+            const y = this.enPassantSquare[2];
 
-            let rank = String.fromCharCode(x + 97);
-            let file = 8 - y;
+            const rank = String.fromCharCode(x + 97);
+            const file = 8 - y;
 
             fenString += ` ${rank}${file}`;
         } else {
@@ -414,6 +434,12 @@ class Board {
         return fenString;
     }
 
+    /**
+     * Highlight the provided moves
+     * @param {Array<Array<number>>} moves moves to highlight
+     * @param {Array<number>} [color] colour used for move highlighting
+     * @returns 
+     */
     highLightMoves(moves, color = [10]) {
         if (moves === undefined || moves.length === 0) return;
         moves.forEach((move) => {
@@ -421,6 +447,12 @@ class Board {
         });
     }
 
+    /**
+     * Display a circle on the square `x, y` in the given colour
+     * @param {number} x x coord of the square
+     * @param {number} y y coord of the square
+     * @param {Array<number>} [color] colour used for move highlighting
+     */
     highLightMove(x, y, color) {
         fill(...color);
         ellipse(
@@ -494,7 +526,7 @@ class Board {
     }
 
     /// Static-ish functions, no data is modified
-    ///-------------------------------------------------------------------
+    ///-----------------------------------------------------------------------------
 
     clone() {
         return Object.assign(Object.create(Object.getPrototypeOf(this)), this);
@@ -511,31 +543,33 @@ class Board {
         return false;
     }
 
-    // Return the index of the piece at the given
-    // coordinates or -1 if there is no piece there
+    /**
+     * Return the index of the piece at the given
+       coordinates or -1 if there is no piece there
+     * @param {number} x 
+     * @param {number} y 
+     * @returns {number}
+     */
     getIndexOfPieceAt(x, y) {
         if (x > 7 || x < 0) return -1;
         if (y > 7 || y < 0) return -1;
         return this.squares[y][x];
     }
 
-    getPieceAt(x, y) {
-        const index = this.getIndexOfPieceAt(x, y);
-        if (index < 0) return null;
-        return this.pieces[index];
-    }
-
-    // Provide a single number as pieceInd or an array or numbers.
-    // If an array is provided, the function returns true if one or
-    // more elements are of the required type
+    /**
+     * Provide a single number as pieceInd or an array of numbers.
+       If an array is provided, the function returns true if one or
+       more elements are of the required type
+     * @param {number | Array<number>} piecInd 
+     * @param {string} type 
+     * @returns {boolean}
+     */
     pieceWithIndexIsOfType(piecInd, type) {
         if (piecInd === undefined || piecInd === null) return false;
         if (type === undefined || type === null) return false;
 
         if (!Array.isArray(piecInd)) {
-            return (
-                this.pieces[piecInd].type.toUpperCase() === type.toUpperCase()
-            );
+            return this.pieces[piecInd].type.toUpperCase() === type.toUpperCase();
         }
         for (let i = 0, n = piecInd.length; i < n; i++) {
             let index = piecInd[i];
@@ -568,29 +602,39 @@ class Board {
         return true;
     }
 
-    // Is this square attacked?
-    // `isWhite` represents the color of the attacker.
-    // use `validate` to add check detection
-    isSquareAttacked(x, y, isWhite, validate = true) {
-        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "P", validate))
+    /**
+     * Is the given square attacked by your opponent?
+     * @param {number} x x coord
+     * @param {number} y y coord
+     * @param {boolean} isWhite true if the attacker is white
+     * @returns {boolean} true if the given square is attacked by the opponent
+     */
+    isSquareAttacked(x, y, isWhite) {
+        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "P"))
             return true;
-        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "N", validate))
+        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "N"))
             return true;
-        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "B", validate))
+        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "B"))
             return true;
-        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "R", validate))
+        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "R"))
             return true;
-        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "Q", validate))
+        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "Q"))
             return true;
-        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "K", validate))
+        if (this.isSquareAttackedByPieceOfType(x, y, isWhite, "K"))
             return true;
 
         return false;
     }
-    // Is this square attacked by a piece of the provided type?
-    // `isWhite` represents the color of the attacker.
-    // use `validate` to add check detection
-    isSquareAttackedByPieceOfType(x, y, isWhite, type, validate = false, verbose = false) {
+
+    /**
+     * Is the square attacked by a piece of the provided type?
+     * @param {number} x x coord
+     * @param {number} y y coord
+     * @param {boolean} isWhite true if the attacker is white
+     * @param {string} type the type of the attacking piece
+     * @returns {boolean} true if the square is attacked by a piece of the provided type
+     */
+    isSquareAttackedByPieceOfType(x, y, isWhite, type) {
         switch (type) {
             case "P": {
                 const upDir = isWhite ? 1 : -1;
@@ -732,7 +776,11 @@ class Board {
         gameOver = true;
     }
 
-    // Return true if the king `isWhite` is in check.
+    /**
+     * Return true if the king `isWhite` is in check.
+     * @param {boolean} isWhite true if our king is white
+     * @returns {boolean} true if the king of the given colour is in check
+     */
     isKingInCheck(isWhite) {
         // Below code is inspired by an idea of reddit user 'Aswole'
         /*
