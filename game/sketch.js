@@ -9,7 +9,6 @@ let isMovingPiece = false;
 let movingPiece = null;
 let gameOver = false;
 let moves;
-let engine;
 
 let posCount = 0;
 let calcTime = 0;
@@ -51,7 +50,6 @@ function setup() {
     background(220);
 
     mainBoard = new Board();
-    engine = new Engine();
 
     mainBoard.fenToBoard(fenStartString);
 }
@@ -134,7 +132,7 @@ function mousePressed() {
 function aiMove() {
     if (gameOver) return;
 
-    const [bestMove, moveValue, newPosCount, newCalcTime] = engine.makeBestMove(
+    const [bestMove, moveValue, newPosCount, newCalcTime] = Engine.makeBestMove(
         mainBoard,
         engineDepth,
         false
@@ -162,7 +160,7 @@ function aiMove() {
 }
 
 function setStatus() {
-    const globalSum = engine.evaluateBoard(mainBoard);
+    const globalSum = Engine.evaluateBoard(mainBoard);
     const fillWidth =
         globalSum === 0 ? 50 : mapToRange(globalSum, -4000, 4000, 0, 100);
 

@@ -4,7 +4,7 @@ class Engine {
      * @param {Board} board the board to generate moves for
      * @param {boolean} isWhite generate moves for white or black
      */
-    generateMoves(board, isWhite) {
+    static generateMoves(board, isWhite) {
         let moves = [];
 
         for (let i = 0, n = board.pieces.length; i < n; i++) {
@@ -26,7 +26,7 @@ class Engine {
      * @param {Board} board the board to evaluate
      * @return {number} the value of this board
      */
-    evaluateBoard(board) {
+    static evaluateBoard(board) {
         if (board.pieces[board.whKingInd].taken) {
             return Number.NEGATIVE_INFINITY;
         }
@@ -68,7 +68,7 @@ class Engine {
     * @param {boolean} isWhite generate moves for black or white
     * @returns {[Array<number>, number, number, number]} bestmove, moveValue, posCount, calcTime
     */
-    makeBestMove(board, depth, isWhite) {
+    static makeBestMove(board, depth, isWhite) {
         this.positionCount = 0;
 
         const startTime = performance.now();
@@ -84,7 +84,7 @@ class Engine {
         const endTime = performance.now();
         return [bestMove, moveValue, this.positionCount, endTime - startTime];
     }
-    
+
     /**
      * Recursively calls itself until the best move is found
      * @param {Board} board the current board
@@ -94,7 +94,7 @@ class Engine {
      * @param {boolean} isMaximizer for pruning
      * @returns {[Array<number>| null, number]}
      */
-    getBestMove(board, depth, alpha, beta, isMaximizer) {
+    static getBestMove(board, depth, alpha, beta, isMaximizer) {
         const moves = this.generateMoves(board, isMaximizer);
 
         if (depth === 0) {

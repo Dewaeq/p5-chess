@@ -273,7 +273,7 @@ class Board {
 
         // TODO: replace with more efficient check
         const isWhite = this.pieces[piecInd].isWhite;
-        if (engine.generateMoves(this, !isWhite).length === 0) {
+        if (Engine.generateMoves(this, !isWhite).length === 0) {
             if (this.isKingInCheck(!isWhite)) {
                 this.checkmate(isWhite);
             }
