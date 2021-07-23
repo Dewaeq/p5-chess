@@ -1,13 +1,16 @@
+import { Board } from "../game/board.js";
+import { Engine } from "./engine.js";
+
 class PerfTest {
 
-    static RunTests() {
+    static RunTests(p5) {
         let results = [];
         TEST_POSITIONS.forEach((pos) => {
-            const { count, time } = PerfTest.TestPosition(pos);
+            const { count, time } = PerfTest.TestPosition(p5, pos);
 
             results.push({
                 speed: (count / time * 1000).toFixed(4) + " moves/sec",
-                depth: pos.depth,
+                depth: USE_CUST_DEPTH ? TEST_DEPTH : pos.depth,
                 time: time,
                 count: count,
                 position: pos.pos,
@@ -22,13 +25,13 @@ class PerfTest {
      * @param {{pos: string, depth: number, isWhite: boolean}} pos
      * @returns {{count: number, time: number}}
      */
-    static TestPosition(pos) {
-        console.log(`Testing position ${pos.pos} at depth ${pos.depth} for ${pos.isWhite ? "white" : "black"}`);
+    static TestPosition(p5, pos) {
+        console.log(`Testing position ${pos.pos} at depth ${USE_CUST_DEPTH ? TEST_DEPTH : pos.depth} for ${pos.isWhite ? "white" : "black"}`);
 
-        const board = new Board();
+        const board = new Board(p5);
         board.fenToBoard(pos.pos);
 
-        const [_, __, posCount, calcTime] = Engine.makeBestMove(board, pos.depth, pos.isWhite);
+        const [_, __, posCount, calcTime] = Engine.makeBestMove(board, USE_CUST_DEPTH ? TEST_DEPTH : pos.depth, pos.isWhite);
         return { count: posCount, time: calcTime };
     }
 }
@@ -53,8 +56,13 @@ const TEST_POSITIONS = [
         isWhite: false,
     }, */
     {
-        pos: "n2N4/P2k4/1P1p4/3Pb1KR/6P1/Q1pBBP2/q7/4r3 w - - 0 1",
-        depth: 2,
+        pos: "7r/p1k5/2n1p3/1p2rp1p/5R2/2PpN1KP/P2P1pP1/R7 w - - 2 28",
+        depth: 6,
+        isWhite: true,
+    },
+    {
+        pos: "6R1/P2k4/r7/5N1P/r7/p7/7K/8 w - -",
+        depth: 6,
         isWhite: true,
     },
     /* {
@@ -68,3 +76,5 @@ const TEST_POSITIONS = [
         isWhite: false,
     },
 ]
+
+export { PerfTest };

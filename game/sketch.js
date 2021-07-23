@@ -1,4 +1,5 @@
 import { Engine } from "../engine/engine.js";
+import { PerfTest } from "../engine/perft.js";
 import { Board } from "./board.js";
 
 export let tileSize = 90;
@@ -46,12 +47,14 @@ const sketch = new p5(function (p5) {
         }
     }
 
-    p5.setup = function () {
+    p5.setup = function () {      
         initUI(p5);
-
+        
         mainBoard = new Board(p5);
-
+        
         mainBoard.fenToBoard(fenStartString);
+
+        setTimeout(() => PerfTest.RunTests(p5), 3000);
     }
 
     p5.draw = async function () {
