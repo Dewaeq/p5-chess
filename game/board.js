@@ -1,5 +1,6 @@
+import { Engine } from "../engine/engine.js";
 import { Piece, King, Queen, Rook, Bishop, Knight, Pawn } from "./piece.js";
-import { tileSize, engine, gameOver } from "./sketch.js";
+import { tileSize } from "./sketch.js";
 
 class Board {
     constructor(
@@ -13,7 +14,8 @@ class Board {
         lastMove = [],
         moveHistory = [],
         enPassantSquare = [],
-        didPromote = false
+        didPromote = false,
+        gameOver = false,
     ) {
         this.p5 = p5;
         this.whitesTurn = whitesTurn;
@@ -38,6 +40,7 @@ class Board {
         // Format is [piecInd, x, y]
         this.enPassantSquare = enPassantSquare;
         this.didPromote = didPromote;
+        this.gameOver = false;
     }
 
     show() {
@@ -264,7 +267,7 @@ class Board {
 
         // TODO: replace with more efficient check
         const isWhite = this.pieces[piecInd].isWhite;
-        if (engine.generateMoves(this, !isWhite).length === 0) {
+        if (Engine.generateMoves(this, !isWhite).length === 0) {
             if (this.isKingInCheck(!isWhite))
                 this.checkmate(isWhite);
             else
@@ -727,13 +730,13 @@ class Board {
 
     checkmate(isWhite) {
         alert("Checkmate: " + (isWhite ? "White won" : "Black won"));
-        gameOver = true;
+        this.gameOver = true;
         // window.location.reload();
     }
 
     stalemate() {
         alert("Stalemate");
-        gameOver = true;
+        this.gameOver = true;
     }
 
     // Return true if the king `isWhite` is in check.

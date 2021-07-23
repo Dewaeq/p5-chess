@@ -2,21 +2,19 @@ import { Engine } from "../engine/engine.js";
 import { Board } from "./board.js";
 
 export let tileSize = 90;
-export let engineDepth = 3;
-export const maxEngineDepth = 15;
-export const engine = new Engine();
+let engineDepth = 3;
+const maxEngineDepth = 15;
 const fenStartString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
 export let images = {};
-export let mainBoard;
-export let isMovingPiece = false;
-export let movingPiece = null;
-export let gameOver = false;
-export let moves;
+/** @type {Board}*/
+let mainBoard;
+let isMovingPiece = false;
+let movingPiece = null;
+let moves;
 
 let posCount = 0;
 let calcTime = 0;
-
 
 const sketch = new p5(function (p5) {
     p5.preload = function () {
@@ -57,7 +55,7 @@ const sketch = new p5(function (p5) {
     }
 
     p5.draw = async function () {
-        if (gameOver) return;
+        if (mainBoard.gameOver) return;
         if (mainBoard.whitesTurn) return;
 
         mainBoard.whitesTurn = true;
@@ -72,7 +70,7 @@ const sketch = new p5(function (p5) {
         if (x > 7 || x < 0) return;
         if (y > 7 || y < 0) return;
 
-        if (gameOver) {
+        if (mainBoard.gameOver) {
             mainBoard.show();
 
             let pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
@@ -131,9 +129,9 @@ const sketch = new p5(function (p5) {
 
 
 function aiMove() {
-    if (gameOver) return;
+    if (mainBoard.gameOver) return;
 
-    const [bestMove, moveValue, newPosCount, newCalcTime] = engine.makeBestMove(
+    const [bestMove, moveValue, newPosCount, newCalcTime] = Engine.makeBestMove(
         mainBoard,
         engineDepth,
         false
@@ -142,7 +140,7 @@ function aiMove() {
     if (bestMove === null || bestMove === undefined) {
         // alert("Mate or error, idk and i really need to fix this");
         // window.location.reload();
-        gameOver = true;
+        mainBoard.gameOver = true;
         return;
     }
 
@@ -161,7 +159,7 @@ function aiMove() {
 }
 
 function setStatus() {
-    const globalSum = engine.evaluateBoard(mainBoard);
+    const globalSum = Engine.evaluateBoard(mainBoard);
     const fillWidth =
         globalSum === 0 ? 50 : mapToRange(globalSum, -4000, 4000, 0, 100);
 
@@ -212,7 +210,7 @@ function initUI(p5) {
 
     $("#fen-string-input").bind("input", function () {
         const fenString = $(this).val();
-        gameOver = false;
+        mainBoard.gameOver = false;
         mainBoard.whitesTurn = true;
         isMovingPiece = false;
         movingPiece = null;
