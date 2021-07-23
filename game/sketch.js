@@ -4,6 +4,7 @@ const maxEngineDepth = 15;
 const fenStartString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
 
 let images = {};
+/** @type {Board} */
 let mainBoard;
 let isMovingPiece = false;
 let movingPiece = null;
@@ -67,8 +68,8 @@ function mousePressed() {
     let x = floor(mouseX / tileSize);
     let y = floor(mouseY / tileSize);
 
-    if(x > 7 || x < 0) return;
-    if(y > 7 || y < 0) return;
+    if (x > 7 || x < 0) return;
+    if (y > 7 || y < 0) return;
 
     if (gameOver) {
         mainBoard.show();
@@ -108,7 +109,7 @@ function mousePressed() {
     mainBoard.show();
 
     const pieceIndex = mainBoard.getIndexOfPieceAt(x, y);
-    if(pieceIndex === undefined) {
+    if (pieceIndex === undefined) {
         console.log(x, y);
     }
     if (
@@ -196,8 +197,8 @@ function initUI() {
                     newDepth > maxEngineDepth
                         ? maxEngineDepth
                         : newDepth <= 0
-                        ? 1
-                        : 3;
+                            ? 1
+                            : 3;
                 $(this).val(newDepth);
             }
 

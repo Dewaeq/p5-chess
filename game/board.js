@@ -120,7 +120,7 @@ class Board {
             );
         }
 
-        // Was this an en passant move?
+        // Was this an en passant capture move?
         if (this.pieces[piecInd].type === "P" && arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3))) {
             const takenPieceRank = this.pieces[piecInd].isWhite ? 3 : 4;
             const indPiecTaken = this.enPassantSquare[0];
@@ -219,12 +219,16 @@ class Board {
         // Can this piece promote?
         // Is/leads this move to en passant?
         if (movingPiece.type === "P") {
-            /// En passant
+            /// En passant capture
             if (arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3))) {
-                const indPiecTaken = this.enPassantSquare[0];
+                tookAPiece = true;
+                indPiecTaken = this.enPassantSquare[0];
+                
                 this.pieces[indPiecTaken].taken = true;
                 this.pieces[indPiecTaken].x = -1;
                 this.pieces[indPiecTaken].y = -1;
+
+                this.squares[(toY === 2 ? 3 : 4)][toX] = -1;
             } else if (toY === oldPos[1] + 2 || toY === oldPos[1] - 2) {
                 const pawnDir = movingPiece.isWhite ? -1 : 1;
                 this.enPassantSquare = [piecInd, toX, toY - pawnDir];
@@ -253,11 +257,6 @@ class Board {
 
         this.squares[toY][toX] = piecInd;
         this.squares[oldPos[1]][oldPos[0]] = -1;
-
-        // Did this move fix our check?
-        /* if (this.playerInCheck === (movingPiece.isWhite ? 1 : -1) && !this.isKingInCheck(movingPiece.isWhite)) {
-            this.playerInCheck = 0;
-        } */
     }
 
     /**
@@ -283,6 +282,10 @@ class Board {
         }
     }
 
+    /**
+     * 
+     * @param {string} fenString 
+     */
     fenToBoard(fenString) {
         this.pieces = [];
         this.squares = [
@@ -298,21 +301,18 @@ class Board {
         this.moveHistory = [];
         this.lastMove = [];
 
+
         /// Get rid of the extra data included in fen strings
         /// like if the player can castle of if an en-passsant
         /// is possible.
         /// TODO: Might want to add this functionality in the future
-        let firstSpaceIndex = fenString.indexOf(" ");
-        fenString = fenString.substring(
-            0,
-            firstSpaceIndex > 0 ? firstSpaceIndex : fenString.length
-        );
-        let fenRows = fenString.split("/");
+        const fenRows = fenString.split(" ")[0].split("/");
+
         // This represents the total amount of pieces when the loop
         // is complete
         let i = 0;
         for (let y = 0; y < fenRows.length; y++) {
-            let row = fenRows[y].split("");
+            const row = fenRows[y].split("");
 
             let x = 0;
             row.forEach((char) => {
@@ -354,6 +354,25 @@ class Board {
                 x += 1;
             });
         }
+
+        if (fenString.split(" ").length > 1) {
+            // Turn to move
+            this.whitesTurn = fenString.split(" ")[1] === "w";
+
+            // EP square
+            if (fenString.split(" ")[3] !== "-") {
+                const rank = fenString.split(" ")[3].split("")[0];
+                const file = fenString.split(" ")[3].split("")[1];
+
+                const x = rank.charCodeAt(0) - 97;
+                const y = 8 - parseInt(file);
+
+                this.enPassantSquare[0] = this.getIndexOfPieceAt(x, y === 5 ? 4 : 3);
+                this.enPassantSquare[1] = x;
+                this.enPassantSquare[2] = y;
+            }
+        }
+
         this.show();
     }
 
@@ -469,7 +488,6 @@ class Board {
 
         if (piecInd < 0) {
             console.trace();
-            console.error("Negative piece index in validate moves!");
             console.log("board=", this);
             console.log("movingPiece=", movingPiece);
 
