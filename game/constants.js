@@ -17,6 +17,15 @@ const BLACK_MASK    =   0b10000;
 const WHITE_MASK    =   0b01000;
 const COLOUR_MASK   =   WHITE_MASK | BLACK_MASK;
 
+const A1 = 0;
+const A8 = 56;
+const D1 = 3;
+const D8 = 59;
+const F1 = 5;
+const F8 = 61;
+const H1 = 7;
+const H8 = 63;
+
 const WhiteCastleQueensideMask  =   0b1111111111111101;
 const WhiteCastleKingsideMask   =   0b1111111111111110;
 const BlackCastleQueensideMask  =   0b1111111111110111;

@@ -9,4 +9,6 @@ class BoardRepresentation {
   ];
 
   static CoordToIndex = (rank, file) => file * 8 + rank;
+
+  static IsSquareInBoard = (square) => square < 64 && square > -1;
 }

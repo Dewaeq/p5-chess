@@ -2,19 +2,24 @@
 let board;
 /**@type {BoardGUI} */
 let gui;
+/**@type {Search} */
+let search;
 
 function setup() {
   const canvas = createCanvas(60 * 8, 60 * 8);
   canvas.parent("#canvas");
 
   board = new Board();
-  board.init();
   gui = new BoardGUI(board);
-
-  const fenStartString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
+  search = new Search();
+  board.init();
+  search.init(board);
+  
+  const fenStartString = "rnbqkbnr/pppppppp/8/8/8/8/8/RNBQKBNR";
   board.fenToBoard(fenStartString);
-
+  
   gui.init();
+  PrecomputedData.Init();
 
   setTimeout(() => {
     gui.show();
@@ -35,7 +40,7 @@ function mousePressed() {
     gui.dragPieceAtSquare(squareIndex);
   }
 
-  console.log(Piece.PieceToString(board.squares[squareIndex]));
+  console.log(squareIndex, Piece.PieceToString(board.squares[squareIndex]));
 }
 
 function mouseReleased() {

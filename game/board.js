@@ -9,6 +9,15 @@ class Board {
      * @type {number} */
     this.currentGameState;
 
+    /**@type {PIECE_WHITE | PIECE_BLACK} */
+    this.colourToMove;
+
+    /**@type {PIECE_WHITE | PIECE_BLACK} */
+    this.opponentColour;
+
+    /**@type {WHITE_INDEX | BLACK_INDEX} */
+    this.colourToMoveIndex;
+
     /**@type {number[]} */
     this.gameStateHistory = [];
 
@@ -35,6 +44,13 @@ class Board {
   }
 
   init() {
+    this.colourToMove = PIECE_WHITE;
+    this.opponentColour = PIECE_BLACK;
+    this.colourToMoveIndex = 0;
+
+    //TODO: Replace with proper game state
+    this.currentGameState = 0b1111;
+
     this.pawns = [new PieceList(8), new PieceList(8)];
     this.knights = [new PieceList(10), new PieceList(10)];
     this.bishops = [new PieceList(10), new PieceList(10)];

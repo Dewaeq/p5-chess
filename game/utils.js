@@ -3,14 +3,19 @@
  * @param {string} str the value to check
  * @returns {boolean} true if the string is numeric, otherwise false
  */
-const isNumeric = (str) => /^\d+$/.test(str)
+const isNumeric = (str) => /^\d+$/.test(str);
 
 /**
  * Check if this string is in uppercase
  * @param {string} str the value to check
  * @returns {boolean} true if the string is in uppercase, otherwise false
  */
-const isUppercase = (str) => str === str.toUpperCase()
+const isUppercase = (str) => str === str.toUpperCase();
+
+const setCharAt = (str, index, chr) => {
+  if (index > str.length - 1) return str;
+  return str.substring(0, index) + chr + str.substring(index + 1);
+};
 
 /**
  * Map a given value from a range to another range
@@ -22,50 +27,50 @@ const isUppercase = (str) => str === str.toUpperCase()
  * @returns {number} the value in the new range
  */
 const mapToRange = (val, inMin, inMax, outMin, outMax) =>
-    ((val - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin
+  ((val - inMin) * (outMax - outMin)) / (inMax - inMin) + outMin;
 
 /**
  * Await this function to sleep for `ms` milliseconds
- * @param {number} ms time to wait in milliseconds 
- * @returns {Promise} 
+ * @param {number} ms time to wait in milliseconds
+ * @returns {Promise}
  */
-const delay = (ms) => new Promise(res => setTimeout(res, ms));
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 /**
  * This does not work correctly for nested arrays and objects because
  * the values get compared with `===`
- * @param {Array} arrayA 
- * @param {Array} arrayB 
+ * @param {Array} arrayA
+ * @param {Array} arrayB
  * @returns {boolean} true if both arrays are the same
  */
 const arrayEquals = (arrayA, arrayB) => {
-    if (arrayA === undefined && arrayB !== undefined) return false;
-    if (arrayA === null && arrayB !== null) return false;
-    if (arrayB === null && arrayA !== null) return false;
-    if (arrayB === undefined && arrayA !== undefined) return false;
+  if (arrayA === undefined && arrayB !== undefined) return false;
+  if (arrayA === null && arrayB !== null) return false;
+  if (arrayB === null && arrayA !== null) return false;
+  if (arrayB === undefined && arrayA !== undefined) return false;
 
-    if (arrayA.length !== arrayB.length) return false;
+  if (arrayA.length !== arrayB.length) return false;
 
-    return arrayA.every((value, index) => value === arrayB[index]);
-}
+  return arrayA.every((value, index) => value === arrayB[index]);
+};
 
 /**
  * Because this calls `arrayEquals`, nested arrays and objects can give
  * wrong results
- * @param {Array} arrayA 
- * @param {Array} arrayB 
+ * @param {Array} arrayA
+ * @param {Array} arrayB
  * @param {number} [limit] let array comparison only happen from element 0 to limit,
  * or full array if undefined
  * @returns {boolean} true if `arrayA` contains `arrayB`
  */
 const arrayContainsArray = (arrayA, arrayB, limit) => {
-    if (arrayA === undefined || arrayA === null) return false;
-    if (arrayB === undefined || arrayB === null) return false;
+  if (arrayA === undefined || arrayA === null) return false;
+  if (arrayB === undefined || arrayB === null) return false;
 
-    for (let i = 0, n = arrayA.length; i < n; i++) {
-        if (arrayEquals(arrayA[i].slice(0, limit), arrayB.slice(0, limit))) {
-            return true;
-        }
+  for (let i = 0, n = arrayA.length; i < n; i++) {
+    if (arrayEquals(arrayA[i].slice(0, limit), arrayB.slice(0, limit))) {
+      return true;
     }
-    return false;
-}
+  }
+  return false;
+};
