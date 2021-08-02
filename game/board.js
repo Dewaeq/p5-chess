@@ -172,13 +172,9 @@ class Board {
         let indPiecTaken;
 
         // Does this move remove the ability to en passant?
-        if (
-            this.enPassantSquare.length !== 0 &&
-            (movingPiece.isWhite ===
-                this.pieces[this.enPassantSquare[0]].isWhite ||
-                !arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3)))
-        ) {
-            this.enPassantSquare = [];
+        if (this.enPassantSquare.length !== 0) {
+            if (movingPiece.type !== 'P') this.enPassantSquare = [];
+            else if (!arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3))) this.enPassantSquare = [];
         }
 
         // Does this move take a piece?
@@ -221,14 +217,14 @@ class Board {
         if (movingPiece.type === "P") {
             /// En passant capture
             if (arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3))) {
-                tookAPiece = true;
-                indPiecTaken = this.enPassantSquare[0];
-                
-                this.pieces[indPiecTaken].taken = true;
-                this.pieces[indPiecTaken].x = -1;
-                this.pieces[indPiecTaken].y = -1;
+                const indEnPassantTaken = this.enPassantSquare[0];
 
+                this.pieces[indEnPassantTaken].taken = true;
+                this.pieces[indEnPassantTaken].x = -1;
+                this.pieces[indEnPassantTaken].y = -1;
                 this.squares[(toY === 2 ? 3 : 4)][toX] = -1;
+
+                this.enPassantSquare = [];
             } else if (toY === oldPos[1] + 2 || toY === oldPos[1] - 2) {
                 const pawnDir = movingPiece.isWhite ? -1 : 1;
                 this.enPassantSquare = [piecInd, toX, toY - pawnDir];
