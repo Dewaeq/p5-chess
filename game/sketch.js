@@ -28,7 +28,6 @@ function setup() {
 
 function draw() {
   if (gui.isDraggingPiece) {
-    gui.show();
     gui.showDraggingPiece();
   }
 }

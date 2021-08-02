@@ -84,6 +84,8 @@ class BoardGUI {
     const piece = this.board.squares[this.draggingSquare];
     if (piece === PIECE_NONE) return;
 
+    this.show();
+
     const pieceStr = Piece.PieceToString(piece);
 
     image(
