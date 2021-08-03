@@ -1,11 +1,10 @@
 class BoardGUI {
-  static TileSize = 60;
-
   /**
    * @param {Board} board
    */
   constructor(board) {
     this.board = board;
+    this.guiSearch = new Search();
     this.images = {};
     this.isDraggingPiece = false;
     this.draggingSquare = -1;
@@ -19,6 +18,8 @@ class BoardGUI {
   };
 
   init() {
+    this.guiSearch.init(this.board);
+
     const fileExt = ".png";
 
     for (let i = 0; i < 2; i++) {
@@ -54,10 +55,10 @@ class BoardGUI {
 
         fill(isWhite ? "#F1D7C1" : "#BC5448");
         rect(
-          i * BoardGUI.TileSize,
-          j * BoardGUI.TileSize,
-          BoardGUI.TileSize,
-          BoardGUI.TileSize
+          i * tileSize,
+          j * tileSize,
+          tileSize,
+          tileSize
         );
       }
     }
@@ -72,12 +73,24 @@ class BoardGUI {
 
       image(
         this.images[pieceStr],
-        x * BoardGUI.TileSize,
-        y * BoardGUI.TileSize,
-        BoardGUI.TileSize,
-        BoardGUI.TileSize
+        x * tileSize,
+        y * tileSize,
+        tileSize,
+        tileSize
       );
     }
+  }
+
+  showPieceMoves(startSquare) {
+    const moves = this.guiSearch.generateMoves(this.board).filter(move => (move.moveValue & Move.StartSquareMask) === startSquare);
+
+    moves.forEach(move => {
+      const targetSquare = (move.moveValue & Move.TargetSquareMask) >> 6;
+      const [x, y] = BoardGUI.SquareToGuiCoord(targetSquare);
+
+      fill(162, 156, 154, 110);
+      ellipse(x * tileSize + tileSize / 2, y * tileSize + tileSize / 2, tileSize / 2.5);
+    });
   }
 
   showDraggingPiece() {
@@ -87,14 +100,25 @@ class BoardGUI {
     this.show();
 
     const pieceStr = Piece.PieceToString(piece);
+    const [x, y] = BoardGUI.SquareToGuiCoord(this.draggingSquare);
+
+    fill(221, 165, 118);
+
+    rect(
+      x * tileSize,
+      y * tileSize,
+      tileSize,
+      tileSize,
+    );
 
     image(
       this.images[pieceStr],
-      mouseX - BoardGUI.TileSize / 2,
-      mouseY - BoardGUI.TileSize / 2,
-      BoardGUI.TileSize * 1.15,
-      BoardGUI.TileSize * 1.15
+      mouseX - tileSize / 2,
+      mouseY - tileSize / 2,
+      tileSize * 1.1,
+      tileSize * 1.1
     );
+    this.showPieceMoves(this.draggingSquare);
   }
 
   dragPieceAtSquare(square) {

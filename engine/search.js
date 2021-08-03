@@ -55,7 +55,7 @@ class Search {
 
 		this.generateSlidingMoves();
 		this.generateKnightMoves();
-		this.generatePawnMoves();
+		// this.generatePawnMoves();
 
 		return this.moves;
 	}
@@ -98,7 +98,18 @@ class Search {
 	}
 
 	generateSlidingMoves() {
-
+		const rooks = this.board.rooks[this.playerColourIndex];
+		for (let i = 0; i < rooks.numPieces; i++) {
+			this.generateSlidingPieceMoves(rooks.occupiedSquares[i], 0, 4);
+		}
+		const bishops = this.board.bishops[this.playerColourIndex];
+		for (let i = 0; i < bishops.numPieces; i++) {
+			this.generateSlidingPieceMoves(bishops.occupiedSquares[i], 4, 8);
+		}
+		const queens = this.board.queens[this.playerColourIndex];
+		for (let i = 0; i < queens.numPieces; i++) {
+			this.generateSlidingPieceMoves(queens.occupiedSquares[i], 0, 8);
+		}
 	}
 
 	generateSlidingPieceMoves(startSquare, startDirIndex, endDirIndex) {
@@ -112,8 +123,79 @@ class Search {
 				if (Piece.IsColour(pieceOnTargetSquare, this.playerColour)) break;
 
 				const isCapture = pieceOnTargetSquare !== PIECE_NONE;
+				const moveBlocksCheck = this.moveBlocksCheck(startSquare, targetSquare);
+
+				// Cant move in this direction if it results in a check
+				if (moveBlocksCheck && !this.inCheck) break;
+
+				if (!this.inCheck || moveBlocksCheck) {
+					if (this.genQuiets || isCapture) {
+						this.moves.push(Move.MoveWithSquares(startSquare, targetSquare));
+					}
+				}
+
+				// If this move blocks a check, than further moves in this direction won't
+				// Also stop searching if there is a capture
+				if (moveBlocksCheck || isCapture) {
+					break;
+				}
 			}
 		}
+	}
+
+	generateKnightMoves() {
+		const knights = this.board.knights[this.playerColourIndex];
+
+		mainLoop: for (let i = 0; i < knights.numPieces; i++) {
+			const startSquare = knights.occupiedSquares[i];
+
+			for (let j = 0; j < PrecomputedData.KnightMoves[startSquare].length; j++) {
+				const targetSquare = PrecomputedData.KnightMoves[startSquare][j];
+				const pieceOnTargetSquare = this.board.squares[targetSquare];
+
+				// Blocked by friendly piece
+				if (Piece.IsColour(pieceOnTargetSquare, this.playerColour)) continue;
+
+				const isCapture = pieceOnTargetSquare !== PIECE_NONE;
+				const moveBlocksCheck = this.moveBlocksCheck(startSquare, targetSquare);
+
+				// Cant move in if it results in a check
+				if (moveBlocksCheck && !this.inCheck) break mainLoop;
+
+				if (!this.inCheck || moveBlocksCheck) {
+					if (this.genQuiets || isCapture) {
+						this.moves.push(Move.MoveWithSquares(startSquare, targetSquare));
+					}
+				}
+
+				// If this move blocks a check, than further moves in this direction won't
+				// Also stop searching if there is a capture
+				if (moveBlocksCheck || isCapture) {
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param {number} startSquare 
+	 * @param {number} targetSquare
+	 * @returns {boolean} 
+	 */
+	moveBlocksCheck(startSquare, targetSquare) {
+		const movingPiece = this.board.squares[startSquare];
+		const pieceOnTargetSquare = this.board.squares[targetSquare];
+
+		this.board.squares[startSquare] = PIECE_NONE;
+		this.board.squares[targetSquare] = movingPiece;
+
+		const isInCheck = this.isSquareAttacked(this.playerKingSquare);
+
+		this.board.squares[startSquare] = movingPiece;
+		this.board.squares[targetSquare] = pieceOnTargetSquare;
+
+		if (this.inCheck !== isInCheck) return true;
+		return false;
 	}
 
 	isSquareAttacked(targetSquare, countAttacks = false, attackLimit) {

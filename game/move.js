@@ -34,4 +34,10 @@ class Move {
   constructor(moveValue) {
     this.moveValue = moveValue;
   }
+
+  printMove() {
+    console.log('start square:', this.moveValue & Move.StartSquareMask);
+    console.log('target square:', (this.moveValue & Move.TargetSquareMask) >> 6);
+    console.log('flag:', (this.moveValue & Move.FlagMask) >> 12);
+  }
 }

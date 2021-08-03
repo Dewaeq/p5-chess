@@ -1,5 +1,5 @@
 class PrecomputedData {
-	// First 4 are orthogonal, last 4 are diagonals (N, S, W, E, NW, SE, NE, SW)
+	/**  First 4 are orthogonal, last 4 are diagonals (N, S, W, E, NW, SE, NE, SW) */
 	static DirectionOffsets = [8, -8, -1, 1, 7, -7, 9, -9];
 
 	static AllKnightJumps = [15, 17, -15, -17, 10, -6, -10, 6];

@@ -48,12 +48,12 @@
   <script src="../game/board_representation.js"></script>
 </head>
 
-<body class="bg-dark">
+<body class="bg-transparent text-light">
   <div class="main-container">
     <div id="canvas"></div>
 
-    <h2 class="text-light advantage-text">Advantage</h2>
-    <p class="text-light"><span id="advantageColor">Neither side</span> has the advantage
+    <h2 class="advantage-text">Advantage</h2>
+    <p><span id="advantageColor">Neither side</span> has the advantage
       (+<span id="advantageNumber">0</span>).</p>
     <div class="progress">
       <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar"
@@ -63,14 +63,14 @@
   </div>
 
   <div class="side-data">
-    <label class="text-light" for="fen-input">Fen String:</label>
+    <label for="fen-input">Fen String:</label>
     <input id="fen-string-input" type="fen-input">
     <br>
-    <label class="text-light" for="engine-depth">Search Depth: </label>
+    <label for="engine-depth">Search Depth: </label>
     <input id="engine-depth-input" name="engine-depth" type="number" min="1" max="15" value="3">
-    <p class="text-light" id="pos-count-text">Calculated <span id="posCountNumber">0</span> positions.</p>
-    <p class="text-light" id="calc-time-text">Calculations took <span id="calcTimeNumber">0</span> seconds.</p>
-    <p class="text-light" id="calc-speed-text">That's <span id="calcSpeedNumber">0</span> moves/s.</p>
+    <p id="pos-count-text">Calculated <span id="posCountNumber">0</span> positions.</p>
+    <p id="calc-time-text">Calculations took <span id="calcTimeNumber">0</span> seconds.</p>
+    <p id="calc-speed-text">That's <span id="calcSpeedNumber">0</span> moves/s.</p>
   </div>
 
 </body>

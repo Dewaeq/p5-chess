@@ -5,8 +5,15 @@ let gui;
 /**@type {Search} */
 let search;
 
+let tileSize = 90;
+let pieceSize = tileSize;
+
 function setup() {
-  const canvas = createCanvas(60 * 8, 60 * 8);
+
+  if (displayWidth >= displayHeight) tileSize = (displayHeight * 0.6) / 8;
+  else tileSize = (displayWidth * 0.6) / 8;
+
+  const canvas = createCanvas(tileSize * 8, tileSize * 8);
   canvas.parent("#canvas");
 
   board = new Board();
@@ -14,10 +21,10 @@ function setup() {
   search = new Search();
   board.init();
   search.init(board);
-  
-  const fenStartString = "rnbqkbnr/pppppppp/8/8/8/8/8/RNBQKBNR";
+
+  const fenStartString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
   board.fenToBoard(fenStartString);
-  
+
   gui.init();
   PrecomputedData.Init();
 
@@ -47,8 +54,8 @@ function mouseReleased() {
 }
 
 function getSquareUnderMouse() {
-  const rank = floor(mouseX / BoardGUI.TileSize);
-  const file = 7 - floor(mouseY / BoardGUI.TileSize);
+  const rank = floor(mouseX / tileSize);
+  const file = 7 - floor(mouseY / tileSize);
 
   if (rank > 7 || rank < 0) return -1;
   if (file > 7 || file < 0) return -1;
