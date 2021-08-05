@@ -19,10 +19,13 @@ class Search {
 		/**@type {Board} */
 		this.board;
 		this.genQuiets;
+		/**@type {PROMOTION_MODE_ALL | PROMOTION_MODE_QUEEN_KNIGHT} */
+		this.promotionsToGenerate;
 	}
 
 	init(board) {
 		this.board = board;
+		this.promotionsToGenerate = PROMOTION_MODE_ALL;
 		this.moves = [];
 		this.inCheck = false;
 		this.inDoubleCheck = false;
@@ -55,7 +58,7 @@ class Search {
 
 		this.generateSlidingMoves();
 		this.generateKnightMoves();
-		// this.generatePawnMoves();
+		this.generatePawnMoves();
 
 		return this.moves;
 	}
@@ -113,7 +116,7 @@ class Search {
 	}
 
 	generateSlidingPieceMoves(startSquare, startDirIndex, endDirIndex) {
-		for (let dirIndex = startDirIndex; dirIndex < endDirIndex; dirIndex++) {
+		mainLoop: for (let dirIndex = startDirIndex; dirIndex < endDirIndex; dirIndex++) {
 			const curDirOffset = PrecomputedData.DirectionOffsets[dirIndex];
 			for (let i = 0; i < PrecomputedData.SqToEdge[startSquare][dirIndex]; i++) {
 				const targetSquare = startSquare + curDirOffset * (i + 1);
@@ -128,15 +131,21 @@ class Search {
 				// Cant move in this direction if it results in a check
 				if (moveBlocksCheck && !this.inCheck) break;
 
-				if (!this.inCheck || moveBlocksCheck) {
+				// If this move fixes the check, further moves won't,
+				// so we can stop generating moves for this piece
+				if (moveBlocksCheck && this.inCheck) {
+					this.moves.push(Move.MoveWithSquares(startSquare, targetSquare));
+					break mainLoop;
+				}
+
+				if (!this.inCheck) {
 					if (this.genQuiets || isCapture) {
 						this.moves.push(Move.MoveWithSquares(startSquare, targetSquare));
 					}
 				}
 
-				// If this move blocks a check, than further moves in this direction won't
-				// Also stop searching if there is a capture
-				if (moveBlocksCheck || isCapture) {
+				// Stop searching if there is a capture
+				if (isCapture) {
 					break;
 				}
 			}
@@ -146,7 +155,7 @@ class Search {
 	generateKnightMoves() {
 		const knights = this.board.knights[this.playerColourIndex];
 
-		mainLoop: for (let i = 0; i < knights.numPieces; i++) {
+		for (let i = 0; i < knights.numPieces; i++) {
 			const startSquare = knights.occupiedSquares[i];
 
 			for (let j = 0; j < PrecomputedData.KnightMoves[startSquare].length; j++) {
@@ -160,7 +169,7 @@ class Search {
 				const moveBlocksCheck = this.moveBlocksCheck(startSquare, targetSquare);
 
 				// Cant move in if it results in a check
-				if (moveBlocksCheck && !this.inCheck) break mainLoop;
+				if (moveBlocksCheck && !this.inCheck) break;
 
 				if (!this.inCheck || moveBlocksCheck) {
 					if (this.genQuiets || isCapture) {
@@ -168,12 +177,103 @@ class Search {
 					}
 				}
 
-				// If this move blocks a check, than further moves in this direction won't
-				// Also stop searching if there is a capture
-				if (moveBlocksCheck || isCapture) {
-					break;
+				// If this move blocks a check, further moves won't
+				if (moveBlocksCheck) break;
+			}
+		}
+	}
+
+	generatePawnMoves() {
+		const pawns = this.board.pawns[this.playerColourIndex];
+		const dirOffset = this.isWhiteToMove ? 8 : -8;
+		const startRank = this.isWhiteToMove ? 1 : 6;
+		const rankBeforePromotion = 7 - startRank;
+
+		const epFile = ((this.board.currentGameState >> 4) & 15) - 1;
+		let epSquare = -1;
+		if (epFile !== -1) {
+			epSquare = (this.isWhiteToMove ? 5 : 2) * 8 + epFile;
+		}
+
+
+		for (let i = 0; i < pawns.numPieces; i++) {
+			const startSquare = pawns.occupiedSquares[i];
+			const rank = BoardRepresentation.RankIndex(startSquare);
+			const canPromote = (rank === rankBeforePromotion);
+
+			if (this.genQuiets) {
+				const oneSquareAhead = startSquare + dirOffset;
+
+				if (this.board.squares[oneSquareAhead] === PIECE_NONE) {
+					let moveBlocksCheck = this.moveBlocksCheck(startSquare, oneSquareAhead);
+					// Move is valid when we're in check and it blocks a check
+					// or when we're not in check and it doesn't cause a check
+					if (this.inCheck === moveBlocksCheck) {
+						if (canPromote) {
+							this.addPromotions(startSquare, oneSquareAhead);
+						} else {
+							this.moves.push(Move.MoveWithSquares(startSquare, oneSquareAhead));
+						}
+					}
+
+					if (rank === startRank) {
+						const twoSquaresAhead = oneSquareAhead + dirOffset;
+						moveBlocksCheck = this.moveBlocksCheck(startSquare, twoSquaresAhead);
+						if (this.board.squares[twoSquaresAhead] === PIECE_NONE) {
+							// Move is valid when we're in check and it blocks a check
+							// or when we're not in check and it doesn't cause a check
+							if (this.inCheck === moveBlocksCheck) {
+								this.moves.push(Move.MoveWithFlag(startSquare, twoSquaresAhead, Move.Flag.PawnDoubleForward));
+							}
+						}
+					}
 				}
 			}
+
+			// Captures
+			for (let j = 0; j < 2; j++) {
+				const captureDirIndex = PrecomputedData.PawnAttackDirectionIndices[this.playerColourIndex][j];
+				if (PrecomputedData.SqToEdge[startSquare][captureDirIndex] === 0) continue;
+
+				const captureDir = PrecomputedData.DirectionOffsets[captureDirIndex];
+				const targetSquare = startSquare + captureDir;
+				const pieceOnTargetSquare = this.board.squares[targetSquare];
+
+				// En-passant capture
+				if (targetSquare === epSquare) {
+					const epPawnSquare = epSquare - dirOffset;
+					const epBlocksCheck = this.enPassantBlocksCheck(startSquare, targetSquare, epPawnSquare);
+
+					// Move is valid when we're in check and it blocks a check
+					// or when we're not in check and it doesn't cause a check
+					if (this.inCheck === epBlocksCheck) {
+						this.moves.push(Move.MoveWithFlag(startSquare, targetSquare, Move.Flag.EnPassantCapture));
+					}
+				}
+				// Normal capture
+				if (pieceOnTargetSquare === PIECE_NONE || Piece.IsColour(pieceOnTargetSquare, this.playerColour)) continue;
+
+				const moveBlocksCheck = this.moveBlocksCheck(startSquare, targetSquare);
+				if (this.inCheck === moveBlocksCheck) {
+					if (canPromote) {
+						this.addPromotions(startSquare, targetSquare)
+					}
+					else {
+						this.moves.push(Move.MoveWithSquares(startSquare, targetSquare));
+					}
+				}
+
+			}
+		}
+	}
+
+	addPromotions(startSquare, targetSquare) {
+		this.moves.push(Move.MoveWithFlag(startSquare, targetSquare, Move.Flag.PromoteToQueen));
+		this.moves.push(Move.MoveWithFlag(startSquare, targetSquare, Move.Flag.PromoteToKnight));
+
+		if (this.promotionsToGenerate === PROMOTION_MODE_ALL) {
+			this.moves.push(Move.MoveWithFlag(startSquare, targetSquare, Move.Flag.PromoteToBishop));
+			this.moves.push(Move.MoveWithFlag(startSquare, targetSquare, Move.Flag.PromoteToRook));
 		}
 	}
 
@@ -193,6 +293,24 @@ class Search {
 
 		this.board.squares[startSquare] = movingPiece;
 		this.board.squares[targetSquare] = pieceOnTargetSquare;
+
+		if (this.inCheck !== isInCheck) return true;
+		return false;
+	}
+
+	enPassantBlocksCheck(startSquare, targetSquare, epPawnSquare) {
+		const movingPawn = this.board.squares[startSquare];
+		const epPawn = this.board.squares[epPawnSquare];
+
+		this.board.squares[startSquare] = PIECE_NONE;
+		this.board.squares[epPawnSquare] = PIECE_NONE;
+		this.board.squares[targetSquare] = movingPawn;
+
+		const isInCheck = this.isSquareAttacked(this.playerKingSquare);
+
+		this.board.squares[startSquare] = movingPawn;
+		this.board.squares[targetSquare] = PIECE_NONE;
+		this.board.squares[epPawnSquare] = epPawn;
 
 		if (this.inCheck !== isInCheck) return true;
 		return false;

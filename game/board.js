@@ -5,7 +5,8 @@ class Board {
 
     /** Bits 0-3 store white and black kingside/queenside castling legality
      * Bits 4-7 store file of ep square (starting at 1, so 0 = no ep square)
-     * Bits 8-13 captured pieceBits 14-... fifty mover counter
+     * Bits 8-13 captured piece
+     * Bits 14-... fifty mover counter
      * @type {number} */
     this.currentGameState;
 
@@ -49,7 +50,7 @@ class Board {
     this.colourToMoveIndex = 0;
 
     //TODO: Replace with proper game state
-    this.currentGameState = 0b1111;
+    this.currentGameState = 0b00000000001111;
 
     this.pawns = [new PieceList(8), new PieceList(8)];
     this.knights = [new PieceList(10), new PieceList(10)];
@@ -78,6 +79,125 @@ class Board {
       this.rooks[BLACK_INDEX],
       this.queens[BLACK_INDEX],
     ];
+  }
+
+  /**
+   * 
+   * @param {Move} move 
+   */
+  makeMove(move) {
+    const startSquare = move.startSquare;
+    const targetSquare = move.targetSquare;
+    const opponentColourIndex = 1 - this.colourToMoveIndex;
+
+    const originalCastleState = this.currentGameState & 15;
+    let newCastleState = originalCastleState;
+    this.currentGameState = 0;
+
+    const movingPiece = this.squares[startSquare];
+    const capturedPiece = this.squares[targetSquare];
+
+    const movingPieceType = Piece.PieceType(movingPiece);
+    const capturedPieceType = Piece.PieceType(capturedPiece);
+    const moveFlag = move.flag;
+    const isPromotion = move.isPromotion;
+
+    // Captures
+    this.currentGameState |= (capturedPieceType << 8);
+    if (capturedPieceType !== PIECE_NONE && moveFlag !== Move.Flag.EnPassantCapture) {
+      this.getPieceList(capturedPieceType, opponentColourIndex).removePieceAtSquare(targetSquare);
+    }
+
+    // Move piece in pieceList
+    if (movingPieceType === PIECE_KING) {
+      this.kingSquares[this.colourToMoveIndex] = targetSquare;
+    }
+    else {
+      this.getPieceList(movingPieceType, this.colourToMoveIndex).movePiece(startSquare, targetSquare);
+    }
+
+    let pieceOnTargetSquare = movingPiece;
+    // Promotions
+    if (isPromotion) {
+      let promoteType = 0;
+
+      switch (moveFlag) {
+        case Move.Flag.PromoteToKnight:
+          promoteType = PIECE_KNIGHT;
+          this.knights[this.colourToMoveIndex].addPieceAtSquare(targetSquare);
+          break;
+        case Move.Flag.PromoteToBishop:
+          promoteType = PIECE_BISHOP;
+          this.bishops[this.colourToMoveIndex].addPieceAtSquare(targetSquare);
+          break;
+        case Move.Flag.PromoteToRook:
+          promoteType = PIECE_ROOK;
+          this.rooks[this.colourToMoveIndex].addPieceAtSquare(targetSquare);
+          break;
+        case Move.Flag.PromoteToQueen:
+          promoteType = PIECE_QUEEN;
+          this.queens[this.colourToMoveIndex].addPieceAtSquare(targetSquare);
+          break;
+      }
+      pieceOnTargetSquare = this.colourToMove | promoteType;
+      this.pawns[this.colourToMoveIndex].removePieceAtSquare(startSquare);
+    }
+    else {
+      switch (moveFlag) {
+        case Move.Flag.PawnDoubleForward:
+          const epFile = BoardRepresentation.FileIndex(startSquare) + 1;
+          // Clear the current ep-data
+          this.currentGameState &= 0b0000_1111;
+          this.currentGameState |= (epFile << 4);
+          break;
+
+        case Move.Flag.EnPassantCapture:
+          const epPawnSquare = targetSquare + (this.colourToMove === PIECE_WHITE ? -8 : 8);
+          // Set ep-pawn as captured piece
+          this.currentGameState |= (this.squares[epPawnSquare] << 8);
+
+          this.squares[epPawnSquare] = PIECE_NONE;
+          this.pawns[opponentColourIndex].removePieceAtSquare(epPawnSquare);
+          break;
+        case Move.Flag.Castling:
+          const kingSideCastle = (targetSquare + 1 === H1) || (targetSquare + 1 === H8);
+          const rookStartSquare = targetSquare + (kingSideCastle ? 1 : -2);
+          const rookTargetSquare = startSquare + (kingSideCastle ? 1 : -1);
+
+          this.squares[rookStartSquare] = PIECE_NONE;
+          this.squares[rookTargetSquare] = this.colourToMove | PIECE_ROOK;
+
+          this.rooks[this.colourToMoveIndex].movePiece(rookStartSquare, rookTargetSquare);
+          break;
+      }
+    }
+
+    if (originalCastleState !== 0) {
+      if (startSquare === H1 || targetSquare === H1) {
+        newCastleState &= WhiteCastleKingsideMask;
+      } else if (startSquare === A1 || targetSquare === A1) {
+        newCastleState &= WhiteCastleQueensideMask;
+      }
+      if (startSquare === H8 || targetSquare === H8) {
+        newCastleState &= BlackCastleKingsideMask;
+      } else if (startSquare === A8 || targetSquare === A8) {
+        newCastleState &= BlackCastleQueensideMask;
+      }
+    }
+
+    this.currentGameState |= newCastleState;
+
+    this.squares[targetSquare] = pieceOnTargetSquare;
+    this.squares[startSquare] = PIECE_NONE;
+
+    this.gameStateHistory.push(this.currentGameState);
+    this.switchTurn();
+  }
+
+  switchTurn() {
+    this.opponentColour = this.colourToMove;
+    this.colourToMoveIndex = 1 - this.colourToMoveIndex;
+    this.colourToMove = (this.colourToMove === PIECE_WHITE) ? PIECE_BLACK : PIECE_WHITE;
   }
 
   /**

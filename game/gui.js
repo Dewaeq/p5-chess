@@ -6,6 +6,8 @@ class BoardGUI {
     this.board = board;
     this.guiSearch = new Search();
     this.images = {};
+    /**@type {Move[]} */
+    this.pieceMoves = [];
     this.isDraggingPiece = false;
     this.draggingSquare = -1;
   }
@@ -23,7 +25,7 @@ class BoardGUI {
     const fileExt = ".png";
 
     for (let i = 0; i < 2; i++) {
-      const pieceColor = i === 0 ? "white" : "black";
+      const pieceColor = (i === 0) ? "white" : "black";
       this.images[`${pieceColor}-king`] = loadImage(
         `../assets/images/${pieceColor}/${pieceColor}-king${fileExt}`
       );
@@ -82,10 +84,20 @@ class BoardGUI {
   }
 
   showPieceMoves(startSquare) {
-    const moves = this.guiSearch.generateMoves(this.board).filter(move => (move.moveValue & Move.StartSquareMask) === startSquare);
+    const moves = this.guiSearch.generateMoves(this.board);
+
+    if (moves.length === 0) {
+      if (search.inCheck) {
+        alert('Checkmate');
+      } else {
+        alert('Stalemate');
+      }
+    }
+
+    this.pieceMoves = moves.filter(move => move.startSquare === startSquare);
 
     moves.forEach(move => {
-      const targetSquare = (move.moveValue & Move.TargetSquareMask) >> 6;
+      const targetSquare = move.targetSquare;
       const [x, y] = BoardGUI.SquareToGuiCoord(targetSquare);
 
       fill(162, 156, 154, 110);
@@ -129,9 +141,42 @@ class BoardGUI {
     if (piece === PIECE_NONE) return;
   }
 
+  promotePiece() {
+    const mouseTargetSquare = getSquareUnderMouse();
+    const promotionMoves = this.pieceMoves.filter(move => move.isPromotion && move.targetSquare === mouseTargetSquare);
+    if (promotionMoves.length === 0) return;
+
+    // Get the promotion type
+    let promotionType = null;
+    while (promotionType === null) {
+      const promptInput = parseInt(prompt('Promotion type: (1: Queen, 2: Rook, 3: Bishop, 4: Knight)'));
+      if (promptInput > 0 && promptInput < 5) {
+        promotionType = promptInput + 2;
+      }
+    }
+
+    const promotingMove = promotionMoves.filter(move => move.flag === promotionType)[0];
+    promotingMove.printMove();
+    board.makeMove(promotingMove);
+
+  }
+
   stopDraggingPiece() {
+    const mouseTargetSquare = getSquareUnderMouse();
+
+    for (const move of this.pieceMoves) {
+      if (move.targetSquare === mouseTargetSquare) {
+        if (move.isPromotion) {
+          this.promotePiece();
+        } else {
+          board.makeMove(move);
+        }
+        break;
+      }
+    }
     this.draggingSquare = -1;
     this.isDraggingPiece = false;
+    this.pieceMoves = [];
     this.show();
   }
 }

@@ -10,14 +10,14 @@
 
 class Move {
   static Flag = {
-    None: 0,
-    EnPassantCapture: 1,
-    Castling: 2,
-    PromoteToQueen: 3,
-    PromoteToRook: 4,
-    PromoteToBishop: 5,
-    PromoteToKnight: 6,
-    PawnDoubleForward: 7,
+    None:               0,
+    EnPassantCapture:   1,
+    Castling:           2,
+    PromoteToQueen:     3,
+    PromoteToRook:      4,
+    PromoteToBishop:    5,
+    PromoteToKnight:    6,
+    PawnDoubleForward:  7,
   };
 
   static MoveWithFlag = (startSquare, targetSquare, flag) =>
@@ -35,9 +35,26 @@ class Move {
     this.moveValue = moveValue;
   }
 
+  get startSquare() {
+    return (this.moveValue & Move.StartSquareMask);
+  }
+
+  get targetSquare() {
+    return (this.moveValue & Move.TargetSquareMask) >> 6;
+  }
+
+  get flag() {
+    return (this.moveValue & Move.FlagMask) >> 12;
+  }
+
+  get isPromotion() {
+    const flag = this.flag;
+    return (flag > 2 && flag < 7);
+  }
+
   printMove() {
-    console.log('start square:', this.moveValue & Move.StartSquareMask);
-    console.log('target square:', (this.moveValue & Move.TargetSquareMask) >> 6);
-    console.log('flag:', (this.moveValue & Move.FlagMask) >> 12);
+    console.log('start square:', this.startSquare);
+    console.log('target square:', this.targetSquare);
+    console.log('flag:', this.flag);
   }
 }

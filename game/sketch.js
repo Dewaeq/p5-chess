@@ -42,7 +42,7 @@ function draw() {
 function mousePressed() {
   const squareIndex = getSquareUnderMouse();
 
-  if (squareIndex !== -1) {
+  if (squareIndex !== -1 && board.squares[squareIndex] !== PIECE_NONE) {
     gui.dragPieceAtSquare(squareIndex);
   }
 
@@ -50,12 +50,14 @@ function mousePressed() {
 }
 
 function mouseReleased() {
-  if (gui.isDraggingPiece) gui.stopDraggingPiece();
+  if (gui.isDraggingPiece) {
+    gui.stopDraggingPiece();
+  }
 }
 
 function getSquareUnderMouse() {
-  const rank = floor(mouseX / tileSize);
-  const file = 7 - floor(mouseY / tileSize);
+  const file = floor(mouseX / tileSize);
+  const rank = 7 - floor(mouseY / tileSize);
 
   if (rank > 7 || rank < 0) return -1;
   if (file > 7 || file < 0) return -1;

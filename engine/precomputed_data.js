@@ -17,9 +17,9 @@ class PrecomputedData {
 
 	// Pawn attacks for white (0) and black (1)
 	// NW, NE; SW, SE
-	static PawnAttackDirections = [
-		[7, 9],
-		[-9, -7],
+	static PawnAttackDirectionIndices = [
+		[4, 6],
+		[7, 5],
 	];
 	/**@type {number[][]} */
 	static PawnAttacksWhite = [];
@@ -30,6 +30,7 @@ class PrecomputedData {
 	static KnightAttackBitboards = [];
 	static PawnAttackBitboards = [];
 
+	/**@type {number[][]} */
 	static SqToEdge = [];
 
 	static Init() {

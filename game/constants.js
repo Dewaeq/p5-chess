@@ -32,3 +32,6 @@ const BlackCastleQueensideMask  =   0b1111111111110111;
 const BlackCastleKingsideMask   =   0b1111111111111011;
 const BlackCastleMask   =   BlackCastleKingsideMask & BlackCastleQueensideMask;
 const WhiteCastleMask   =   WhiteCastleKingsideMask & WhiteCastleQueensideMask;
+
+const PROMOTION_MODE_ALL = 0;
+const PROMOTION_MODE_QUEEN_KNIGHT = 1;

@@ -8,7 +8,7 @@ class BoardRepresentation {
     this.RankIndex(sqIndex),
   ];
 
-  static CoordToIndex = (rank, file) => file * 8 + rank;
+  static CoordToIndex = (rank, file) => rank * 8 + file;
 
   static IsSquareInBoard = (square) => square < 64 && square > -1;
 }
