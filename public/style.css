@@ -2,11 +2,13 @@ html,
 body {
     height: 100%;
     background-color: #181a1b;
+    /* To disable Safari elastic scrolling */
+    overflow: hidden;
+    margin: 0;
 }
 
 body {
     padding: 10px 5%;
-    margin: 0;
     display: flex;
 
     justify-content: center;
