@@ -147,7 +147,7 @@ class Board {
         case Move.Flag.PawnDoubleForward:
           const epFile = BoardRepresentation.FileIndex(startSquare) + 1;
           // Clear the current ep-data
-          this.currentGameState &= 0b0000_1111;
+          // this.currentGameState &= 0b0000_1111;
           this.currentGameState |= (epFile << 4);
           break;
 
@@ -192,6 +192,10 @@ class Board {
 
     this.gameStateHistory.push(this.currentGameState);
     this.switchTurn();
+  }
+
+  unMakeMove(move) {
+    
   }
 
   switchTurn() {

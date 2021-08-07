@@ -87,7 +87,7 @@ class BoardGUI {
     const moves = this.guiSearch.generateMoves(this.board);
 
     if (moves.length === 0) {
-      if (search.inCheck) {
+      if (this.guiSearch.inCheck) {
         alert('Checkmate');
       } else {
         alert('Stalemate');
@@ -96,7 +96,7 @@ class BoardGUI {
 
     this.pieceMoves = moves.filter(move => move.startSquare === startSquare);
 
-    moves.forEach(move => {
+    this.pieceMoves.forEach(move => {
       const targetSquare = move.targetSquare;
       const [x, y] = BoardGUI.SquareToGuiCoord(targetSquare);
 

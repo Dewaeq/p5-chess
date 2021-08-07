@@ -77,6 +77,8 @@ class Search {
 			if (!isCapture && !this.genQuiets) continue;
 			if (squareIsAttacked) continue;
 
+			if (this.inCheck && !this.moveBlocksCheck(this.playerKingSquare, targetSquare)) continue;
+
 			this.moves.push(Move.MoveWithSquares(this.playerKingSquare, targetSquare));
 
 			// Castling
@@ -286,6 +288,13 @@ class Search {
 		const movingPiece = this.board.squares[startSquare];
 		const pieceOnTargetSquare = this.board.squares[targetSquare];
 
+		let isKingMove = false;
+
+		if (startSquare === this.playerKingSquare) {
+			this.playerKingSquare = targetSquare;
+			isKingMove = true;
+		}
+
 		this.board.squares[startSquare] = PIECE_NONE;
 		this.board.squares[targetSquare] = movingPiece;
 
@@ -293,6 +302,10 @@ class Search {
 
 		this.board.squares[startSquare] = movingPiece;
 		this.board.squares[targetSquare] = pieceOnTargetSquare;
+
+		if (isKingMove) {
+			this.playerKingSquare = startSquare;
+		}
 
 		if (this.inCheck !== isInCheck) return true;
 		return false;
@@ -411,7 +424,10 @@ class Search {
 	}
 
 	isSquareAttackedByPawn(targetSquare) {
-		const pawnAttacks = (this.opponentColour === PIECE_WHITE) ? PrecomputedData.PawnAttacksWhite[targetSquare] : PrecomputedData.PawnAttacksBlack[targetSquare];
+		// Reversed attack lists to find attacking pawn
+		const pawnAttacks = (this.opponentColour === PIECE_WHITE)
+			? PrecomputedData.PawnAttacksBlack[targetSquare]
+			: PrecomputedData.PawnAttacksWhite[targetSquare];
 		for (let i = 0; i < pawnAttacks.length; i++) {
 			const startSquare = pawnAttacks[i];
 			if (this.board.squares[startSquare] === (this.opponentColour | PIECE_PAWN)) return true;

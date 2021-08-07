@@ -69,20 +69,20 @@ class PrecomputedData {
 
 			// Take west of pawn
 			if (x > 0) {
-				if (y < 7 && squareIndex > 7) {
+				if (y < 7) {
 					pawnCapturesWhite.push(squareIndex + 7);
 					whitePawnBitboard = setCharAt(whitePawnBitboard, squareIndex + 7, '1');
-				} if (y > 0 && squareIndex < 56) {
+				} if (y > 0) {
 					pawnCapturesBlack.push(squareIndex - 9);
 					blackPawnBitboard = setCharAt(blackPawnBitboard, squareIndex - 9, '1');
 				}
 			}
 			// Take east of pawn
 			if (x < 7) {
-				if (y < 7 && squareIndex > 7) {
+				if (y < 7) {
 					pawnCapturesWhite.push(squareIndex + 9);
 					blackPawnBitboard = setCharAt(blackPawnBitboard, squareIndex + 9, '1');
-				} if (y > 0 && squareIndex < 56) {
+				} if (y > 0) {
 					pawnCapturesBlack.push(squareIndex - 7);
 					blackPawnBitboard = setCharAt(blackPawnBitboard, squareIndex - 7, '1');
 				}
