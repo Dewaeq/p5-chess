@@ -97,8 +97,7 @@ class BoardGUI {
     this.pieceMoves = moves.filter(move => move.startSquare === startSquare);
 
     this.pieceMoves.forEach(move => {
-      const targetSquare = move.targetSquare;
-      const [x, y] = BoardGUI.SquareToGuiCoord(targetSquare);
+      const [x, y] = BoardGUI.SquareToGuiCoord(move.targetSquare);
 
       fill(162, 156, 154, 110);
       ellipse(x * tileSize + tileSize / 2, y * tileSize + tileSize / 2, tileSize / 2.5);
