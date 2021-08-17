@@ -1,5 +1,35 @@
 class PerfTest {
 
+    static CountMoves(depth) {
+        const startTime = performance.now();
+        const result = this.countPossibleMoves(depth);
+        const endTime = performance.now();
+
+        mainBoard.whitesTurn = true;
+
+        return {
+            numPositions: result,
+            time: endTime - startTime,
+        };
+    }
+
+    static countPossibleMoves(depth) {
+        if (depth === 0) return 1;
+
+        const moves = Engine.generateMoves(mainBoard, mainBoard.whitesTurn);
+        let numPositions = 0;
+
+        for(let i = 0; i < moves.length; i++) {
+            const move = moves[i];
+            mainBoard.testMove(move[2], move[0], move[1]);
+
+            numPositions += this.countPossibleMoves(depth - 1);
+            mainBoard.undoLastMove();
+        }
+
+        return numPositions;
+    }
+
     static RunTests() {
         let results = [];
         TEST_POSITIONS.forEach((pos) => {

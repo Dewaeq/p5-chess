@@ -59,7 +59,6 @@ async function draw() {
     if (gameOver) return;
     if (mainBoard.whitesTurn) return;
 
-    mainBoard.whitesTurn = true;
     await delay(0.1);
     aiMove();
 }
@@ -93,7 +92,6 @@ function mousePressed() {
             movingPiece.y
         );
 
-        mainBoard.whitesTurn = !mainBoard.whitesTurn;
         isMovingPiece = false;
         movingPiece = null;
         moves = null;
@@ -156,7 +154,6 @@ function aiMove() {
     );
     mainBoard.movePiece(bestMove[2], bestMove[0], bestMove[1]);
 
-    mainBoard.whitesTurn = true;
     setStatus();
 }
 

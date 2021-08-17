@@ -71,6 +71,8 @@ class Board {
         }
 
         const [piecInd, fromX, fromY, toX, toY, takenPieceInd] = this.lastMove;
+        const isEPCapture = this.pieces[piecInd].type === "P" && arrayEquals([toX, toY], this.enPassantSquare.slice(1, 3));
+
         // Was it a castling move?
         if ((fromX - 2 === toX || fromX + 2 === toX) && (piecInd === this.whKingInd || piecInd === this.blKingInd)) {
             // Castle left
@@ -95,7 +97,7 @@ class Board {
             }
         }
         // Did this move take a piece?
-        else if (takenPieceInd !== undefined && takenPieceInd !== null) {
+        else if (takenPieceInd && !isEPCapture) {
             this.pieces[takenPieceInd].setPiecePosition([toX, toY]);
             this.pieces[takenPieceInd].taken = false;
 
@@ -245,6 +247,8 @@ class Board {
                 );
             }
         }
+
+        this.whitesTurn = !this.whitesTurn;
 
         this.lastMove = [piecInd, movingPiece.x, movingPiece.y, toX, toY];
         if (tookAPiece) this.lastMove.push(indPiecTaken);
