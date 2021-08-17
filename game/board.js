@@ -86,6 +86,7 @@ class Board {
    * @param {Move} move 
    */
   makeMove(move) {
+    this.lastMove = move;
     const startSquare = move.startSquare;
     const targetSquare = move.targetSquare;
     const opponentColourIndex = 1 - this.colourToMoveIndex;
@@ -194,8 +195,81 @@ class Board {
     this.switchTurn();
   }
 
+  /**
+   * 
+   * @param {Move} move 
+   */
   unMakeMove(move) {
-    
+    const startSquare = move.startSquare;
+    const targetSquare = move.targetSquare;
+    const opponentColourIndex = this.colourToMoveIndex;
+
+    this.switchTurn();
+
+    const isPromotion = move.isPromotion;
+    const moveFlag = move.flag;
+    const capturedPieceType = (this.currentGameState >> 8) & 0b111111;
+    const capturedPiece = capturedPieceType === 0 ? 0 : (this.opponentColour | capturedPieceType);
+
+    const movedPiece = (isPromotion) ? (this.colourToMove | PIECE_PAWN) : this.squares[targetSquare];
+    const movedPieceType = Piece.PieceType(movedPiece);
+
+    // Normal capture
+    if (capturedPieceType !== PIECE_NONE && moveFlag !== Move.Flag.EnPassantCapture) {
+      this.getPieceList(capturedPieceType, opponentColourIndex).addPieceAtSquare(targetSquare);
+    }
+
+    // Move in pieceList
+    if (movedPieceType === PIECE_KING) {
+      this.kingSquares[this.colourToMoveIndex] = startSquare;
+    } else if (!isPromotion) {
+      this.getPieceList(movedPieceType, this.colourToMoveIndex).movePiece(targetSquare, startSquare);
+    }
+
+    this.squares[startSquare] = movedPiece;
+    this.squares[targetSquare] = capturedPiece;
+
+    if (isPromotion) {
+      this.pawns[this.colourToMoveIndex].addPieceAtSquare(startSquare);
+      switch (moveFlag) {
+        case Move.Flag.PromoteToKnight:
+          this.knights[this.colourToMoveIndex].removePieceAtSquare(targetSquare);
+          break;
+        case Move.Flag.PromoteToBishop:
+          this.bishops[this.colourToMoveIndex].removePieceAtSquare(targetSquare);
+          break;
+        case Move.Flag.PromoteToRook:
+          this.rooks[this.colourToMoveIndex].removePieceAtSquare(targetSquare);
+          break;
+        case Move.Flag.PromoteToQueen:
+          this.queens[this.colourToMoveIndex].removePieceAtSquare(targetSquare);
+          break;
+
+      }
+    } else {
+      switch (moveFlag) {
+        case Move.Flag.EnPassantCapture:
+          const epPawnSquare = targetSquare + (this.colourToMove === PIECE_WHITE ? -8 : 8);
+          this.squares[targetSquare] = PIECE_NONE;
+          this.squares[epPawnSquare] = capturedPiece;
+          this.pawns[opponentColourIndex].addPieceAtSquare(epPawnSquare);
+          break;
+
+        case Move.Flag.Castling:
+          const kingSideCastle = (targetSquare + 1 === H1) || (targetSquare + 1 === H8);
+          const rookStartSquare = targetSquare + (kingSideCastle ? 1 : -2);
+          const rookTargetSquare = startSquare + (kingSideCastle ? 1 : -1);
+
+          this.squares[rookTargetSquare] = PIECE_NONE;
+          this.squares[rookStartSquare] = this.colourToMove | PIECE_ROOK
+
+          this.rooks[this.colourToMoveIndex].movePiece(rookTargetSquare, rookStartSquare);
+          break;
+      }
+    }
+
+    this.gameStateHistory.pop();
+    this.currentGameState = this.gameStateHistory[this.gameStateHistory.length - 1];
   }
 
   switchTurn() {
