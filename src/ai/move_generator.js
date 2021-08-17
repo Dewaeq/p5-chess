@@ -1,4 +1,4 @@
-class Search {
+class MoveGenerator {
 	constructor() {
 		/**@type {Move[]} */
 		this.moves;

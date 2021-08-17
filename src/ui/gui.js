@@ -4,7 +4,7 @@ class BoardGUI {
    */
   constructor(board) {
     this.board = board;
-    this.guiSearch = new Search();
+    this.moveGen = new MoveGenerator();
     this.images = {};
     this.moveSound;
     /**@type {Move[]} */
@@ -21,7 +21,7 @@ class BoardGUI {
   };
 
   init() {
-    this.guiSearch.init(this.board);
+    this.moveGen.init(this.board);
 
     this.moveSound = loadSound('../../assets/move_sound.wav');
 
@@ -87,10 +87,10 @@ class BoardGUI {
   }
 
   showPieceMoves(startSquare) {
-    const moves = this.guiSearch.generateMoves(this.board);
+    const moves = this.moveGen.generateMoves(this.board);
 
     if (moves.length === 0) {
-      if (this.guiSearch.inCheck) {
+      if (this.moveGen.inCheck) {
         alert('Checkmate');
       } else {
         alert('Stalemate');
@@ -162,7 +162,6 @@ class BoardGUI {
     }
 
     const promotingMove = promotionMoves.filter(move => move.flag === promotionType)[0];
-    promotingMove.printMove();
     board.makeMove(promotingMove);
   }
 

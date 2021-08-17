@@ -1,6 +1,6 @@
 class Perft {  
     static CountMoves(depth) {
-        this.search = new Search();
+        this.moveGen = new MoveGenerator();
 
         const startTime = performance.now();
         const result =  this.countPossibleMoves(depth);
@@ -17,7 +17,7 @@ class Perft {
             return 1;
         }
 
-        const moves = this.search.generateMoves(board);
+        const moves = this.moveGen.generateMoves(board);
         let numPositions = 0;
 
         for (let i = 0; i < moves.length; i++) {
