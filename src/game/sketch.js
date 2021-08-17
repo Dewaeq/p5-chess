@@ -24,7 +24,7 @@ function setup() {
   gui.init();
   PrecomputedData.Init();
 
-    gui.show();
+  gui.show();
 }
 
 function draw() {

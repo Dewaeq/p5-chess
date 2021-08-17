@@ -1,4 +1,4 @@
-class Engine {  
+class Perft {  
     static CountMoves(depth) {
         this.search = new Search();
 
