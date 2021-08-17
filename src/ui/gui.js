@@ -6,6 +6,7 @@ class BoardGUI {
     this.board = board;
     this.guiSearch = new Search();
     this.images = {};
+    this.moveSound;
     /**@type {Move[]} */
     this.pieceMoves = [];
     this.isDraggingPiece = false;
@@ -21,6 +22,8 @@ class BoardGUI {
 
   init() {
     this.guiSearch.init(this.board);
+
+    this.moveSound = loadSound('../../assets/move_sound.wav');
 
     const fileExt = ".png";
 
@@ -140,6 +143,10 @@ class BoardGUI {
     if (piece === PIECE_NONE) return;
   }
 
+  playMoveSound() {
+    this.moveSound.play();
+  }
+
   promotePiece() {
     const mouseTargetSquare = getSquareUnderMouse();
     const promotionMoves = this.pieceMoves.filter(move => move.isPromotion && move.targetSquare === mouseTargetSquare);
@@ -157,7 +164,6 @@ class BoardGUI {
     const promotingMove = promotionMoves.filter(move => move.flag === promotionType)[0];
     promotingMove.printMove();
     board.makeMove(promotingMove);
-
   }
 
   stopDraggingPiece() {
@@ -166,8 +172,10 @@ class BoardGUI {
     for (const move of this.pieceMoves) {
       if (move.targetSquare === mouseTargetSquare) {
         if (move.isPromotion) {
+          this.playMoveSound();
           this.promotePiece();
         } else {
+          this.playMoveSound();
           board.makeMove(move);
         }
         break;
