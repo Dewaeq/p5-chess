@@ -35,3 +35,6 @@ const WhiteCastleMask   =   WhiteCastleKingsideMask & WhiteCastleQueensideMask;
 
 const PROMOTION_MODE_ALL = 0;
 const PROMOTION_MODE_QUEEN_KNIGHT = 1;
+
+const IMMEDIATE_MATE_SCORE = 100000;
+const INVALID_MOVE = new Move(0);

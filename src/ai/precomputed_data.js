@@ -30,8 +30,16 @@ class PrecomputedData {
 	static KnightAttackBitboards = [];
 	static PawnAttackBitboards = [];
 
+	/**@type {number[]} */
+	static CentreManhattanDistance = [];
+	/**@type {number[][]} */
+	static OrthogonalDistance = [];
 	/**@type {number[][]} */
 	static SqToEdge = [];
+
+	static NumRookMovesToSquare(startSquare, targetSquare) {
+		return this.OrthogonalDistance[startSquare][targetSquare];
+	}
 
 	static Init() {
 		const emptyBitboard =
@@ -158,6 +166,25 @@ class PrecomputedData {
 
 			// Queen moves
 			this.QueenMoves[squareIndex] = [...bishopMoves, ...rookMoves];
+		}
+
+		this.OrthogonalDistance = Array(64);
+		this.CentreManhattanDistance = Array(64);
+
+		for (let squareA = 0; squareA < 64; squareA++) {
+			const [fileA, rankA] = BoardRepresentation.CoordFromIndex(squareA);
+			const fileDstFromCentre = Math.max(3 - fileA, fileA - 4);
+			const rankDstFromCentre = Math.max(3 - rankA, rankA - 4);
+			this.CentreManhattanDistance[squareA] = fileDstFromCentre + rankDstFromCentre;
+
+			this.OrthogonalDistance[squareA] = Array(64);
+
+			for (let squareB = 0; squareB < 64; squareB++) {
+				const [fileB, rankB] = BoardRepresentation.CoordFromIndex(squareB);
+				const rankDst = Math.abs(rankA - rankB);
+				const fileDst = Math.abs(fileA - fileB);
+				this.OrthogonalDistance[squareA][squareB] = Math.max(rankDst, fileDst);
+			}
 		}
 	}
 }

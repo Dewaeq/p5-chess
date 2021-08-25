@@ -51,6 +51,7 @@ class Board {
 
     //TODO: Replace with proper game state
     this.currentGameState = 0b00000000001111;
+    this.lastMove = INVALID_MOVE;
 
     this.pawns = [new PieceList(8), new PieceList(8)];
     this.knights = [new PieceList(10), new PieceList(10)];
@@ -347,5 +348,9 @@ class Board {
 
   getPieceList(pieceType, colourIndex) {
     return this.allPieceLists[colourIndex * 8 + pieceType];
+  }
+
+  get whiteToMove() {
+    return (this.colourToMove === PIECE_WHITE);
   }
 }

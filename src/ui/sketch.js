@@ -2,6 +2,8 @@
 let board;
 /**@type {BoardGUI} */
 let gui;
+/**@type {Search} */
+let search;
 
 let tileSize = 90;
 let pieceSize = tileSize;
@@ -17,6 +19,8 @@ function setup() {
   board = new Board();
   gui = new BoardGUI(board);
   board.init();
+
+  search = new Search(board);
 
   const fenStartString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
   board.fenToBoard(fenStartString);

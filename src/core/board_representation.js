@@ -1,3 +1,7 @@
+/**
+ * Files and ranks are from 0 - 7
+ */
+
 class BoardRepresentation {
   static RankIndex = (square) => square >>> 3;
 
@@ -9,6 +13,8 @@ class BoardRepresentation {
   ];
 
   static CoordToIndex = (rank, file) => rank * 8 + file;
+
+  static CoordFromIndex = (square) => [this.FileIndex(square), this.RankIndex(square)];
 
   static IsSquareInBoard = (square) => square < 64 && square > -1;
 }
