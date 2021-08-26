@@ -11,6 +11,7 @@ class BoardGUI {
     this.pieceMoves = [];
     this.isDraggingPiece = false;
     this.draggingSquare = -1;
+    this.lastMove = INVALID_MOVE;
   }
 
   static SquareToGuiCoord = (square) => {
@@ -22,6 +23,7 @@ class BoardGUI {
 
   init() {
     this.moveGen.init(this.board);
+    this.initUI();
 
     this.moveSound = loadSound('../../assets/move_sound.wav');
 
@@ -50,6 +52,43 @@ class BoardGUI {
     }
   }
 
+  initUI() {
+
+    $("#include-quiet-input").prop("checked", true);
+    $("#order-moves-input").prop("checked", true);
+    $("#play-white-input").prop("checked", true);
+
+    $("#play-white-input").on("click", function () {
+      gameManager.humanPlaysWhite = !gameManager.humanPlaysWhite
+    });
+
+    $("#include-quiet-input").on("click", function () {
+      gameManager.aiPlayer.search.searchQuiescencent = !gameManager.aiPlayer.search.searchQuiescencent
+    });
+
+    $("#order-moves-input").on("click", function () {
+      gameManager.aiPlayer.search.orderMoves = !gameManager.aiPlayer.search.orderMoves
+    });
+
+    $("#fen-string-input").val(fenStartString);
+
+    $("#fen-string-input").on("change", function () {
+      gameManager.board.fenToBoard($(this).val());
+    });
+
+    $("#search-depth-input").val(5);
+
+    $("#search-depth-input").on("change", function () {
+      if (!isNumeric($(this).val())) {
+        $(this).val(gameManager.aiPlayer.searchDepth);
+        return;
+      }
+
+      const newDepth = parseInt($(this).val());
+      gameManager.aiPlayer.searchDepth = newDepth;
+    });
+  }
+
   show() {
     background(0);
     noStroke();
@@ -66,6 +105,18 @@ class BoardGUI {
           tileSize
         );
       }
+    }
+
+    if (this.board.gameStateHistory.length > 0) {
+      const [startSquare, targetSquare] = [this.lastMove.startSquare, this.lastMove.targetSquare];
+
+      const [startX, startY] = BoardGUI.SquareToGuiCoord(startSquare);
+      fill("#FFCE88");
+      rect(startX * tileSize, startY * tileSize, tileSize, tileSize);
+
+      const [targetX, targetY] = BoardGUI.SquareToGuiCoord(targetSquare);
+      rect(targetX * tileSize, targetY * tileSize, tileSize, tileSize);
+      fill("#DBA671");
     }
 
     for (let i = 0; i < 64; i++) {
@@ -90,11 +141,7 @@ class BoardGUI {
     const moves = this.moveGen.generateMoves(this.board);
 
     if (moves.length === 0) {
-      if (this.moveGen.inCheck) {
-        alert('Checkmate');
-      } else {
-        alert('Stalemate');
-      }
+      return;
     }
 
     this.pieceMoves = moves.filter(move => move.startSquare === startSquare);
@@ -138,9 +185,6 @@ class BoardGUI {
   dragPieceAtSquare(square) {
     this.isDraggingPiece = true;
     this.draggingSquare = square;
-
-    const piece = this.board.squares[square];
-    if (piece === PIECE_NONE) return;
   }
 
   playMoveSound() {
@@ -162,7 +206,7 @@ class BoardGUI {
     }
 
     const promotingMove = promotionMoves.filter(move => move.flag === promotionType)[0];
-    board.makeMove(promotingMove);
+    gameManager.makeMove(promotingMove);
   }
 
   stopDraggingPiece() {
@@ -175,7 +219,7 @@ class BoardGUI {
           this.promotePiece();
         } else {
           this.playMoveSound();
-          board.makeMove(move);
+          gameManager.makeMove(move);
         }
         break;
       }

@@ -45,13 +45,13 @@ class Board {
   }
 
   init() {
+    this.squares = Array(64).fill(0);
     this.colourToMove = PIECE_WHITE;
     this.opponentColour = PIECE_BLACK;
     this.colourToMoveIndex = 0;
 
     //TODO: Replace with proper game state
     this.currentGameState = 0b00000000001111;
-    this.lastMove = INVALID_MOVE;
 
     this.pawns = [new PieceList(8), new PieceList(8)];
     this.knights = [new PieceList(10), new PieceList(10)];
@@ -83,11 +83,9 @@ class Board {
   }
 
   /**
-   * 
    * @param {Move} move 
    */
   makeMove(move) {
-    this.lastMove = move;
     const startSquare = move.startSquare;
     const targetSquare = move.targetSquare;
     const opponentColourIndex = 1 - this.colourToMoveIndex;
@@ -103,15 +101,18 @@ class Board {
     const capturedPieceType = Piece.PieceType(capturedPiece);
     const moveFlag = move.flag;
     const isPromotion = move.isPromotion;
+    const isEnPassant = (moveFlag === Move.Flag.EnPassantCapture)
 
     // Captures
     this.currentGameState |= (capturedPieceType << 8);
-    if (capturedPieceType !== PIECE_NONE && moveFlag !== Move.Flag.EnPassantCapture) {
+    if (capturedPieceType !== PIECE_NONE && !isEnPassant) {
       this.getPieceList(capturedPieceType, opponentColourIndex).removePieceAtSquare(targetSquare);
     }
 
     // Move piece in pieceList
     if (movingPieceType === PIECE_KING) {
+      if (this.whiteToMove && (startSquare > 40 || targetSquare > 40))
+        console.log();
       this.kingSquares[this.colourToMoveIndex] = targetSquare;
     }
     else {
@@ -141,20 +142,19 @@ class Board {
           this.queens[this.colourToMoveIndex].addPieceAtSquare(targetSquare);
           break;
       }
-      pieceOnTargetSquare = this.colourToMove | promoteType;
-      this.pawns[this.colourToMoveIndex].removePieceAtSquare(startSquare);
+      pieceOnTargetSquare = (this.colourToMove | promoteType);
+      this.pawns[this.colourToMoveIndex].removePieceAtSquare(targetSquare);
     }
     else {
       switch (moveFlag) {
         case Move.Flag.PawnDoubleForward:
           const epFile = BoardRepresentation.FileIndex(startSquare) + 1;
           // Clear the current ep-data
-          // this.currentGameState &= 0b0000_1111;
           this.currentGameState |= (epFile << 4);
           break;
 
         case Move.Flag.EnPassantCapture:
-          const epPawnSquare = targetSquare + (this.colourToMove === PIECE_WHITE ? -8 : 8);
+          const epPawnSquare = targetSquare + ((this.colourToMove === PIECE_WHITE) ? -8 : 8);
           // Set ep-pawn as captured piece
           this.currentGameState |= (this.squares[epPawnSquare] << 8);
 
@@ -162,14 +162,16 @@ class Board {
           this.pawns[opponentColourIndex].removePieceAtSquare(epPawnSquare);
           break;
         case Move.Flag.Castling:
-          const kingSideCastle = (targetSquare + 1 === H1) || (targetSquare + 1 === H8);
+          const kingSideCastle = (targetSquare === G1) || (targetSquare === G8);
           const rookStartSquare = targetSquare + (kingSideCastle ? 1 : -2);
           const rookTargetSquare = startSquare + (kingSideCastle ? 1 : -1);
 
           this.squares[rookStartSquare] = PIECE_NONE;
-          this.squares[rookTargetSquare] = this.colourToMove | PIECE_ROOK;
+          this.squares[rookTargetSquare] = (this.colourToMove | PIECE_ROOK);
 
           this.rooks[this.colourToMoveIndex].movePiece(rookStartSquare, rookTargetSquare);
+
+          newCastleState &= (this.whiteToMove) ? WhiteCastleMask : BlackCastleMask;
           break;
       }
     }
@@ -197,7 +199,6 @@ class Board {
   }
 
   /**
-   * 
    * @param {Move} move 
    */
   unMakeMove(move) {
@@ -207,21 +208,25 @@ class Board {
 
     this.switchTurn();
 
+    const capturedPieceType = (this.currentGameState >> 8) & 0b111111;
+    const capturedPiece = (capturedPieceType === 0) ? 0 : (this.opponentColour | capturedPieceType);
+
     const isPromotion = move.isPromotion;
     const moveFlag = move.flag;
-    const capturedPieceType = (this.currentGameState >> 8) & 0b111111;
-    const capturedPiece = capturedPieceType === 0 ? 0 : (this.opponentColour | capturedPieceType);
+    const isEnPassant = (moveFlag === Move.Flag.EnPassantCapture);
 
     const movedPiece = (isPromotion) ? (this.colourToMove | PIECE_PAWN) : this.squares[targetSquare];
     const movedPieceType = Piece.PieceType(movedPiece);
 
     // Normal capture
-    if (capturedPieceType !== PIECE_NONE && moveFlag !== Move.Flag.EnPassantCapture) {
+    if (capturedPieceType !== PIECE_NONE && !isEnPassant) {
       this.getPieceList(capturedPieceType, opponentColourIndex).addPieceAtSquare(targetSquare);
     }
 
     // Move in pieceList
     if (movedPieceType === PIECE_KING) {
+      if (this.whiteToMove && (startSquare > 40 || targetSquare > 40))
+        console.log();
       this.kingSquares[this.colourToMoveIndex] = startSquare;
     } else if (!isPromotion) {
       this.getPieceList(movedPieceType, this.colourToMoveIndex).movePiece(targetSquare, startSquare);
@@ -245,24 +250,23 @@ class Board {
         case Move.Flag.PromoteToQueen:
           this.queens[this.colourToMoveIndex].removePieceAtSquare(targetSquare);
           break;
-
       }
     } else {
       switch (moveFlag) {
         case Move.Flag.EnPassantCapture:
-          const epPawnSquare = targetSquare + (this.colourToMove === PIECE_WHITE ? -8 : 8);
+          const epPawnSquare = targetSquare + ((this.colourToMove === PIECE_WHITE) ? -8 : 8);
           this.squares[targetSquare] = PIECE_NONE;
-          this.squares[epPawnSquare] = capturedPiece;
+          this.squares[epPawnSquare] = (this.opponentColour | PIECE_PAWN);
           this.pawns[opponentColourIndex].addPieceAtSquare(epPawnSquare);
           break;
 
         case Move.Flag.Castling:
-          const kingSideCastle = (targetSquare + 1 === H1) || (targetSquare + 1 === H8);
+          const kingSideCastle = (targetSquare === G1) || (targetSquare === G8);
           const rookStartSquare = targetSquare + (kingSideCastle ? 1 : -2);
           const rookTargetSquare = startSquare + (kingSideCastle ? 1 : -1);
 
           this.squares[rookTargetSquare] = PIECE_NONE;
-          this.squares[rookStartSquare] = this.colourToMove | PIECE_ROOK
+          this.squares[rookStartSquare] = (this.colourToMove | PIECE_ROOK);
 
           this.rooks[this.colourToMoveIndex].movePiece(rookTargetSquare, rookStartSquare);
           break;
@@ -280,10 +284,11 @@ class Board {
   }
 
   /**
-   *
    * @param {String} fenString
    */
   fenToBoard(fenString) {
+    this.init();
+
     const pieceTypeFromSymbol = {
       p: PIECE_PAWN,
       n: PIECE_KNIGHT,

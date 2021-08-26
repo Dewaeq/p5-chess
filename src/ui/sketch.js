@@ -1,12 +1,7 @@
-/**@type {Board} */
-let board;
-/**@type {BoardGUI} */
-let gui;
-/**@type {Search} */
-let search;
+/**@type {GameManager} */
+let gameManager;
 
 let tileSize = 90;
-let pieceSize = tileSize;
 
 function setup() {
 
@@ -16,40 +11,34 @@ function setup() {
   const canvas = createCanvas(tileSize * 8, tileSize * 8);
   canvas.parent("#canvas");
 
-  board = new Board();
-  gui = new BoardGUI(board);
-  board.init();
-
-  search = new Search(board);
-
-  const fenStartString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";
-  board.fenToBoard(fenStartString);
-
-  gui.init();
-  PrecomputedData.Init();
-
-  gui.show();
+  gameManager = new GameManager();
+  gameManager.init();
 }
 
 function draw() {
-  if (gui.isDraggingPiece) {
-    gui.showDraggingPiece();
+  if (gameManager.gui.isDraggingPiece) {
+    gameManager.gui.showDraggingPiece();
   }
 }
 
 function mousePressed() {
-  const squareIndex = getSquareUnderMouse();
-
-  if (squareIndex !== -1 && board.squares[squareIndex] !== PIECE_NONE) {
-    gui.dragPieceAtSquare(squareIndex);
+  if (gameManager.humanPlaysWhite !== gameManager.whiteToMove) {
+    // return;
   }
 
-  console.log(squareIndex, Piece.PieceToString(board.squares[squareIndex]));
+  const squareIndex = getSquareUnderMouse();
+  if (squareIndex < 0) return;
+
+  if (gameManager.board.squares[squareIndex] !== PIECE_NONE) {
+    gameManager.gui.dragPieceAtSquare(squareIndex);
+  }
+
+  console.log(squareIndex, Piece.PieceToString(gameManager.board.squares[squareIndex]));
 }
 
 function mouseReleased() {
-  if (gui.isDraggingPiece) {
-    gui.stopDraggingPiece();
+  if (gameManager.gui.isDraggingPiece) {
+    gameManager.gui.stopDraggingPiece();
   }
 }
 

@@ -178,9 +178,6 @@ class MoveGenerator {
 						this.moves.push(Move.MoveWithSquares(startSquare, targetSquare));
 					}
 				}
-
-				// If this move blocks a check, further moves won't
-				if (moveBlocksCheck) break;
 			}
 		}
 	}
@@ -436,12 +433,12 @@ class MoveGenerator {
 	}
 
 	hasCastleKingsideRight() {
-		const mask = (this.isWhiteToMove) ? 1 : 4;
-		return (this.board.currentGameState & mask) !== 0;
+		const mask = (this.board.whiteToMove) ? 1 : 4;
+		return ((this.board.currentGameState & mask) !== 0);
 	}
 
 	hasCastleQueensideRight() {
-		const mask = (this.isWhiteToMove) ? 2 : 8;
-		return (this.board.currentGameState & mask) !== 0;
+		const mask = (this.board.whiteToMove) ? 2 : 8;
+		return ((this.board.currentGameState & mask) !== 0);
 	}
 }

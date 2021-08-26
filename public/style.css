@@ -17,10 +17,17 @@ body {
     background-color: #181a1b;
 }
 
-h1,
-h2,
-p {
+.main-container {
     text-align: center;
+}
+
+.settings-title {
+    padding-bottom: 5%;
+}
+
+.info-title {
+    padding-top: 10% ;
+    padding-bottom: 5%;
 }
 
 .side-data {
@@ -34,12 +41,6 @@ p {
 .advantage-text {
     padding-top: 20px;
     padding-bottom: 10px;
-}
-
-#pos-count-text,
-#calc-time-text,
-#calc-speed-text {
-    text-align: left;
 }
 
 .progress {

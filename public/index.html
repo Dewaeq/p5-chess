@@ -37,6 +37,7 @@
   <script src="../src/core/constants.js"></script>
   <script src="../src/core/board_representation.js"></script>
   <script src="../src/core/utils.js"></script>
+  <script src="../src/core/game_manager.js"></script>
   <script src="../src/ai/precomputed_data.js"></script>
   <script src="../src/ai/perft.js"></script>
   <script src="../src/ai/values.js"></script>
@@ -62,14 +63,32 @@
   </div>
 
   <div class="side-data">
-    <label for="fen-input">Fen String:</label>
-    <input id="fen-string-input" type="fen-input">
-    <br>
-    <label for="engine-depth">Search Depth: </label>
-    <input id="engine-depth-input" name="engine-depth" type="number" min="1" max="15" value="3">
-    <p id="pos-count-text">Calculated <span id="posCountNumber">0</span> positions.</p>
-    <p id="calc-time-text">Calculations took <span id="calcTimeNumber">0</span> seconds.</p>
-    <p id="calc-speed-text">That's <span id="calcSpeedNumber">0</span> moves/s.</p>
+
+    <div class="settings-container">
+      <h3 class="settings-title">Settings</h3>
+      <input id="include-quiet-input" type="checkbox" name="include-quiet" checked>
+      <label for="include-quiet">Quiescence search</label>
+      <br>
+      <input id="order-moves-input" type="checkbox" name="order-moves" checked>
+      <label for="order-moves">Order moves</label>
+      <br>
+      <input id="play-white-input" type="checkbox" name="play-white" checked>
+      <label for="play-white">Play as white</label>
+      <br>
+      <label for="fen-input">Fen String:</label>
+      <input id="fen-string-input" type="fen-input">
+      <br>
+      <label for="search-depth">Search Depth: </label>
+      <input id="search-depth-input" name="search-depth" type="number" min="1" max="15" value="5">
+    </div>
+
+    <div class="info-container">
+      <h3 class="info-title">Stats</h3>
+      <p>Nodes: <span id="nodes-count">0</span></p>
+      <p>QNodes: <span id="qnodes-count">0</span></p>
+      <p>Total nodes/s: <span id="nodes-per-second-count">0</span></p>
+      <p>Cutoffs: <span id="cuttofs-count">0</span></p>
+    </div>
   </div>
 
 </body>

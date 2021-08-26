@@ -1,18 +1,23 @@
 class Search {
     /**
      * @param {Board} board 
+     * @param {Function} onMoveFound
      */
-    constructor(board) {
+    constructor(board, onMoveFound) {
         this.board = board;
         this.moveGenerator = new MoveGenerator();
         this.evaluation = new Evaluation();
         this.moveOrdering = new MoveOrdering();
+
+        this.onMoveFound = onMoveFound;
 
         this.numNodes = 0;
         this.numQNodes = 0;
         this.numCutOffs = 0;
 
         this.abortSearch = false;
+        this.orderMoves = true;
+        this.searchQuiescencent = true;
         this.bestMoveThisIteration = INVALID_MOVE;
         this.bestEvalThisIteration = 0;
         this.bestMove = INVALID_MOVE;
@@ -25,42 +30,21 @@ class Search {
         this.bestMoveThisIteration = INVALID_MOVE;
         this.bestMove = INVALID_MOVE;
         this.abortSearch = false;
-        this.orderMoves = true;
 
         this.numCutOffs = 0;
         this.numNodes = 0;
         this.numQNodes = 0;
 
-        // With move ordering
-        const startTime1 = performance.now();
-
+        const startTime = performance.now();
         this.searchMoves(depth, 0, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
-
-        const endTime1 = performance.now();
-        console.log(this.numNodes / (endTime1 - startTime1) * 1000, "nodes/s with move ordering");
-        console.log("nodes: ", this.numNodes, "cutoffs: ", this.numCutOffs);
-
-        this.numCutOffs = 0;
-        this.numNodes = 0;
-        this.numQNodes = 0;
-
-        // Without move ordering
-        this.orderMoves = false;
-        const startTime2 = performance.now();
-
-        this.searchMoves(depth, 0, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
-
-        const endTime2 = performance.now();
-        console.log(this.numNodes / (endTime2 - startTime2) * 1000, "nodes/s without move ordering");
-        console.log("nodes: ", this.numNodes, "cutoffs: ", this.numCutOffs);
+        const endTime = performance.now();
+        console.log((this.numNodes + this.numQNodes) / (endTime - startTime) * 1000, "nodes/s");
+        console.log("nodes: ", this.numNodes, "cutoffs: ", this.numCutOffs, "qNodes: ", this.numQNodes);
 
         this.bestMove = this.bestMoveThisIteration;
         this.bestEval = this.bestEvalThisIteration;
 
-        if (this.bestMove.moveValue !== INVALID_MOVE.moveValue) {
-            board.makeMove(this.bestMove);
-            gui.show();
-        }
+        this.onMoveFound(this.bestMove);
     }
 
     stopSearch() {
@@ -89,9 +73,9 @@ class Search {
         }
 
         if (depth === 0) {
-            // const evaluation = this.quiescenseSearch(alpha, beta);
-            const evaluation = this.evaluation.evaluate(this.board);
-            return evaluation;
+            if (this.searchQuiescencent)
+                return this.quiescenceSearch(alpha, beta);
+            return this.evaluation.evaluate(this.board);
         }
 
         const moves = this.moveGenerator.generateMoves(this.board);
@@ -131,7 +115,7 @@ class Search {
         return alpha;
     }
 
-    quiescenseSearch(alpha, beta) {
+    quiescenceSearch(alpha, beta) {
         let evaluation = this.evaluation.evaluate(this.board);
 
         if (evaluation >= beta) {
@@ -143,10 +127,10 @@ class Search {
 
         const moves = this.moveGenerator.generateMoves(this.board, false);
         if (this.orderMoves)
-            this.moveOrdering.orderMoves(board, moves);
+            this.moveOrdering.orderMoves(this.board, moves);
         for (let i = 0; i < moves.length; i++) {
             this.board.makeMove(moves[i]);
-            evaluation = -this.quiescenseSearch(-beta, -alpha);
+            evaluation = -this.quiescenceSearch(-beta, -alpha);
             this.board.unMakeMove(moves[i]);
             this.numQNodes++;
 

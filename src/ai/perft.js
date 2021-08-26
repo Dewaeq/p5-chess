@@ -1,6 +1,7 @@
 class Perft {  
     static CountMoves(depth) {
         this.moveGen = new MoveGenerator();
+        this.board = gameManager.board;
 
         const startTime = performance.now();
         const result =  this.countPossibleMoves(depth);
@@ -17,14 +18,14 @@ class Perft {
             return 1;
         }
 
-        const moves = this.moveGen.generateMoves(board);
+        const moves = this.moveGen.generateMoves(this.board);
         let numPositions = 0;
 
         for (let i = 0; i < moves.length; i++) {
             const move = moves[i];
-            board.makeMove(move);
+            this.board.makeMove(move);
             numPositions += this.countPossibleMoves(depth - 1);
-            board.unMakeMove(move);
+            this.board.unMakeMove(move);
         }
 
         return numPositions;

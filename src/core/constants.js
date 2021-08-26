@@ -23,6 +23,8 @@ const D1 = 3;
 const D8 = 59;
 const F1 = 5;
 const F8 = 61;
+const G1 = 6;
+const G8 = 62;
 const H1 = 7;
 const H8 = 63;
 
@@ -38,3 +40,5 @@ const PROMOTION_MODE_QUEEN_KNIGHT = 1;
 
 const IMMEDIATE_MATE_SCORE = 100000;
 const INVALID_MOVE = new Move(0);
+
+const fenStartString = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR";

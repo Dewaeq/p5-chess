@@ -66,7 +66,7 @@ class Evaluation {
         value += this.countPieceListPositionalValue(BISHOP_POSITIONAL_VALUE, this.board.bishops[colourIndex], isWhite);
         value += this.countPieceListPositionalValue(ROOK_POSITIONAL_VALUE, this.board.rooks[colourIndex], isWhite);
         value += this.countPieceListPositionalValue(QUEEN_POSITIONAL_VALUE, this.board.queens[colourIndex], isWhite);
-        const kingEarlyPhase = this.countPieceListPositionalValue(KING_POSITIONAL_VALUE, this.board.kingSquares[colourIndex], isWhite);
+        const kingEarlyPhase = this.getPstValue(KING_POSITIONAL_VALUE, this.board.kingSquares[colourIndex], isWhite);
         // Bitwise OR to round to int
         value += (kingEarlyPhase * (1 - endgamePhaseWeight)) | 0;
 
