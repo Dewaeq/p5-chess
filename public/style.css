@@ -15,9 +15,7 @@ body {
     background-color: #181a1b;
 }
 
-h1,
-h2,
-p {
+.main-container {
     text-align: center;
 }
 
