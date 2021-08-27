@@ -164,7 +164,7 @@ class Board {
         case Move.Flag.Castling:
           const kingSideCastle = (targetSquare === G1) || (targetSquare === G8);
           const rookStartSquare = targetSquare + (kingSideCastle ? 1 : -2);
-          const rookTargetSquare = startSquare + (kingSideCastle ? 1 : -1);
+          const rookTargetSquare = targetSquare + (kingSideCastle ? -1 : 1);
 
           this.squares[rookStartSquare] = PIECE_NONE;
           this.squares[rookTargetSquare] = (this.colourToMove | PIECE_ROOK);
@@ -263,7 +263,7 @@ class Board {
         case Move.Flag.Castling:
           const kingSideCastle = (targetSquare === G1) || (targetSquare === G8);
           const rookStartSquare = targetSquare + (kingSideCastle ? 1 : -2);
-          const rookTargetSquare = startSquare + (kingSideCastle ? 1 : -1);
+          const rookTargetSquare = targetSquare + (kingSideCastle ? -1 : 1);
 
           this.squares[rookTargetSquare] = PIECE_NONE;
           this.squares[rookStartSquare] = (this.colourToMove | PIECE_ROOK);

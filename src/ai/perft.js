@@ -18,14 +18,14 @@ class Perft {
             return 1;
         }
 
-        const moves = this.moveGen.generateMoves(this.board);
+        const moves = this.moveGen.generateMoves(gameManager.board);
         let numPositions = 0;
 
         for (let i = 0; i < moves.length; i++) {
             const move = moves[i];
-            this.board.makeMove(move);
+            gameManager.board.makeMove(move);
             numPositions += this.countPossibleMoves(depth - 1);
-            this.board.unMakeMove(move);
+            gameManager.board.unMakeMove(move);
         }
 
         return numPositions;

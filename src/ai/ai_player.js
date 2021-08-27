@@ -2,7 +2,7 @@ class AIPlayer {
     constructor(board) {
         this.board = board;
         this.search = new Search(board, this.moveFound);
-        this.searchDepth = 5;
+        this.searchDepth = 4;
         this.move = INVALID_MOVE;
     }
     

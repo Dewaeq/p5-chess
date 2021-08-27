@@ -22,7 +22,7 @@ class BoardGUI {
   };
 
   init() {
-    this.moveGen.init(this.board);
+    this.moveGen.init(gameManager.board);
     this.initUI();
 
     this.moveSound = loadSound('../../assets/move_sound.wav');
@@ -76,7 +76,7 @@ class BoardGUI {
       gameManager.board.fenToBoard($(this).val());
     });
 
-    $("#search-depth-input").val(5);
+    $("#search-depth-input").val(4);
 
     $("#search-depth-input").on("change", function () {
       if (!isNumeric($(this).val())) {
@@ -87,6 +87,19 @@ class BoardGUI {
       const newDepth = parseInt($(this).val());
       gameManager.aiPlayer.searchDepth = newDepth;
     });
+  }
+
+  updateStats() {
+    const numNodes = gameManager.aiPlayer.search.numNodes;
+    const numQNodes = gameManager.aiPlayer.search.numQNodes;
+    const numCutOffs = gameManager.aiPlayer.search.numCutOffs;
+    const calcTime = gameManager.aiPlayer.search.calcTime;
+
+    $("#nodes-count").text(numNodes);
+    $("#qnodes-count").text(numQNodes);
+    $("#cuttofs-count").text(numCutOffs);
+    $("#calc-time-count").text((calcTime / 1000).toFixed(4) + " s");
+    $("#nodes-per-second-count").text(((numNodes + numQNodes) / calcTime * 1000) | 0);
   }
 
   show() {
@@ -107,7 +120,7 @@ class BoardGUI {
       }
     }
 
-    if (this.board.gameStateHistory.length > 0) {
+    if (gameManager.board.gameStateHistory.length > 0) {
       const [startSquare, targetSquare] = [this.lastMove.startSquare, this.lastMove.targetSquare];
 
       const [startX, startY] = BoardGUI.SquareToGuiCoord(startSquare);
@@ -120,7 +133,7 @@ class BoardGUI {
     }
 
     for (let i = 0; i < 64; i++) {
-      const piece = this.board.squares[i];
+      const piece = gameManager.board.squares[i];
       if (piece === PIECE_NONE) continue;
       if (this.isDraggingPiece && i === this.draggingSquare) continue;
 
@@ -138,7 +151,7 @@ class BoardGUI {
   }
 
   showPieceMoves(startSquare) {
-    const moves = this.moveGen.generateMoves(this.board);
+    const moves = this.moveGen.generateMoves(gameManager.board);
 
     if (moves.length === 0) {
       return;
@@ -155,7 +168,7 @@ class BoardGUI {
   }
 
   showDraggingPiece() {
-    const piece = this.board.squares[this.draggingSquare];
+    const piece = gameManager.board.squares[this.draggingSquare];
     if (piece === PIECE_NONE) return;
 
     this.show();

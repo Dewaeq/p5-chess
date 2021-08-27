@@ -30,6 +30,10 @@ class GameManager {
      * @param {Move} move 
      */
     makeMove(move) {
+        if(this.whiteToMove !== this.humanPlaysWhite) {
+            this.gui.updateStats();
+        }
+
         this.board.makeMove(move);
         this.gui.lastMove = move;
         this.whiteToMove = !this.whiteToMove;

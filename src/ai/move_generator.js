@@ -30,13 +30,13 @@ class MoveGenerator {
 		this.inCheck = false;
 		this.inDoubleCheck = false;
 
-		this.isWhiteToMove = this.board.colourToMove === PIECE_WHITE;
-		this.playerColour = this.board.colourToMove;
-		this.opponentColour = this.board.opponentColour;
-		this.playerColourIndex = this.board.colourToMoveIndex;
-		this.opponentColourIndex = 1 - this.board.colourToMoveIndex;
+		this.isWhiteToMove = gameManager.board.colourToMove === PIECE_WHITE;
+		this.playerColour = gameManager.board.colourToMove;
+		this.opponentColour = gameManager.board.opponentColour;
+		this.playerColourIndex = gameManager.board.colourToMoveIndex;
+		this.opponentColourIndex = 1 - gameManager.board.colourToMoveIndex;
 
-		this.playerKingSquare = this.board.kingSquares[this.board.colourToMoveIndex];
+		this.playerKingSquare = gameManager.board.kingSquares[gameManager.board.colourToMoveIndex];
 	}
 	/**
 	 * @param {Board} board
@@ -66,7 +66,7 @@ class MoveGenerator {
 	generateKingMoves() {
 		for (let i = 0; i < PrecomputedData.KingMoves[this.playerKingSquare].length; i++) {
 			const targetSquare = PrecomputedData.KingMoves[this.playerKingSquare][i];
-			const pieceOnTargetSquare = this.board.squares[targetSquare];
+			const pieceOnTargetSquare = gameManager.board.squares[targetSquare];
 
 			if (Piece.IsColour(pieceOnTargetSquare, this.playerColour)) continue;
 
@@ -87,14 +87,14 @@ class MoveGenerator {
 			// Castle kingside
 			if ((targetSquare === F1 || targetSquare === F8) && this.hasCastleKingsideRight()) {
 				const castleSquare = targetSquare + 1;
-				if (this.board.squares[castleSquare] === PIECE_NONE && !this.isSquareAttacked(castleSquare)) {
+				if (gameManager.board.squares[castleSquare] === PIECE_NONE && !this.isSquareAttacked(castleSquare)) {
 					this.moves.push(Move.MoveWithFlag(this.playerKingSquare, castleSquare, Move.Flag.Castling));
 				}
 			}
 			// Castle queenside
-			if ((targetSquare === D1 || targetSquare === D8) && this.hasCastleQueensideRight) {
+			if ((targetSquare === D1 || targetSquare === D8) && this.hasCastleQueensideRight()) {
 				const castleSquare = targetSquare - 1;
-				if (this.board.squares[castleSquare] === PIECE_NONE && !this.isSquareAttacked(castleSquare)) {
+				if (gameManager.board.squares[castleSquare] === PIECE_NONE && !this.isSquareAttacked(castleSquare)) {
 					this.moves.push(Move.MoveWithFlag(this.playerKingSquare, castleSquare, Move.Flag.Castling));
 				}
 			}
@@ -103,15 +103,15 @@ class MoveGenerator {
 	}
 
 	generateSlidingMoves() {
-		const rooks = this.board.rooks[this.playerColourIndex];
+		const rooks = gameManager.board.rooks[this.playerColourIndex];
 		for (let i = 0; i < rooks.numPieces; i++) {
 			this.generateSlidingPieceMoves(rooks.occupiedSquares[i], 0, 4);
 		}
-		const bishops = this.board.bishops[this.playerColourIndex];
+		const bishops = gameManager.board.bishops[this.playerColourIndex];
 		for (let i = 0; i < bishops.numPieces; i++) {
 			this.generateSlidingPieceMoves(bishops.occupiedSquares[i], 4, 8);
 		}
-		const queens = this.board.queens[this.playerColourIndex];
+		const queens = gameManager.board.queens[this.playerColourIndex];
 		for (let i = 0; i < queens.numPieces; i++) {
 			this.generateSlidingPieceMoves(queens.occupiedSquares[i], 0, 8);
 		}
@@ -122,7 +122,7 @@ class MoveGenerator {
 			const curDirOffset = PrecomputedData.DirectionOffsets[dirIndex];
 			for (let i = 0; i < PrecomputedData.SqToEdge[startSquare][dirIndex]; i++) {
 				const targetSquare = startSquare + curDirOffset * (i + 1);
-				const pieceOnTargetSquare = this.board.squares[targetSquare];
+				const pieceOnTargetSquare = gameManager.board.squares[targetSquare];
 
 				// Blocked by friendly piece
 				if (Piece.IsColour(pieceOnTargetSquare, this.playerColour)) break;
@@ -155,14 +155,14 @@ class MoveGenerator {
 	}
 
 	generateKnightMoves() {
-		const knights = this.board.knights[this.playerColourIndex];
+		const knights = gameManager.board.knights[this.playerColourIndex];
 
 		for (let i = 0; i < knights.numPieces; i++) {
 			const startSquare = knights.occupiedSquares[i];
 
 			for (let j = 0; j < PrecomputedData.KnightMoves[startSquare].length; j++) {
 				const targetSquare = PrecomputedData.KnightMoves[startSquare][j];
-				const pieceOnTargetSquare = this.board.squares[targetSquare];
+				const pieceOnTargetSquare = gameManager.board.squares[targetSquare];
 
 				// Blocked by friendly piece
 				if (Piece.IsColour(pieceOnTargetSquare, this.playerColour)) continue;
@@ -183,12 +183,12 @@ class MoveGenerator {
 	}
 
 	generatePawnMoves() {
-		const pawns = this.board.pawns[this.playerColourIndex];
+		const pawns = gameManager.board.pawns[this.playerColourIndex];
 		const dirOffset = this.isWhiteToMove ? 8 : -8;
 		const startRank = this.isWhiteToMove ? 1 : 6;
 		const rankBeforePromotion = 7 - startRank;
 
-		const epFile = ((this.board.currentGameState >> 4) & 15) - 1;
+		const epFile = ((gameManager.board.currentGameState >> 4) & 15) - 1;
 		let epSquare = -1;
 		if (epFile !== -1) {
 			epSquare = (this.isWhiteToMove ? 5 : 2) * 8 + epFile;
@@ -203,7 +203,7 @@ class MoveGenerator {
 			if (this.genQuiets) {
 				const oneSquareAhead = startSquare + dirOffset;
 
-				if (this.board.squares[oneSquareAhead] === PIECE_NONE) {
+				if (gameManager.board.squares[oneSquareAhead] === PIECE_NONE) {
 					let moveBlocksCheck = this.moveBlocksCheck(startSquare, oneSquareAhead);
 					// Move is valid when we're in check and it blocks a check
 					// or when we're not in check and it doesn't cause a check
@@ -218,7 +218,7 @@ class MoveGenerator {
 					if (rank === startRank) {
 						const twoSquaresAhead = oneSquareAhead + dirOffset;
 						moveBlocksCheck = this.moveBlocksCheck(startSquare, twoSquaresAhead);
-						if (this.board.squares[twoSquaresAhead] === PIECE_NONE) {
+						if (gameManager.board.squares[twoSquaresAhead] === PIECE_NONE) {
 							// Move is valid when we're in check and it blocks a check
 							// or when we're not in check and it doesn't cause a check
 							if (this.inCheck === moveBlocksCheck) {
@@ -236,7 +236,7 @@ class MoveGenerator {
 
 				const captureDir = PrecomputedData.DirectionOffsets[captureDirIndex];
 				const targetSquare = startSquare + captureDir;
-				const pieceOnTargetSquare = this.board.squares[targetSquare];
+				const pieceOnTargetSquare = gameManager.board.squares[targetSquare];
 
 				// En-passant capture
 				if (targetSquare === epSquare) {
@@ -282,8 +282,8 @@ class MoveGenerator {
 	 * @returns {boolean} 
 	 */
 	moveBlocksCheck(startSquare, targetSquare) {
-		const movingPiece = this.board.squares[startSquare];
-		const pieceOnTargetSquare = this.board.squares[targetSquare];
+		const movingPiece = gameManager.board.squares[startSquare];
+		const pieceOnTargetSquare = gameManager.board.squares[targetSquare];
 
 		let isKingMove = false;
 
@@ -292,35 +292,34 @@ class MoveGenerator {
 			isKingMove = true;
 		}
 
-		this.board.squares[startSquare] = PIECE_NONE;
-		this.board.squares[targetSquare] = movingPiece;
+		gameManager.board.squares[startSquare] = PIECE_NONE;
+		gameManager.board.squares[targetSquare] = movingPiece;
 
 		const isInCheck = this.isSquareAttacked(this.playerKingSquare);
 
-		this.board.squares[startSquare] = movingPiece;
-		this.board.squares[targetSquare] = pieceOnTargetSquare;
+		gameManager.board.squares[startSquare] = movingPiece;
+		gameManager.board.squares[targetSquare] = pieceOnTargetSquare;
 
 		if (isKingMove) {
 			this.playerKingSquare = startSquare;
 		}
 
-		if (this.inCheck !== isInCheck) return true;
-		return false;
+		return (this.inCheck !== isInCheck);
 	}
 
 	enPassantBlocksCheck(startSquare, targetSquare, epPawnSquare) {
-		const movingPawn = this.board.squares[startSquare];
-		const epPawn = this.board.squares[epPawnSquare];
+		const movingPawn = gameManager.board.squares[startSquare];
+		const epPawn = gameManager.board.squares[epPawnSquare];
 
-		this.board.squares[startSquare] = PIECE_NONE;
-		this.board.squares[epPawnSquare] = PIECE_NONE;
-		this.board.squares[targetSquare] = movingPawn;
+		gameManager.board.squares[startSquare] = PIECE_NONE;
+		gameManager.board.squares[epPawnSquare] = PIECE_NONE;
+		gameManager.board.squares[targetSquare] = movingPawn;
 
 		const isInCheck = this.isSquareAttacked(this.playerKingSquare);
 
-		this.board.squares[startSquare] = movingPawn;
-		this.board.squares[targetSquare] = PIECE_NONE;
-		this.board.squares[epPawnSquare] = epPawn;
+		gameManager.board.squares[startSquare] = movingPawn;
+		gameManager.board.squares[targetSquare] = PIECE_NONE;
+		gameManager.board.squares[epPawnSquare] = epPawn;
 
 		if (this.inCheck !== isInCheck) return true;
 		return false;
@@ -365,7 +364,7 @@ class MoveGenerator {
 	isSquareAttackedByKing(targetSquare) {
 		for (let i = 0; i < PrecomputedData.KingMoves[targetSquare].length; i++) {
 			const startSquare = PrecomputedData.KingMoves[targetSquare][i];
-			if (this.board.squares[startSquare] === (this.opponentColour | PIECE_KING)) return true;
+			if (gameManager.board.squares[startSquare] === (this.opponentColour | PIECE_KING)) return true;
 		}
 		return false;
 	}
@@ -373,7 +372,7 @@ class MoveGenerator {
 	isSquareAttackedByKnight(targetSquare) {
 		for (let i = 0; i < PrecomputedData.KnightMoves[targetSquare].length; i++) {
 			const startSquare = PrecomputedData.KnightMoves[targetSquare][i];
-			if (this.board.squares[startSquare] === (this.opponentColour | PIECE_KNIGHT)) return true;
+			if (gameManager.board.squares[startSquare] === (this.opponentColour | PIECE_KNIGHT)) return true;
 		}
 		return false;
 	}
@@ -383,10 +382,10 @@ class MoveGenerator {
 			const curDirection = PrecomputedData.DirectionOffsets[directionIndex];
 			for (let i = 0; i < PrecomputedData.SqToEdge[targetSquare][directionIndex]; i++) {
 				const startSquare = targetSquare + curDirection * (i + 1);
-				if (this.board.squares[startSquare] === (this.opponentColour | PIECE_BISHOP)) return true;
+				if (gameManager.board.squares[startSquare] === (this.opponentColour | PIECE_BISHOP)) return true;
 				// There is a piece on the square and it's not a bishop from the opponent,
 				// so stop the search in this direction
-				if (this.board.squares[startSquare] !== PIECE_NONE) break;
+				if (gameManager.board.squares[startSquare] !== PIECE_NONE) break;
 			}
 		}
 		return false;
@@ -397,10 +396,10 @@ class MoveGenerator {
 			const curDirection = PrecomputedData.DirectionOffsets[directionIndex];
 			for (let i = 0; i < PrecomputedData.SqToEdge[targetSquare][directionIndex]; i++) {
 				const startSquare = targetSquare + curDirection * (i + 1);
-				if (this.board.squares[startSquare] === (this.opponentColour | PIECE_ROOK)) return true;
+				if (gameManager.board.squares[startSquare] === (this.opponentColour | PIECE_ROOK)) return true;
 				// There is a piece on the square and it's not a rook from the opponent,
 				// so stop the search in this direction
-				if (this.board.squares[startSquare] !== PIECE_NONE) break;
+				if (gameManager.board.squares[startSquare] !== PIECE_NONE) break;
 			}
 		}
 		return false;
@@ -411,10 +410,10 @@ class MoveGenerator {
 			const curDirection = PrecomputedData.DirectionOffsets[directionIndex];
 			for (let i = 0; i < PrecomputedData.SqToEdge[targetSquare][directionIndex]; i++) {
 				const startSquare = targetSquare + curDirection * (i + 1);
-				if (this.board.squares[startSquare] === (this.opponentColour | PIECE_QUEEN)) return true;
+				if (gameManager.board.squares[startSquare] === (this.opponentColour | PIECE_QUEEN)) return true;
 				// There is a piece on the square and it's not a queen from the opponent,
 				// so stop the search in this direction
-				if (this.board.squares[startSquare] !== PIECE_NONE) break;
+				if (gameManager.board.squares[startSquare] !== PIECE_NONE) break;
 			}
 		}
 		return false;
@@ -427,18 +426,18 @@ class MoveGenerator {
 			: PrecomputedData.PawnAttacksWhite[targetSquare];
 		for (let i = 0; i < pawnAttacks.length; i++) {
 			const startSquare = pawnAttacks[i];
-			if (this.board.squares[startSquare] === (this.opponentColour | PIECE_PAWN)) return true;
+			if (gameManager.board.squares[startSquare] === (this.opponentColour | PIECE_PAWN)) return true;
 		}
 		return false;
 	}
 
 	hasCastleKingsideRight() {
-		const mask = (this.board.whiteToMove) ? 1 : 4;
-		return ((this.board.currentGameState & mask) !== 0);
+		const mask = (gameManager.board.whiteToMove) ? 1 : 4;
+		return ((gameManager.board.currentGameState & mask) !== 0);
 	}
 
 	hasCastleQueensideRight() {
-		const mask = (this.board.whiteToMove) ? 2 : 8;
-		return ((this.board.currentGameState & mask) !== 0);
+		const mask = (gameManager.board.whiteToMove) ? 2 : 8;
+		return ((gameManager.board.currentGameState & mask) !== 0);
 	}
 }

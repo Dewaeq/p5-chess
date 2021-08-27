@@ -8,10 +8,11 @@ class MoveOrdering {
      * @param {Move[]} moves 
      */
     orderMoves(board, moves) {
+        this.board = board;
         for (let i = 0; i < moves.length; i++) {
             let score = 0;
-            const movePieceType = Piece.PieceType(board.squares[moves[i].startSquare]);
-            const capturePiecetype = Piece.PieceType(board.squares[moves[i].targetSquare]);
+            const movePieceType = Piece.PieceType(gameManager.board.squares[moves[i].startSquare]);
+            const capturePiecetype = Piece.PieceType(gameManager.board.squares[moves[i].targetSquare]);
             const flag = moves[i].flag;
 
             if (capturePiecetype !== PIECE_NONE) {

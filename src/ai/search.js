@@ -14,6 +14,7 @@ class Search {
         this.numNodes = 0;
         this.numQNodes = 0;
         this.numCutOffs = 0;
+        this.calcTime = 0;
 
         this.abortSearch = false;
         this.orderMoves = true;
@@ -38,7 +39,10 @@ class Search {
         const startTime = performance.now();
         this.searchMoves(depth, 0, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
         const endTime = performance.now();
-        console.log((this.numNodes + this.numQNodes) / (endTime - startTime) * 1000, "nodes/s");
+
+        this.calcTime = endTime - startTime;
+
+        console.log((this.numNodes + this.numQNodes) / this.calcTime * 1000, "nodes/s");
         console.log("nodes: ", this.numNodes, "cutoffs: ", this.numCutOffs, "qNodes: ", this.numQNodes);
 
         this.bestMove = this.bestMoveThisIteration;
@@ -75,12 +79,12 @@ class Search {
         if (depth === 0) {
             if (this.searchQuiescencent)
                 return this.quiescenceSearch(alpha, beta);
-            return this.evaluation.evaluate(this.board);
+            return this.evaluation.evaluate(gameManager.board);
         }
 
-        const moves = this.moveGenerator.generateMoves(this.board);
+        const moves = this.moveGenerator.generateMoves(gameManager.board);
         if (this.orderMoves)
-            this.moveOrdering.orderMoves(this.board, moves);
+            this.moveOrdering.orderMoves(gameManager.board, moves);
 
         if (moves.length === 0) {
             if (this.moveGenerator.inCheck) {
@@ -90,11 +94,10 @@ class Search {
             return 0;
         }
 
-
         for (let i = 0; i < moves.length; i++) {
-            this.board.makeMove(moves[i]);
+            gameManager.board.makeMove(moves[i]);
             const evaluation = -this.searchMoves(depth - 1, plyFromRoot + 1, -beta, -alpha);
-            this.board.unMakeMove(moves[i]);
+            gameManager.board.unMakeMove(moves[i]);
             this.numNodes++;
 
             if (evaluation >= beta) {
@@ -116,7 +119,7 @@ class Search {
     }
 
     quiescenceSearch(alpha, beta) {
-        let evaluation = this.evaluation.evaluate(this.board);
+        let evaluation = this.evaluation.evaluate(gameManager.board);
 
         if (evaluation >= beta) {
             return beta;
@@ -125,13 +128,13 @@ class Search {
             alpha = evaluation;
         }
 
-        const moves = this.moveGenerator.generateMoves(this.board, false);
+        const moves = this.moveGenerator.generateMoves(gameManager.board, false);
         if (this.orderMoves)
-            this.moveOrdering.orderMoves(this.board, moves);
+            this.moveOrdering.orderMoves(gameManager.board, moves);
         for (let i = 0; i < moves.length; i++) {
-            this.board.makeMove(moves[i]);
+            gameManager.board.makeMove(moves[i]);
             evaluation = -this.quiescenceSearch(-beta, -alpha);
-            this.board.unMakeMove(moves[i]);
+            gameManager.board.unMakeMove(moves[i]);
             this.numQNodes++;
 
             if (evaluation >= beta) {
