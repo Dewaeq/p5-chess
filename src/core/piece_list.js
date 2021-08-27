@@ -12,6 +12,7 @@ class PieceList {
     this.map[square] = this.numPieces;
     this.numPieces++;
   }
+
   removePieceAtSquare(square) {
     const pieceIndex = this.map[square];
     // Move the last element to the place of the removed element
