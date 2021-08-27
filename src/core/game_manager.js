@@ -67,20 +67,21 @@ class GameManager {
         }
 
         const evaluation = this.aiPlayer.search.bestEval;
+        const guiEvaluation = -evaluation / 100;
 
         if (Search.IsMateScore(evaluation)) {
             this.gui.setGameState(`Mate in ${Search.NumPlyToMateFromScore(evaluation)} ply`);
         } else {
-            if (evaluation > 0) {
+            if (guiEvaluation > 0) {
                 this.gui.setGameState("White has the advantage");
-            } else if (evaluation < 0) {
+            } else if (guiEvaluation < 0) {
                 this.gui.setGameState("Black has the advantage");
             }else {
                 this.gui.setGameState("Neither side has the advantage");
             }
         }
 
-        this.gui.setEval(-evaluation / 100);
+        this.gui.setEval(guiEvaluation);
 
         // Insufficient material
         const numPawns = this.board.pawns[WHITE_INDEX] + this.board.pawns[BLACK_INDEX];
