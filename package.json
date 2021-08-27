@@ -1,0 +1,25 @@
+{
+  "name": "chess",
+  "version": "1.0.0",
+  "description": "A simple chess engine written in javascript. P5.js is used for rendering the board.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "copyfiles assets/** public/** src/** dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dewaeq/p5-chess.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dewaeq/p5-chess/issues"
+  },
+  "homepage": "https://github.com/dewaeq/p5-chess#readme",
+  "devDependencies": {},
+  "dependencies": {
+    "copyfiles": "^2.4.1"
+  }
+}
