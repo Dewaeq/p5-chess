@@ -102,6 +102,14 @@ class BoardGUI {
     $("#nodes-per-second-count").text(((numNodes + numQNodes) / calcTime * 1000) | 0);
   }
 
+  setEval(gameEval) {
+    $("#game-eval").text(gameEval);
+  }
+
+  setGameState(gameState) {
+    $("#game-state").text(gameState);
+  }
+
   show() {
     background(0);
     noStroke();

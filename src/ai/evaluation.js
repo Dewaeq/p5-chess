@@ -17,6 +17,8 @@ class Evaluation {
 
         whiteEval += whiteMaterial;
         blackEval += blackMaterial;
+        whiteEval += this.mopupEval(WHITE_INDEX, BLACK_INDEX, whiteMaterial, blackMaterial, whiteEndgamePhaseWeight);
+        blackEval += this.mopupEval(BLACK_INDEX, WHITE_INDEX, blackMaterial, whiteMaterial, blackEndgamePhaseWeight);
 
         whiteEval += this.evaluatePiecePosition(WHITE_INDEX, blackEndgamePhaseWeight);
         blackEval += this.evaluatePiecePosition(BLACK_INDEX, whiteEndgamePhaseWeight);

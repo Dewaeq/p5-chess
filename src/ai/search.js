@@ -147,4 +147,12 @@ class Search {
         }
         return alpha;
     }
+
+    static IsMateScore(score) {
+        return (Math.abs(score) > (IMMEDIATE_MATE_SCORE - 1000));
+    }
+
+    static NumPlyToMateFromScore(score) {
+        return ((IMMEDIATE_MATE_SCORE - Math.abs(score)) / 2) | 0;
+    }
 }

@@ -16,8 +16,9 @@ class GameManager {
         this.board.fenToBoard(fenStartString);
 
         this.whiteToMove = this.board.whiteToMove;
-
-        this.gui.show();
+        setTimeout(() => {
+            this.gui.show();
+        }, 200);
     }
 
     startGame() {
@@ -30,7 +31,7 @@ class GameManager {
      * @param {Move} move 
      */
     makeMove(move) {
-        if(this.whiteToMove !== this.humanPlaysWhite) {
+        if (this.whiteToMove !== this.humanPlaysWhite) {
             this.gui.updateStats();
         }
 
@@ -45,7 +46,7 @@ class GameManager {
         if (this.whiteToMove !== this.humanPlaysWhite) {
             setTimeout(() => {
                 this.aiPlayer.turnToMove();
-            }, 10);
+            }, 200);
         }
     }
 
@@ -55,13 +56,31 @@ class GameManager {
 
         // (Stale)mate
         if (moves.length === 0) {
+            this.gui.setEval("");
+
             if (moveGenerator.inCheck) {
-                console.log((this.whiteToMove) ? "white is mated" : "black is mated");
+                this.gui.setGameState((this.whiteToMove) ? "White is mated" : "Black is mated");
                 return;
             }
-            console.log("stalemate");
+            this.gui.setGameState("Stalemate");
             return;
         }
+
+        const evaluation = this.aiPlayer.search.bestEval;
+
+        if (Search.IsMateScore(evaluation)) {
+            this.gui.setGameState(`Mate in ${Search.NumPlyToMateFromScore(evaluation)} ply`);
+        } else {
+            if (evaluation > 0) {
+                this.gui.setGameState("White has the advantage");
+            } else if (evaluation < 0) {
+                this.gui.setGameState("Black has the advantage");
+            }else {
+                this.gui.setGameState("Neither side has the advantage");
+            }
+        }
+
+        this.gui.setEval(-evaluation / 100);
 
         // Insufficient material
         const numPawns = this.board.pawns[WHITE_INDEX] + this.board.pawns[BLACK_INDEX];
