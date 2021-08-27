@@ -18,7 +18,7 @@ class GameManager {
         this.whiteToMove = this.board.whiteToMove;
         setTimeout(() => {
             this.gui.show();
-        }, 200);
+        }, 1000);
     }
 
     startGame() {
