@@ -128,7 +128,7 @@ class BoardGUI {
       }
     }
 
-    if (gameManager.board.gameStateHistory.length > 0) {
+    if (this.lastMove !== INVALID_MOVE) {
       const [startSquare, targetSquare] = [this.lastMove.startSquare, this.lastMove.targetSquare];
 
       const [startX, startY] = BoardGUI.SquareToGuiCoord(startSquare);

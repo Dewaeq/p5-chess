@@ -3,7 +3,7 @@
  */
 
 class BoardRepresentation {
-  static RankIndex = (square) => square >>> 3;
+  static RankIndex = (square) => square >> 3;
 
   static FileIndex = (square) => square & 0b000111;
 

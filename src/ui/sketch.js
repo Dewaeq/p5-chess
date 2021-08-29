@@ -23,7 +23,7 @@ function draw() {
 
 function mousePressed() {
   if (gameManager.humanPlaysWhite !== gameManager.whiteToMove) {
-    return;
+    // return;
   }
 
   const squareIndex = getSquareUnderMouse();

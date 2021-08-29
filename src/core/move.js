@@ -48,8 +48,7 @@ class Move {
   }
 
   get isPromotion() {
-    const flag = this.flag;
-    return (flag > 2 && flag < 7);
+    return (this.flag > 2 && this.flag < 7);
   }
 
   printMove() {

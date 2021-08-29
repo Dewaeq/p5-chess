@@ -1,7 +1,7 @@
 class Board {
   constructor() {
-    /**@type {number[]} */
-    this.squares = Array(64).fill(0);
+    /**@type {Uint8Array} */
+    this.squares = new Uint8Array(64);
 
     /** Bits 0-3 store white and black kingside/queenside castling legality
      * Bits 4-7 store file of ep square (starting at 1, so 0 = no ep square)
@@ -19,8 +19,10 @@ class Board {
     /**@type {WHITE_INDEX | BLACK_INDEX} */
     this.colourToMoveIndex;
 
-    /**@type {number[]} */
-    this.gameStateHistory = [];
+    /**@type {Uint16Array} */
+    this.gameStateHistory = new Uint16Array(400);
+
+    this.gameStateIndex = 1;
 
     /**@type {number[]} */
     this.kingSquares = [];
@@ -45,13 +47,15 @@ class Board {
   }
 
   init() {
-    this.squares = Array(64).fill(0);
+    this.squares = new Uint8Array(64);
     this.colourToMove = PIECE_WHITE;
     this.opponentColour = PIECE_BLACK;
     this.colourToMoveIndex = 0;
 
     //TODO: Replace with proper game state
     this.currentGameState = 0b00000000001111;
+    this.gameStateHistory = new Uint16Array(400);
+    this.gameStateIndex = 1;
 
     this.pawns = [new PieceList(8), new PieceList(8)];
     this.knights = [new PieceList(10), new PieceList(10)];
@@ -194,7 +198,9 @@ class Board {
     this.squares[targetSquare] = pieceOnTargetSquare;
     this.squares[startSquare] = PIECE_NONE;
 
-    this.gameStateHistory.push(this.currentGameState);
+    this.gameStateHistory[this.gameStateIndex] = this.currentGameState;
+    this.gameStateIndex++;
+
     this.switchTurn();
   }
 
@@ -273,8 +279,11 @@ class Board {
       }
     }
 
-    this.gameStateHistory.pop();
-    this.currentGameState = this.gameStateHistory[this.gameStateHistory.length - 1];
+    this.gameStateIndex--;
+    this.currentGameState = this.gameStateHistory[this.gameStateIndex - 1];
+
+    // this.gameStateHistory.pop();
+    // this.currentGameState = this.gameStateHistory[this.gameStateHistory.length - 1];
   }
 
   switchTurn() {
@@ -316,7 +325,7 @@ class Board {
       const pieceColour = isUppercase(symbol) ? PIECE_WHITE : PIECE_BLACK;
       const pieceType = pieceTypeFromSymbol[symbol.toLowerCase()];
 
-      this.squares[rank * 8 + file] = pieceType | pieceColour;
+      this.squares[rank * 8 + file] = (pieceType | pieceColour);
       file++;
     });
 

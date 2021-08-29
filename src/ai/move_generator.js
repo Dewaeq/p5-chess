@@ -118,7 +118,7 @@ class MoveGenerator {
 	}
 
 	generateSlidingPieceMoves(startSquare, startDirIndex, endDirIndex) {
-		mainLoop: for (let dirIndex = startDirIndex; dirIndex < endDirIndex; dirIndex++) {
+		for (let dirIndex = startDirIndex; dirIndex < endDirIndex; dirIndex++) {
 			const curDirOffset = PrecomputedData.DirectionOffsets[dirIndex];
 			for (let i = 0; i < PrecomputedData.SqToEdge[startSquare][dirIndex]; i++) {
 				const targetSquare = startSquare + curDirOffset * (i + 1);
@@ -137,7 +137,7 @@ class MoveGenerator {
 				// so we can stop generating moves for this piece
 				if (moveBlocksCheck && this.inCheck) {
 					this.moves.push(Move.MoveWithSquares(startSquare, targetSquare));
-					break mainLoop;
+					break;
 				}
 
 				if (!this.inCheck) {
@@ -232,7 +232,13 @@ class MoveGenerator {
 			// Captures
 			for (let j = 0; j < 2; j++) {
 				const captureDirIndex = PrecomputedData.PawnAttackDirectionIndices[this.playerColourIndex][j];
-				if (PrecomputedData.SqToEdge[startSquare][captureDirIndex] === 0) continue;
+				try {
+					if (PrecomputedData.SqToEdge[startSquare][captureDirIndex] === 0) continue;
+				} catch (e) {
+					console.log(`j=${j} playerIndex=${this.playerColourIndex} captureDirIndex=${captureDirIndex} startSquare=${startSquare}`);
+					console.log(pawns);
+					throw(e);
+				}
 
 				const captureDir = PrecomputedData.DirectionOffsets[captureDirIndex];
 				const targetSquare = startSquare + captureDir;

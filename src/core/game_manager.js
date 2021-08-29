@@ -76,7 +76,7 @@ class GameManager {
                 this.gui.setGameState("White has the advantage");
             } else if (guiEvaluation < 0) {
                 this.gui.setGameState("Black has the advantage");
-            }else {
+            } else {
                 this.gui.setGameState("Neither side has the advantage");
             }
         }
@@ -91,8 +91,10 @@ class GameManager {
         const numQueens = this.board.queens[WHITE_INDEX] + this.board.rooks[BLACK_INDEX];
 
         if ((numPawns + numRooks + numQueens === 0) && (numKnights === 1 || numBishops === 1)) {
-            console.log("draw for insufficient material");
-            return;
+            this.gui.setEval("Draw for insufficient material");
+            this.gui.setEval("");
+
+            this.whiteToMove = (this.humanPlaysWhite) ? false : true;
         }
     }
 }

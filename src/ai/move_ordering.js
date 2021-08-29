@@ -1,7 +1,7 @@
 class MoveOrdering {
     constructor(moveGenerator) {
         this.moveGenerator = moveGenerator;
-        this.moveScores = Array(218);
+        this.moveScores = new Uint16Array(218);
     }
     /**
      * @param {Board} board 

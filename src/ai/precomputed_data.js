@@ -169,7 +169,7 @@ class PrecomputedData {
 		}
 
 		this.OrthogonalDistance = Array(64);
-		this.CentreManhattanDistance = Array(64);
+		this.CentreManhattanDistance = new Uint8Array(64);
 
 		for (let squareA = 0; squareA < 64; squareA++) {
 			const [fileA, rankA] = BoardRepresentation.CoordFromIndex(squareA);
@@ -177,7 +177,7 @@ class PrecomputedData {
 			const rankDstFromCentre = Math.max(3 - rankA, rankA - 4);
 			this.CentreManhattanDistance[squareA] = fileDstFromCentre + rankDstFromCentre;
 
-			this.OrthogonalDistance[squareA] = Array(64);
+			this.OrthogonalDistance[squareA] = new Uint8Array(64);
 
 			for (let squareB = 0; squareB < 64; squareB++) {
 				const [fileB, rankB] = BoardRepresentation.CoordFromIndex(squareB);

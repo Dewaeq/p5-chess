@@ -1,9 +1,9 @@
 class PieceList {
   constructor(maxPieceCount = 16) {
     /**The square this piece sits on */
-    this.occupiedSquares = Array(maxPieceCount);
+    this.occupiedSquares = new Uint8Array(maxPieceCount);
     /**The index of the piece at this square */
-    this.map = Array(64);
+    this.map = new Uint8Array(64);
     this.numPieces = 0;
   }
 
