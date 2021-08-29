@@ -194,7 +194,6 @@ class MoveGenerator {
 			epSquare = (this.isWhiteToMove ? 5 : 2) * 8 + epFile;
 		}
 
-
 		for (let i = 0; i < pawns.numPieces; i++) {
 			const startSquare = pawns.occupiedSquares[i];
 			const rank = BoardRepresentation.RankIndex(startSquare);
@@ -232,13 +231,7 @@ class MoveGenerator {
 			// Captures
 			for (let j = 0; j < 2; j++) {
 				const captureDirIndex = PrecomputedData.PawnAttackDirectionIndices[this.playerColourIndex][j];
-				try {
-					if (PrecomputedData.SqToEdge[startSquare][captureDirIndex] === 0) continue;
-				} catch (e) {
-					console.log(`j=${j} playerIndex=${this.playerColourIndex} captureDirIndex=${captureDirIndex} startSquare=${startSquare}`);
-					console.log(pawns);
-					throw(e);
-				}
+				if (PrecomputedData.SqToEdge[startSquare][captureDirIndex] === 0) continue;
 
 				const captureDir = PrecomputedData.DirectionOffsets[captureDirIndex];
 				const targetSquare = startSquare + captureDir;
@@ -283,6 +276,8 @@ class MoveGenerator {
 	}
 
 	/**
+	 * Returns true if we're in check and the move fixes the check
+	 * or when we're not in check but the move results in a check on us
 	 * @param {number} startSquare 
 	 * @param {number} targetSquare
 	 * @returns {boolean} 
@@ -310,7 +305,10 @@ class MoveGenerator {
 			this.playerKingSquare = startSquare;
 		}
 
-		return (this.inCheck !== isInCheck);
+		if (this.inCheck && !isInCheck) return true;
+		if (!this.inCheck && isInCheck) return true;
+
+		return false;
 	}
 
 	enPassantBlocksCheck(startSquare, targetSquare, epPawnSquare) {
