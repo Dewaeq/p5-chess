@@ -3,6 +3,9 @@
  */
 
 class BoardRepresentation {
+
+  static FileNames = "abcdefgh";
+
   static RankIndex = (square) => square >> 3;
 
   static FileIndex = (square) => square & 0b000111;
@@ -13,6 +16,13 @@ class BoardRepresentation {
   ];
 
   static CoordToIndex = (rank, file) => rank * 8 + file;
+
+  static StringCoordToIndex = (str) => {
+    const file = this.FileNames.indexOf(str[0]);
+    const rank = parseInt(str[1]) - 1;
+
+    return this.CoordToIndex(rank, file);
+  }
 
   static CoordFromIndex = (square) => [this.FileIndex(square), this.RankIndex(square)];
 
