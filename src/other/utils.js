@@ -6,6 +6,13 @@
 const isNumeric = (str) => /^\d+$/.test(str);
 
 /**
+ * Is the given string null, undefined or empty?
+ * @param {string} str 
+ * @returns {boolean}
+ */
+const isEmptyString = (str) => (str === undefined || str === null || str.trim().length === 0);
+
+/**
  * Check if this string is in uppercase
  * @param {string} str the value to check
  * @returns {boolean} true if the string is in uppercase, otherwise false
@@ -74,3 +81,16 @@ const arrayContainsArray = (arrayA, arrayB, limit) => {
   }
   return false;
 };
+
+const download = (filename, text) => {
+  const element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
