@@ -303,7 +303,7 @@ class Board {
           this.squares[targetSquare] = PIECE_NONE;
           this.squares[epPawnSquare] = (this.opponentColour | PIECE_PAWN);
           this.pawns[opponentColourIndex].addPieceAtSquare(epPawnSquare);
-          this.applyHashes(Zobrist.PiecesArray[PIECE_PAWN][this.opponentColour][epPawnSquare]);
+          this.applyHashes(Zobrist.PiecesArray[PIECE_PAWN][opponentColourIndex][epPawnSquare]);
           break;
 
         case Move.Flag.Castling:
