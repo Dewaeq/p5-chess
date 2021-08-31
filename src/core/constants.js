@@ -19,6 +19,8 @@ const COLOUR_MASK   =   WHITE_MASK | BLACK_MASK;
 
 const A1 = 0;
 const A8 = 56;
+const C1 = 2;
+const C8 = 58;
 const D1 = 3;
 const D8 = 59;
 const F1 = 5;
