@@ -79,12 +79,12 @@ class Search {
         if (depth === 0) {
             if (this.searchQuiescencent)
                 return this.quiescenceSearch(alpha, beta);
-            return this.evaluation.evaluate(gameManager.board);
+            return this.evaluation.evaluate(this.board);
         }
 
-        const moves = this.moveGenerator.generateMoves(gameManager.board);
+        const moves = this.moveGenerator.generateMoves(this.board);
         if (this.orderMoves)
-            this.moveOrdering.orderMoves(gameManager.board, moves);
+            this.moveOrdering.orderMoves(this.board, moves);
 
         if (moves.length === 0) {
             if (this.moveGenerator.inCheck) {
@@ -95,9 +95,9 @@ class Search {
         }
 
         for (let i = 0; i < moves.length; i++) {
-            gameManager.board.makeMove(moves[i]);
+            this.board.makeMove(moves[i]);
             const evaluation = -this.searchMoves(depth - 1, plyFromRoot + 1, -beta, -alpha);
-            gameManager.board.unMakeMove(moves[i]);
+            this.board.unMakeMove(moves[i]);
             this.numNodes++;
 
             if (evaluation >= beta) {
@@ -119,7 +119,7 @@ class Search {
     }
 
     quiescenceSearch(alpha, beta) {
-        let evaluation = this.evaluation.evaluate(gameManager.board);
+        let evaluation = this.evaluation.evaluate(this.board);
 
         if (evaluation >= beta) {
             return beta;
@@ -128,13 +128,13 @@ class Search {
             alpha = evaluation;
         }
 
-        const moves = this.moveGenerator.generateMoves(gameManager.board, false);
+        const moves = this.moveGenerator.generateMoves(this.board, false);
         if (this.orderMoves)
-            this.moveOrdering.orderMoves(gameManager.board, moves);
+            this.moveOrdering.orderMoves(this.board, moves);
         for (let i = 0; i < moves.length; i++) {
-            gameManager.board.makeMove(moves[i]);
+            this.board.makeMove(moves[i]);
             evaluation = -this.quiescenceSearch(-beta, -alpha);
-            gameManager.board.unMakeMove(moves[i]);
+            this.board.unMakeMove(moves[i]);
             this.numQNodes++;
 
             if (evaluation >= beta) {

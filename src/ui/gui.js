@@ -22,10 +22,10 @@ class BoardGUI {
   };
 
   init() {
-    this.moveGen.init(gameManager.board);
+    this.moveGen.init(this.board);
     this.initUI();
 
-    this.moveSound = loadSound('../../assets/move_sound.wav');
+    this.moveSound = loadSound('../../assets/sounds/move_sound.wav');
 
     const fileExt = ".png";
 
@@ -73,7 +73,7 @@ class BoardGUI {
     $("#fen-string-input").val(fenStartString);
 
     $("#fen-string-input").on("change", function () {
-      gameManager.board.fenToBoard($(this).val());
+      this.board.fenToBoard($(this).val());
     });
 
     $("#search-depth-input").val(4);
@@ -141,7 +141,7 @@ class BoardGUI {
     }
 
     for (let i = 0; i < 64; i++) {
-      const piece = gameManager.board.squares[i];
+      const piece = this.board.squares[i];
       if (piece === PIECE_NONE) continue;
       if (this.isDraggingPiece && i === this.draggingSquare) continue;
 
@@ -159,7 +159,7 @@ class BoardGUI {
   }
 
   showPieceMoves(startSquare) {
-    const moves = this.moveGen.generateMoves(gameManager.board);
+    const moves = this.moveGen.generateMoves(this.board);
 
     if (moves.length === 0) {
       return;
@@ -176,7 +176,7 @@ class BoardGUI {
   }
 
   showDraggingPiece() {
-    const piece = gameManager.board.squares[this.draggingSquare];
+    const piece = this.board.squares[this.draggingSquare];
     if (piece === PIECE_NONE) return;
 
     this.show();
