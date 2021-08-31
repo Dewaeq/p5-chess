@@ -9,6 +9,7 @@ class GameManager {
 
     init() {
         PrecomputedData.Init();
+        Zobrist.Init();
 
         this.board.init();
         this.gui.init();
