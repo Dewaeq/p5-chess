@@ -1,14 +1,25 @@
 class AIPlayer {
     constructor(board) {
+        /**@type {Board} */
         this.board = board;
         this.search = new Search(board, this.moveFound);
         this.searchDepth = 4;
         this.move = INVALID_MOVE;
+        this.isBookMove = false;
     }
-    
+
     turnToMove() {
         this.move = INVALID_MOVE;
-        this.search.startSearch(this.searchDepth);
+        this.isBookMove = false;
+
+        if (this.board.gameStateIndex <= MAX_BOOK_MOVES && gameManager.book.hasPosition(...this.board.zobristKey)) {
+            const bookMove = gameManager.book.getRandomBookMove(...this.board.zobristKey);
+            this.isBookMove = true;
+            this.moveFound(bookMove);
+        } else {
+            this.search.startSearch(this.searchDepth);
+        }
+
     }
     /**
      * @param {Move} move 

@@ -17,6 +17,8 @@ const BLACK_MASK    =   0b10000;
 const WHITE_MASK    =   0b01000;
 const COLOUR_MASK   =   WHITE_MASK | BLACK_MASK;
 
+const MAX_BOOK_MOVES = 20;
+
 const A1 = 0;
 const A8 = 56;
 const C1 = 2;

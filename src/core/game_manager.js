@@ -3,13 +3,15 @@ class GameManager {
         this.board = new Board();
         this.gui = new BoardGUI(this.board);
         this.aiPlayer = new AIPlayer(this.board);
+        this.book = new Book();
         this.humanPlaysWhite = true;
         this.whiteToMove = true;
     }
 
-    init() {
+    async init() {
         PrecomputedData.Init();
         Zobrist.Init();
+        await loadBookFromFile();
 
         this.board.init();
         this.gui.init();
@@ -64,6 +66,12 @@ class GameManager {
                 return;
             }
             this.gui.setGameState("Stalemate");
+            return;
+        }
+
+        if (this.aiPlayer.isBookMove) {
+            this.gui.setEval("/");
+            this.gui.setGameState("Book move");
             return;
         }
 

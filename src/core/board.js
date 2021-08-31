@@ -24,6 +24,8 @@ class Board {
 
     this.gameStateIndex = 1;
 
+    this.zobristKey = [0, 0];
+
     /**@type {number[]} */
     this.kingSquares = [];
 
@@ -55,7 +57,8 @@ class Board {
     //TODO: Replace with proper game state
     this.currentGameState = 0b00000000001111;
     this.gameStateHistory = new Uint16Array(400);
-    this.gameStateIndex = 1;
+    this.gameStateIndex = 0;
+    this.zobristKey = [0, 0];
 
     this.pawns = [new PieceList(8), new PieceList(8)];
     this.knights = [new PieceList(10), new PieceList(10)];
@@ -86,6 +89,12 @@ class Board {
     ];
   }
 
+  applyHashes(hashes) {
+    const [l, h] = hashes;
+    this.zobristKey[0] ^= l;
+    this.zobristKey[1] ^= h;
+  }
+
   /**
    * @param {Move} move 
    */
@@ -94,6 +103,7 @@ class Board {
     const targetSquare = move.targetSquare;
     const opponentColourIndex = 1 - this.colourToMoveIndex;
 
+    const oldEpFile = (this.currentGameState >> 4) & 15;
     const originalCastleState = this.currentGameState & 15;
     let newCastleState = originalCastleState;
     this.currentGameState = 0;
@@ -110,14 +120,14 @@ class Board {
     // Captures
     this.currentGameState |= (capturedPieceType << 8);
     if (capturedPieceType !== PIECE_NONE && !isEnPassant) {
+      this.applyHashes(Zobrist.PiecesArray[capturedPieceType][opponentColourIndex][targetSquare])
       this.getPieceList(capturedPieceType, opponentColourIndex).removePieceAtSquare(targetSquare);
     }
 
     // Move piece in pieceList
     if (movingPieceType === PIECE_KING) {
-      if (this.whiteToMove && (startSquare > 40 || targetSquare > 40))
-        console.log();
       this.kingSquares[this.colourToMoveIndex] = targetSquare;
+      newCastleState &= (this.whiteToMove) ? WhiteCastleMask : BlackCastleMask;
     }
     else {
       this.getPieceList(movingPieceType, this.colourToMoveIndex).movePiece(startSquare, targetSquare);
@@ -155,12 +165,14 @@ class Board {
           const epFile = BoardRepresentation.FileIndex(startSquare) + 1;
           // Clear the current ep-data
           this.currentGameState |= (epFile << 4);
+          this.applyHashes(Zobrist.EPFile[epFile]);
           break;
 
         case Move.Flag.EnPassantCapture:
           const epPawnSquare = targetSquare + ((this.colourToMove === PIECE_WHITE) ? -8 : 8);
           // Set ep-pawn as captured piece
           this.currentGameState |= (this.squares[epPawnSquare] << 8);
+          this.applyHashes(Zobrist.PiecesArray[PIECE_PAWN][opponentColourIndex][epPawnSquare]);
 
           this.squares[epPawnSquare] = PIECE_NONE;
           this.pawns[opponentColourIndex].removePieceAtSquare(epPawnSquare);
@@ -174,6 +186,8 @@ class Board {
           this.squares[rookTargetSquare] = (this.colourToMove | PIECE_ROOK);
 
           this.rooks[this.colourToMoveIndex].movePiece(rookStartSquare, rookTargetSquare);
+          this.applyHashes(Zobrist.PiecesArray[PIECE_ROOK][this.colourToMoveIndex][rookStartSquare]);
+          this.applyHashes(Zobrist.PiecesArray[PIECE_ROOK][this.colourToMoveIndex][rookTargetSquare]);
 
           newCastleState &= (this.whiteToMove) ? WhiteCastleMask : BlackCastleMask;
           break;
@@ -191,6 +205,19 @@ class Board {
       } else if (startSquare === A8 || targetSquare === A8) {
         newCastleState &= BlackCastleQueensideMask;
       }
+    }
+
+    this.applyHashes(Zobrist.SideToMove);
+    this.applyHashes(Zobrist.PiecesArray[movingPieceType][this.colourToMoveIndex][startSquare]);
+    this.applyHashes(Zobrist.PiecesArray[Piece.PieceType(pieceOnTargetSquare)][this.colourToMoveIndex][targetSquare]);
+
+    if (newCastleState !== originalCastleState) {
+      this.applyHashes(Zobrist.CastlingRights[originalCastleState]);
+      this.applyHashes(Zobrist.CastlingRights[newCastleState]);
+    }
+
+    if (oldEpFile !== 0) {
+      this.applyHashes(Zobrist.EPFile[oldEpFile]);
     }
 
     this.currentGameState |= newCastleState;
@@ -217,6 +244,9 @@ class Board {
     const capturedPieceType = (this.currentGameState >> 8) & 0b111111;
     const capturedPiece = (capturedPieceType === 0) ? 0 : (this.opponentColour | capturedPieceType);
 
+    const oldEpFile = (this.currentGameState >> 4) & 15;
+    const originalCastleState = this.currentGameState & 15;
+
     const isPromotion = move.isPromotion;
     const moveFlag = move.flag;
     const isEnPassant = (moveFlag === Move.Flag.EnPassantCapture);
@@ -224,8 +254,17 @@ class Board {
     const movedPiece = (isPromotion) ? (this.colourToMove | PIECE_PAWN) : this.squares[targetSquare];
     const movedPieceType = Piece.PieceType(movedPiece);
 
+    this.applyHashes(Zobrist.SideToMove);;
+    this.applyHashes(Zobrist.PiecesArray[movedPieceType][this.colourToMoveIndex][startSquare]);
+    this.applyHashes(Zobrist.PiecesArray[movedPieceType][this.colourToMoveIndex][targetSquare]);
+
+    if (oldEpFile !== 0) {
+      this.applyHashes(Zobrist.EPFile[oldEpFile]);
+    }
+
     // Normal capture
     if (capturedPieceType !== PIECE_NONE && !isEnPassant) {
+      this.applyHashes(Zobrist.PiecesArray[capturedPieceType][opponentColourIndex][targetSquare]);
       this.getPieceList(capturedPieceType, opponentColourIndex).addPieceAtSquare(targetSquare);
     }
 
@@ -264,6 +303,7 @@ class Board {
           this.squares[targetSquare] = PIECE_NONE;
           this.squares[epPawnSquare] = (this.opponentColour | PIECE_PAWN);
           this.pawns[opponentColourIndex].addPieceAtSquare(epPawnSquare);
+          this.applyHashes(Zobrist.PiecesArray[PIECE_PAWN][this.opponentColour][epPawnSquare]);
           break;
 
         case Move.Flag.Castling:
@@ -275,15 +315,25 @@ class Board {
           this.squares[rookStartSquare] = (this.colourToMove | PIECE_ROOK);
 
           this.rooks[this.colourToMoveIndex].movePiece(rookTargetSquare, rookStartSquare);
+          this.applyHashes(Zobrist.PiecesArray[PIECE_ROOK][this.colourToMoveIndex][rookStartSquare]);
+          this.applyHashes(Zobrist.PiecesArray[PIECE_ROOK][this.colourToMoveIndex][rookTargetSquare]);
           break;
       }
     }
 
     this.gameStateIndex--;
-    this.currentGameState = this.gameStateHistory[this.gameStateIndex - 1];
+    this.currentGameState = this.gameStateHistory[this.gameStateIndex - 1] ?? this.gameStateHistory[0];
 
-    // this.gameStateHistory.pop();
-    // this.currentGameState = this.gameStateHistory[this.gameStateHistory.length - 1];
+    const newEpFile = (this.currentGameState >> 4) & 15;
+    if (newEpFile !== 0) {
+      this.applyHashes(Zobrist.EPFile[newEpFile]);
+    }
+
+    const newCastleState = this.currentGameState & 15;
+    if(newCastleState !== originalCastleState) {
+      this.applyHashes(Zobrist.CastlingRights[originalCastleState]);
+      this.applyHashes(Zobrist.CastlingRights[newCastleState]);
+    }
   }
 
   switchTurn() {
@@ -358,6 +408,8 @@ class Board {
           break;
       }
     }
+
+    this.zobristKey = Zobrist.CalculateZobristHash(this);
   }
 
   getPieceList(pieceType, colourIndex) {
