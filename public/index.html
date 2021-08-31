@@ -14,42 +14,62 @@
 
   <title>Chess Engine</title>
 
-  <link rel="stylesheet" type="text/css" href="./style.css">
+  <link rel="shortcut icon" href="favicon.ico">
 
-  <!-- P5 JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.3.1/p5.min.js" crossorigin="anonymous"></script>
+  <!-- Counter Analytics -->
+  <script>
+    if (!sessionStorage.getItem("_swa") && document.referrer.indexOf(location.protocol + "//" + location.host) !== 0) {
+      fetch("https://counter.dev/track?" +
+        new URLSearchParams({ referrer: document.referrer, screen: screen.width + "x" + screen.height, user: "dewaeq", utcoffset: "2" })
+      )
+    }; sessionStorage.setItem("_swa", "1");
+  </script>
+
+  <!-- CUSTOM STYLES -->
+  <link rel="stylesheet" href="./style.css">
 
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
 
+  <!-- P5 JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
 
   <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
-    crossorigin="anonymous">
-    </script>
-
-  <!-- Lodash -->
-  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
 
   <!-- Custom JS -->
-  <script src="../game/sketch.js"></script>
-  <script src="../game/piece.js"></script>
-  <script src="../game/board.js"></script>
-  <script src="../game/utils.js"></script>
-  <script src="../game/move_model.js"></script>
-  <script src="../engine/engine.js"></script>
-  <script src="../engine/values.js"></script>
-  <script src="../engine/perft.js"></script>
+  <script src="../src/ui/sketch.js"></script>
+  <script src="../src/ui/gui.js"></script>
+  <script src="../src/core/piece.js"></script>
+  <script src="../src/core/board.js"></script>
+  <script src="../src/core/piece_list.js"></script>
+  <script src="../src/core/move.js"></script>
+  <script src="../src/core/constants.js"></script>
+  <script src="../src/core/board_representation.js"></script>
+  <script src="../src/core/zobrist.js"></script>
+  <script src="../src/core/game_manager.js"></script>
+  <script src="../src/ai/precomputed_data.js"></script>
+  <script src="../src/ai/perft.js"></script>
+  <script src="../src/ai/values.js"></script>
+  <script src="../src/ai/move_generator.js"></script>
+  <script src="../src/ai/ai_player.js"></script>
+  <script src="../src/ai/evaluation.js"></script>
+  <script src="../src/ai/search.js"></script>
+  <script src="../src/ai/move_ordering.js"></script>
+  <script src="../src/other/random.js"></script>
+  <script src="../src/other/utils.js"></script>
+  <script src="../src/other/pgn_loader.js"></script>
+  <script src="../src/other/book/book.js"></script>
+  <script src="../src/other/book/book_creator.js"></script>
 </head>
 
-<body class="bg-dark">
+<body class="bg-transparent text-light">
   <div class="main-container">
     <div id="canvas"></div>
 
-    <h2 class="text-light advantage-text">Advantage</h2>
-    <p class="text-light"><span id="advantageColor">Neither side</span> has the advantage
-      (+<span id="advantageNumber">0</span>).</p>
+    <h2 id="game-eval" class="advantage-text">0</h2>
+    <p id="game-state">Neither side has the advantage</p>
     <div class="progress">
       <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar"
         aria-valuenow="0" style="width: 50%" aria-valuemin="-1000" aria-valuemax="1000" id='advantageBar'>
@@ -59,27 +79,33 @@
 
   <div class="side-data">
 
-    <div class="card" style="width: 18rem; margin-bottom: 100px;">
-      <div class="card-header">
-        Featured
-      </div>
-      <div class="card-body">
-        <h5 class="card-title">V2 is ready</h5>
-        <p class="card-text">Up to 50 times faster, better UI, quiescence search, move ordering and much more!</p>
-        <a href="https://chess-engine.netlify.app/" class="btn btn-primary">Check it out</a>
-      </div>
+    <div class="settings-container">
+      <h3 class="settings-title">Settings</h3>
+      <input id="include-quiet-input" type="checkbox" name="include-quiet" checked>
+      <label for="include-quiet">Quiescence search</label>
+      <br>
+      <input id="order-moves-input" type="checkbox" name="order-moves" checked>
+      <label for="order-moves">Order moves</label>
+      <br>
+      <input id="play-white-input" type="checkbox" name="play-white" checked>
+      <label for="play-white">Play as white</label>
+      <br>
+      <label for="fen-input">Fen String:</label>
+      <input id="fen-string-input" type="fen-input">
+      <br>
+      <label for="search-depth">Search Depth: </label>
+      <input id="search-depth-input" name="search-depth" type="number" min="1" max="15" value="5">
     </div>
 
-    <label class="text-light" for="fen-input">Fen String:</label>
-    <input id="fen-string-input" type="fen-input">
-    <br>
-    <label class="text-light" for="engine-depth">Search Depth: </label>
-    <input id="engine-depth-input" name="engine-depth" type="number" min="1" max="15" value="3">
-    <p class="text-light" id="pos-count-text">Calculated <span id="posCountNumber">0</span> positions.</p>
-    <p class="text-light" id="calc-time-text">Calculations took <span id="calcTimeNumber">0</span> seconds.</p>
-    <p class="text-light" id="calc-speed-text">That's <span id="calcSpeedNumber">0</span> moves/s.</p>
+    <div class="info-container">
+      <h3 class="info-title">Stats</h3>
+      <p>Nodes: <span id="nodes-count">0</span></p>
+      <p>QNodes: <span id="qnodes-count">0</span></p>
+      <p>Cutoffs: <span id="cuttofs-count">0</span></p>
+      <p>Time: <span id="calc-time-count">0</span></p>
+      <p>Total nodes/s: <span id="nodes-per-second-count">0</span></p>
+    </div>
   </div>
-
 </body>
 
 </html>

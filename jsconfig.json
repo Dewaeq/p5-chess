@@ -1,8 +1,6 @@
 {
     "include": [
-        "libraries/*.js",
-        "game/*.js",
-        "engine/*.js",
-        "c:\\Users\\Quinten\\.vscode\\extensions\\samplavigne.p5-vscode-1.2.6\\p5types\\global.d.ts"
+        "src/**/*",
+        "c:\\Users\\Quinten\\.vscode\\extensions\\samplavigne.p5-vscode-1.2.7\\p5types\\global.d.ts"
     ]
 }
