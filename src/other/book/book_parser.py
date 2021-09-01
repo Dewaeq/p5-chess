@@ -37,6 +37,7 @@ def create_book():
         output = ""
         source = remove_comments(book.read())
         source = source.replace(". ", ".")
+        source = source.replace("...", "")
         lines = source.splitlines()
 
         for line in lines:

@@ -1,6 +1,8 @@
 const createBook = async () => {
     const book = new Book();
     const board = new Board();
+    const MIN_MOVE_COUNT = 20;
+    const MIN_TIMES_PLAYED = 10;
 
     const response = await fetch("../../../src/other/book/games-parsed.pgn");
     const data = await response.text();
@@ -8,6 +10,9 @@ const createBook = async () => {
     const lines = data.split("\n");
 
     for (const line of lines) {
+        if (line.split(" ").length < MIN_MOVE_COUNT) {
+            continue;
+        }
         board.fenToBoard(fenStartString);
         const moves = PGNLoader.MovesFromPGN(line, MAX_BOOK_MOVES);
 
@@ -17,7 +22,7 @@ const createBook = async () => {
         }
     }
 
-    console.log(book.bookPositions.size);
+    console.log("parsed ", book.bookPositions.size, "positions");
 
     let bookString = "";
 
@@ -26,8 +31,8 @@ const createBook = async () => {
 
         let isFirstMoveEntry = true;
         bookPosition.moves.forEach((moveCount, moveValue) => {
-            // Positions needs to occur at least 10 times to be included in the book
-            if (moveCount >= 10) {
+            // Positions needs to occur at least x times to be included in the book
+            if (moveCount >= MIN_TIMES_PLAYED) {
                 if (isFirstMoveEntry) {
                     isFirstMoveEntry = false;
                 } else {
@@ -39,7 +44,6 @@ const createBook = async () => {
         if (!isFirstMoveEntry) {
             bookString += (line + "\n");
         }
-
     });
     download("book.txt", bookString);
 }
