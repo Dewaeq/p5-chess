@@ -1,5 +1,6 @@
 import glob
 
+
 def remove_comments(data: str):
     is_comment = False
     is_game_info = False
@@ -31,9 +32,8 @@ def add_games_to_source_map():
     with open("./games-parsed.pgn", "w") as destfile:
         destfile.write(data)
 
-add_games_to_source_map()
-exit()
 
+add_games_to_source_map()
 
 with open("./games-source.pgn") as book:
     output = ""
