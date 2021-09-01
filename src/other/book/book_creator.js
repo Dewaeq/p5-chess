@@ -2,7 +2,7 @@ const createBook = async () => {
     const book = new Book();
     const board = new Board();
 
-    const response = await fetch("../../../src/other/book/book1.pgn");
+    const response = await fetch("../../../src/other/book/games-parsed.pgn");
     const data = await response.text();
 
     const lines = data.split("\n");
