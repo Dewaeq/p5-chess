@@ -13,7 +13,7 @@ class AIPlayer {
         this.isBookMove = false;
 
         if (this.board.gameStateIndex <= MAX_BOOK_MOVES && gameManager.book.hasPosition(...this.board.zobristKey)) {
-            const bookMove = gameManager.book.getRandomBookMove(...this.board.zobristKey);
+            const bookMove = gameManager.book.getRandomBookMoveWeighted(...this.board.zobristKey);
             this.isBookMove = true;
             this.moveFound(bookMove);
         } else {
