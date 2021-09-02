@@ -18,6 +18,9 @@ def remove_comments(data: str):
         elif char == "]":
             is_game_info = False
 
+    new_data = new_data.replace(". ", ".")
+    new_data = new_data.replace("...", "")
+
     return new_data
 
 
@@ -36,8 +39,6 @@ def create_book():
     with open("./games-source.pgn") as book:
         output = ""
         source = remove_comments(book.read())
-        source = source.replace(". ", ".")
-        source = source.replace("...", "")
         lines = source.splitlines()
 
         for line in lines:
@@ -64,6 +65,7 @@ def create_book():
 
         with open("./games-parsed.pgn", "w") as output_book:
             result = set([x.lstrip() for x in output.splitlines()])
+            result = sorted(result, key=str.lower)
             output_book.write("\n".join(result))
 
 if __name__ == "__main__":
