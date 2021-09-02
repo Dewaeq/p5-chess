@@ -1,4 +1,5 @@
 import glob
+import os
 
 
 def remove_comments(data: str):
@@ -26,14 +27,20 @@ def remove_comments(data: str):
 
 def add_games_to_source_map():
     sourcefiles = glob.glob("./sourceFiles/*.pgn")
+    total_size = 0
     data = ""
 
     for f in sourcefiles:
         with open(f) as sourcefile:
             data += sourcefile.read()
+            total_size += os.path.getsize(f)
 
     with open("./games-source.pgn", "w") as destfile:
         destfile.write(data)
+
+    total_size = total_size // (1024 ** 2)
+    print(f"Wrote {total_size} MB to games-source.pgn")
+
 
 def create_book():
     with open("./games-source.pgn") as book:
@@ -64,9 +71,13 @@ def create_book():
         output = output.replace("  ", " ")
 
         with open("./games-parsed.pgn", "w") as output_book:
+            print(f"Total num of parsed games: {len(output.splitlines())}")
             result = set([x.lstrip() for x in output.splitlines()])
             result = sorted(result, key=str.lower)
             output_book.write("\n".join(result))
+
+            print(f"Wrote {len(result)} games to games-parsed.pgn")
+
 
 if __name__ == "__main__":
     add_games_to_source_map()
