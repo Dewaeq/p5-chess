@@ -270,8 +270,6 @@ class Board {
 
     // Move in pieceList
     if (movedPieceType === PIECE_KING) {
-      if (this.whiteToMove && (startSquare > 40 || targetSquare > 40))
-        console.log();
       this.kingSquares[this.colourToMoveIndex] = startSquare;
     } else if (!isPromotion) {
       this.getPieceList(movedPieceType, this.colourToMoveIndex).movePiece(targetSquare, startSquare);

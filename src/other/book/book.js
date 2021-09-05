@@ -10,8 +10,6 @@ class Book {
         const posKey = Book.KeysToPosKey(lowKey, highKey);
         if (!this.bookPositions.has(posKey)) {
             this.bookPositions.set(posKey, new BookPosition());
-        } else {
-            // console.log("hi");
         }
 
         this.bookPositions.get(posKey).addMove(move, numTimesPlayed);
