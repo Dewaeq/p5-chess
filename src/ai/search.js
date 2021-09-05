@@ -42,9 +42,6 @@ class Search {
 
         this.calcTime = endTime - startTime;
 
-        console.log((this.numNodes + this.numQNodes) / this.calcTime * 1000, "nodes/s");
-        console.log("nodes: ", this.numNodes, "cutoffs: ", this.numCutOffs, "qNodes: ", this.numQNodes);
-
         this.bestMove = this.bestMoveThisIteration;
         this.bestEval = this.bestEvalThisIteration;
 
