@@ -1,4 +1,4 @@
-importScripts(["../ai/search.js", ]);
+importScripts(["../ai/search.js",]);
 importScripts("../ai/move_generator.js");
 importScripts("../ai/evaluation.js");
 importScripts("../ai/precomputed_data.js");
@@ -14,19 +14,19 @@ importScripts("../core/zobrist.js");
 importScripts("../core/board_representation.js");
 importScripts("../other/utils.js");
 
-onmessage = (e) => {
+onmessage = (message) => {
     PrecomputedData.Init();
     Zobrist.Init();
-    const [sourceBoard, depth, searchQuiescencent, orderMoves] = e.data;
 
+    const searchSettings = message.data;
     const board = new Board();
     board.init()
 
-    mapPieceList(sourceBoard.pawns, board.pawns);
-    mapPieceList(sourceBoard.knights, board.knights);
-    mapPieceList(sourceBoard.bishops, board.bishops);
-    mapPieceList(sourceBoard.rooks, board.rooks);
-    mapPieceList(sourceBoard.queens, board.queens);
+    mapPieceList(searchSettings.board.pawns, board.pawns);
+    mapPieceList(searchSettings.board.knights, board.knights);
+    mapPieceList(searchSettings.board.bishops, board.bishops);
+    mapPieceList(searchSettings.board.rooks, board.rooks);
+    mapPieceList(searchSettings.board.queens, board.queens);
 
     const emptyList = new PieceList(0);
 
@@ -50,22 +50,24 @@ onmessage = (e) => {
         board.queens[BLACK_INDEX],
     ];
 
-    board.kingSquares = sourceBoard.kingSquares;
-    board.squares = sourceBoard.squares;
-    board.zobristKey = sourceBoard.zobristKey;
+    board.kingSquares = searchSettings.board.kingSquares;
+    board.squares = searchSettings.board.squares;
+    board.zobristKey = searchSettings.board.zobristKey;
 
-    board.colourToMove = sourceBoard.colourToMove;
-    board.colourToMoveIndex = sourceBoard.colourToMoveIndex;
-    board.opponentColour = sourceBoard.opponentColour;
-    board.currentGameState = sourceBoard.currentGameState;
-    board.gameStateIndex = sourceBoard.gameStateIndex;
-    board.gameStateHistory = sourceBoard.gameStateHistory;
+    board.colourToMove = searchSettings.board.colourToMove;
+    board.colourToMoveIndex = searchSettings.board.colourToMoveIndex;
+    board.opponentColour = searchSettings.board.opponentColour;
+    board.currentGameState = searchSettings.board.currentGameState;
+    board.gameStateIndex = searchSettings.board.gameStateIndex;
+    board.gameStateHistory = searchSettings.board.gameStateHistory;
 
     const search = new Search(board, function () { });
-    search.searchQuiescencent = searchQuiescencent;
-    search.orderMoves = orderMoves;
+    search.searchQuiescencent = searchSettings.searchQuiescencent;
+    search.orderMoves = searchSettings.orderMoves;
+    search.bestEvalThisIteration = searchSettings.bestEvalThisIteration;
+    search.bestMoveThisIteration = searchSettings.bestMoveThisIteration;
 
-    search.startSearch(depth);
+    search.startSearch(searchSettings.depth);
 
     const result = new SearchWorkerResult(
         search.bestMove.moveValue,
@@ -73,7 +75,7 @@ onmessage = (e) => {
         search.numNodes,
         search.numQNodes,
         search.numCutOffs,
-        depth,
+        searchSettings.depth,
     );
 
     postMessage(result)
