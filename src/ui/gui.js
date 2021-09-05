@@ -73,7 +73,7 @@ class BoardGUI {
     $("#fen-string-input").val(fenStartString);
 
     $("#fen-string-input").on("change", function () {
-      this.board.fenToBoard($(this).val());
+      gameManager.board.fenToBoard($(this).val());
     });
 
     $("#search-depth-input").val(4);
@@ -81,11 +81,10 @@ class BoardGUI {
     $("#search-depth-input").on("change", function () {
       if (!isNumeric($(this).val())) {
         $(this).val(gameManager.aiPlayer.searchDepth);
-        return;
+      } else {
+        const newDepth = parseInt($(this).val());
+        gameManager.aiPlayer.searchDepth = newDepth;
       }
-
-      const newDepth = parseInt($(this).val());
-      gameManager.aiPlayer.searchDepth = newDepth;
     });
   }
 
