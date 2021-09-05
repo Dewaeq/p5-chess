@@ -1,5 +1,7 @@
 import glob
 import os
+import sys
+import time
 
 
 def remove_comments(data: str):
@@ -25,25 +27,27 @@ def remove_comments(data: str):
     return new_data
 
 
-def add_games_to_source_map():
-    sourcefiles = glob.glob("./sourceFiles/*.pgn")
+def add_games_to_source_map(files_dir):
+    sourcefiles = glob.glob(files_dir + "/*.pgn")
     total_size = 0
     data = ""
 
     for f in sourcefiles:
+        if "games-source.pgn" in f or "games-parsed.pgn" in f:
+            continue
         with open(f) as sourcefile:
             data += sourcefile.read()
             total_size += os.path.getsize(f)
 
-    with open("./games-source.pgn", "w") as destfile:
+    with open(files_dir + "/games-source.pgn", "w") as destfile:
         destfile.write(data)
 
-    total_size = total_size // (1024 ** 2)
-    print(f"Wrote {total_size} MB to games-source.pgn")
+    total_size = total_size / (1024 ** 2)
+    print(f"Wrote {total_size:.2f} MB to {files_dir}/games-source.pgn")
 
 
-def create_book():
-    with open("./games-source.pgn") as book:
+def create_book(files_dir):
+    with open(files_dir + "/games-source.pgn") as book:
         output = ""
         source = remove_comments(book.read())
         lines = source.splitlines()
@@ -70,15 +74,20 @@ def create_book():
         output = output.replace("  ", " ")
         output = output.replace("  ", " ")
 
-        with open("./games-parsed.pgn", "w") as output_book:
+        with open(files_dir + "/games-parsed.pgn", "w") as output_book:
             print(f"Total num of parsed games: {len(output.splitlines())}")
             result = set([x.lstrip() for x in output.splitlines()])
             result = sorted(result, key=str.lower)
             output_book.write("\n".join(result))
 
-            print(f"Wrote {len(result)} games to games-parsed.pgn")
+            print(f"Wrote {len(result)} games to {files_dir}/games-parsed.pgn")
 
 
 if __name__ == "__main__":
-    add_games_to_source_map()
-    create_book()
+    start = time.time()
+    files_dir = sys.argv[1]
+    add_games_to_source_map(files_dir)
+    create_book(files_dir)
+    end = time.time()
+
+    print(f"Operations took {end - start:.2f} seconds")
