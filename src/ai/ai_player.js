@@ -17,7 +17,7 @@ class AIPlayer {
             this.isBookMove = true;
             this.moveFound(bookMove);
         } else {
-            this.search.startSearch(this.searchDepth);
+            this.search.startMultiThreadedIterativeSearch(this.searchDepth);
         }
 
     }
