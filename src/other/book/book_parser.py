@@ -2,6 +2,7 @@ import glob
 import os
 import sys
 import time
+from threading import Thread
 
 
 def remove_comments(data: str):
@@ -28,28 +29,41 @@ def remove_comments(data: str):
 
 
 def add_games_to_source_map(files_dir):
-    sourcefiles = glob.glob(files_dir + "/*.pgn")
-    total_size = 0
     data = ""
+
+    def open_and_parse_file(file_dir):
+        with open(file_dir) as sourcefile:
+            nonlocal data
+            data += remove_comments(sourcefile.read())
+
+    sourcefiles = glob.glob(files_dir + "/*.pgn")
+    threads = []
 
     for f in sourcefiles:
         if "games-source.pgn" in f or "games-parsed.pgn" in f:
             continue
-        with open(f) as sourcefile:
-            data += sourcefile.read()
-            total_size += os.path.getsize(f)
+        thread = Thread(target=open_and_parse_file, args=(f, ))
+        threads.append(thread)
 
+    print(f"{len(threads)} threads are running")
+
+    for thread in threads:
+        thread.start()
+        thread.join()
+
+    total_size = 0
     with open(files_dir + "/games-source.pgn", "w") as destfile:
         destfile.write(data)
+    
+    total_size = os.path.getsize(files_dir + "/games-source.pgn") / (1024 ** 2)
 
-    total_size = total_size / (1024 ** 2)
     print(f"Wrote {total_size:.2f} MB to {files_dir}/games-source.pgn")
 
 
 def create_book(files_dir):
     with open(files_dir + "/games-source.pgn") as book:
         output = ""
-        source = remove_comments(book.read())
+        source = book.read()
         lines = source.splitlines()
 
         for line in lines:
