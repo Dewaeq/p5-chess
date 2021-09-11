@@ -44,7 +44,7 @@ class Search {
     startMultiThreadedIterativeSearch(searchTime) {
         this.init();
 
-        const START_DEPTH = 4;
+        const START_DEPTH = 3;
         const workers = new Array(5);
         const searchSettings = new SearchWorkerInput(
             this.board,
@@ -55,7 +55,7 @@ class Search {
             this.bestEvalThisIteration,
         );
 
-        setTimeout(() => {
+        const timer = setTimeout(() => {
             workers.forEach(worker => worker.terminate());
             this.onMoveFound(this.bestMove);
         }, searchTime);
@@ -74,8 +74,16 @@ class Search {
                 this.calcTime = searchResult.searchTime;
 
                 gameManager.gui.updateSearchDepthStat(this.lastCompletedDepth);
-                searchSettings.depth++;
-                workers[i].postMessage(searchSettings);
+
+                if (Search.IsMateScore(this.bestEval)) {
+                    workers.forEach(worker => worker.terminate());
+                    clearTimeout(timer);
+                    this.onMoveFound(this.bestMove);
+                } else {
+                    searchSettings.depth++;
+                    workers[i].postMessage(searchSettings);
+                }
+
             }
             workers[i].postMessage(searchSettings);
             searchSettings.depth++;
