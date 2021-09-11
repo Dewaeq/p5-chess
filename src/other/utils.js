@@ -92,6 +92,9 @@ const download = (filename, text) => {
   element.click();
 }
 
+/**
+ * @returns {Promise<File>}
+ */
 const requestFile = () => {
   const element = document.createElement('input');
   element.setAttribute('type', 'file');
