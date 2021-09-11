@@ -1,30 +1,70 @@
 const createBook = async () => {
-    const book = new Book();
-    const board = new Board();
-    const MIN_MOVE_COUNT = 20;
-    const MIN_TIMES_PLAYED = 10;
-
     const file = await requestFile();
     const data = await file.text();
-
     const lines = data.split("\n");
 
-    for (const line of lines) {
-        if (line.split(" ").length < MIN_MOVE_COUNT) {
-            continue;
-        }
-        board.fenToBoard(fenStartString);
-        const moves = PGNLoader.MovesFromPGN(line, MAX_BOOK_MOVES);
+    const step = Math.ceil(lines.length / CPU_CORES);
+    const workers = new Array(CPU_CORES / 2);
+    let finishedWorkers = 0;
 
-        for (const move of moves) {
-            book.add(board.zobristKey[0], board.zobristKey[1], move);
-            board.makeMove(move);
+    let books = [];
+
+    for (let i = 0; i < workers.length; i++) {
+        const workerLines = lines.slice(i * step, (i + 1) * step);
+        workers[i] = new Worker("../src/other/book/book_worker.js");
+
+        workers[i].onmessage = (message) => {
+            books.push(message.data);
+
+            finishedWorkers++;
+            if (finishedWorkers === workers.length) {
+                const book = onWorkersFinished(books);
+                bookToFile(book);
+
+                workers.forEach(worker => worker.terminate());
+            }
         }
+        workers[i].postMessage(workerLines);
     }
+}
 
+/**
+ * Merge all the books from the workers into one book
+ * @param {Book[]} workerBooks 
+ * @returns {Book}
+ */
+const onWorkersFinished = (workerBooks) => {
+    const book = new Book();
+
+    for (const workerBook of workerBooks) {
+        const bookPositions = workerBook.bookPositions;
+
+        bookPositions.forEach((bookPosition, key) => {
+            if (!book.bookPositions.has(key)) {
+                book.bookPositions.set(key, new BookPosition());
+            }
+
+            bookPosition.moves.forEach((moveCount, moveValue) => {
+                if (book.bookPositions.get(key).moves.has(moveValue)) {
+                    const oldMoveCount = book.bookPositions.get(key).moves.get(moveValue);
+                    book.bookPositions.get(key).moves.set(moveValue, oldMoveCount + moveCount);
+                } else {
+                    book.bookPositions.get(key).moves.set(moveValue, moveCount);
+                }
+            });
+        });
+    }
+    return book;
+}
+
+/**
+ * Convert this book to a text file and download it
+ * @param {Book} book 
+ */
+const bookToFile = (book) => {
     console.log("parsed ", book.bookPositions.size, "positions");
 
-    let bookString = "";
+    let lines = [];
 
     book.bookPositions.forEach((bookPosition, key) => {
         let line = key + ":";
@@ -42,12 +82,20 @@ const createBook = async () => {
             }
         });
         if (!isFirstMoveEntry) {
-            bookString += (line + "\n");
+            lines.push(line + "\n");
         }
     });
-    download("book.txt", bookString);
+
+    // This isn't necessary, but sorting the lines makes it way
+    // easier to quickly compare different books
+    lines.sort();
+
+    download("book.txt", lines.join(""));
 }
 
+/**
+ * Load a book from a text file
+ */
 const loadBookFromFile = async () => {
     const response = await fetch("../../../assets/books/book1.txt");
     const data = await response.text();
