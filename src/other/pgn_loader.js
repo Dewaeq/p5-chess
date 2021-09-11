@@ -39,7 +39,7 @@ class PGNLoader {
         for (let i = 0; i < algebraicMoves.length; i++) {
             const move = this.MoveFromAlgebraic(board, algebraicMoves[i]);
 
-            if (move === INVALID_MOVE) {
+            if (move.moveValue === INVALID_MOVE.moveValue) {
                 throw ("Failed to parse move: ", algebraicMoves[i]);
             }
 
