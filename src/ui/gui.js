@@ -53,7 +53,6 @@ class BoardGUI {
   }
 
   initUI() {
-
     $("#include-quiet-input").prop("checked", true);
     $("#order-moves-input").prop("checked", true);
     $("#play-white-input").prop("checked", true);
@@ -75,17 +74,6 @@ class BoardGUI {
     $("#fen-string-input").on("change", function () {
       gameManager.board.fenToBoard($(this).val());
     });
-
-    $("#search-depth-input").val(4);
-
-    $("#search-depth-input").on("change", function () {
-      if (!isNumeric($(this).val())) {
-        $(this).val(gameManager.aiPlayer.searchDepth);
-      } else {
-        const newDepth = parseInt($(this).val());
-        gameManager.aiPlayer.searchDepth = newDepth;
-      }
-    });
   }
 
   updateStats() {
@@ -99,7 +87,6 @@ class BoardGUI {
     $("#nodes-count").text(numNodes);
     $("#qnodes-count").text(numQNodes);
     $("#cuttofs-count").text(numCutOffs);
-    $("#calc-time-count").text((calcTime / 1000).toFixed(4) + " s");
     $("#nodes-per-second-count").text(((numNodes + numQNodes) / calcTime * 1000) | 0);
   }
 

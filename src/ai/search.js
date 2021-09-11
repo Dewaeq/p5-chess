@@ -29,7 +29,6 @@ class Search {
     }
 
     startMultiThreadedIterativeSearch() {
-        const startTime = performance.now();
         const START_DEPTH = 4;
         const workers = new Array(5);
         const searchSettings = new SearchWorkerInput(
@@ -43,7 +42,6 @@ class Search {
 
         setTimeout(() => {
             workers.forEach(worker => worker.terminate());
-            this.calcTime = performance.now() - startTime;
             this.onMoveFound(this.bestMove);
         }, this.searchTime);
 
@@ -58,6 +56,7 @@ class Search {
                 this.numQNodes = searchResult.numQNodes;
                 this.numCutOffs = searchResult.numCutOffs;
                 this.lastCompletedDepth = searchResult.searchDepth;
+                this.calcTime = searchResult.searchTime;
 
                 gameManager.gui.updateSearchDepthStat(this.lastCompletedDepth);
                 workers[i].terminate();
@@ -248,12 +247,13 @@ class SearchWorkerInput {
 }
 
 class SearchWorkerResult {
-    constructor(bestMoveValue, bestEval, numNodes, numQnodes, numCutoffs, searchDepth) {
+    constructor(bestMoveValue, bestEval, numNodes, numQnodes, numCutoffs, searchDepth, searchTime) {
         this.bestMoveValue = bestMoveValue;
         this.bestEval = bestEval;
         this.numNodes = numNodes;
         this.numQNodes = numQnodes;
         this.numCutOffs = numCutoffs;
         this.searchDepth = searchDepth;
+        this.searchTime = searchTime;
     }
 }
