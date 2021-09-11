@@ -20,7 +20,6 @@ class Search {
         this.orderMoves = true;
         this.searchQuiescencent = true;
         this.iterativeSearch = false;
-        this.searchTime = 5000;
         this.lastCompletedDepth = 0;
         this.bestMoveThisIteration = INVALID_MOVE;
         this.bestEvalThisIteration = 0;
@@ -28,7 +27,23 @@ class Search {
         this.bestEval = 0;
     }
 
-    startMultiThreadedIterativeSearch() {
+    init() {
+        this.numNodes = 0;
+        this.numQNodes = 0;
+        this.numCutOffs = 0;
+        this.calcTime = 0;
+
+        this.abortSearch = false;
+        this.lastCompletedDepth = 0;
+        this.bestMoveThisIteration = INVALID_MOVE;
+        this.bestEvalThisIteration = 0;
+        this.bestMove = INVALID_MOVE;
+        this.bestEval = 0;
+    }
+
+    startMultiThreadedIterativeSearch(searchTime) {
+        this.init();
+
         const START_DEPTH = 4;
         const workers = new Array(5);
         const searchSettings = new SearchWorkerInput(
@@ -43,7 +58,7 @@ class Search {
         setTimeout(() => {
             workers.forEach(worker => worker.terminate());
             this.onMoveFound(this.bestMove);
-        }, this.searchTime);
+        }, searchTime);
 
         for (let i = 0; i < workers.length; i++) {
             workers[i] = new Worker("../src/ai/search_worker.js");
@@ -59,14 +74,17 @@ class Search {
                 this.calcTime = searchResult.searchTime;
 
                 gameManager.gui.updateSearchDepthStat(this.lastCompletedDepth);
-                workers[i].terminate();
+                searchSettings.depth++;
+                workers[i].postMessage(searchSettings);
             }
             workers[i].postMessage(searchSettings);
             searchSettings.depth++;
         }
     }
 
-    startIterativeSearch() {
+    startIterativeSearch(searchTime) {
+        this.init();
+
         const worker = new Worker("../src/ai/search_worker.js");
         const START_DEPTH = 4;
         const searchSettings = new SearchWorkerInput(
@@ -86,7 +104,7 @@ class Search {
             this.calcTime = endTime - startTime;
 
             this.onMoveFound(this.bestMove);
-        }, this.searchTime);
+        }, searchTime);
 
         worker.onmessage = (message) => {
             const searchResult = message.data;
@@ -107,15 +125,7 @@ class Search {
     }
 
     startSearch(depth) {
-        this.bestEvalThisIteration = 0;
-        this.bestEval = 0;
-        this.bestMoveThisIteration = INVALID_MOVE;
-        this.bestMove = INVALID_MOVE;
-        this.abortSearch = false;
-
-        this.numCutOffs = 0;
-        this.numNodes = 0;
-        this.numQNodes = 0;
+        this.init();
 
         const startTime = performance.now();
         this.searchMoves(depth, 0, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
