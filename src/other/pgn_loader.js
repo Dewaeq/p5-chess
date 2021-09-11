@@ -15,7 +15,7 @@ class PGNLoader {
 
             const entry = entries[i].trim();
 
-            if (entry === "1/2-1/2" || entry === "0-1" || entry === "1-0") {
+            if (entry === "END") {
                 break;
             }
 
@@ -40,15 +40,11 @@ class PGNLoader {
             const move = this.MoveFromAlgebraic(board, algebraicMoves[i]);
 
             if (move === INVALID_MOVE) {
-                console.log(move);
-                console.trace();
-                console.log(algebraicMoves);
-                throw ("f");
+                throw ("Failed to parse move: ", algebraicMoves[i]);
             }
 
             moves.push(move);
             board.makeMove(move);
-            gameManager.gui.show();
         }
 
         return moves;
