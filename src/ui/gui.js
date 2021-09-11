@@ -74,6 +74,10 @@ class BoardGUI {
     $("#fen-string-input").on("change", function () {
       gameManager.board.fenToBoard($(this).val());
     });
+
+    $("#search-time-input").on("change", function () {
+      gameManager.aiPlayer.searchTime = parseInt($(this).val());
+    });
   }
 
   updateStats() {
@@ -120,7 +124,7 @@ class BoardGUI {
       }
     }
 
-    if (this.lastMove !== INVALID_MOVE) {
+    if (this.lastMove.moveValue !== INVALID_MOVE.moveValue) {
       const [startSquare, targetSquare] = [this.lastMove.startSquare, this.lastMove.targetSquare];
 
       const [startX, startY] = BoardGUI.SquareToGuiCoord(startSquare);
