@@ -57,7 +57,7 @@ class Board {
     //TODO: Replace with proper game state
     this.currentGameState = 0b00000000001111;
     this.gameStateHistory = new Uint16Array(400);
-    this.gameStateIndex = 0;
+    this.gameStateIndex = 1;
     this.zobristKey = [0, 0];
 
     this.pawns = [new PieceList(8), new PieceList(8)];
@@ -408,6 +408,7 @@ class Board {
     }
 
     this.zobristKey = Zobrist.CalculateZobristHash(this);
+    this.gameStateHistory[0] = this.currentGameState;
   }
 
   getPieceList(pieceType, colourIndex) {
