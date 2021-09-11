@@ -17,7 +17,11 @@ const BLACK_MASK    =   0b10000;
 const WHITE_MASK    =   0b01000;
 const COLOUR_MASK   =   WHITE_MASK | BLACK_MASK;
 
-const MAX_BOOK_MOVES = 20;
+const MAX_BOOK_MOVES = 30;
+const MIN_MOVE_COUNT = 20;
+const MIN_TIMES_PLAYED = 6;
+
+const CPU_CORES = navigator.hardwareConcurrency;
 
 const A1 = 0;
 const A8 = 56;
