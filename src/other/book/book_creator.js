@@ -1,3 +1,8 @@
+/**
+ * It's possible that your browser runs out of memory when creating the book.
+ * To circumvent this behaviour, add --js-flags="--max_old_space_size=8192" to
+ * your chrome launch target
+ */
 const createBook = async () => {
     const file = await requestFile();
     const data = await file.text();
