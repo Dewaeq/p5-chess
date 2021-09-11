@@ -30,12 +30,10 @@ def remove_comments(data: str):
     new_data = new_data.replace("1-0", "END\n")
     new_data = new_data.replace("0-1", "END\n")
     new_data = new_data.replace("0-1", "END\n")
-    new_data = new_data.replace("1/2-1/2`", "END\n")
     new_data = new_data.replace("1/2-1/2", "END\n")
     new_data = new_data.replace("*", "END\n")
 
     new_data = new_data.replace(". ", ".")
-    new_data = new_data.replace("...", "")
     new_data = new_data.replace("  ", " ")
     new_data = new_data.replace("  ", " ")
     new_data = new_data.replace("  ", " ")
@@ -54,7 +52,6 @@ def open_and_parse_file(file_dir):
 
 
 def add_games_to_source_map(files_dir):
-
     files = glob.glob(files_dir + "/*.pgn")
     pool = ThreadPool(os.cpu_count() - 4)
     files = [x for x in files if not "games-source.pgn" in x]
@@ -75,12 +72,13 @@ def create_book(data: str):
             continue
         line = line.replace("+", "")
         line = line.replace("#", "")
+        line = line.lstrip()
 
         moves = line.split(" ")
         for move in moves:
             if "." in move:
                 new_move = " " + move.split(".")[-1] + " "
-                line = line.replace(move, new_move)
+                line = line.replace(move, new_move, 1)
 
         output += line.lstrip() + "\n"
 
