@@ -9,6 +9,7 @@ class BoardGUI {
     this.moveSound;
     /**@type {Move[]} */
     this.pieceMoves = [];
+    this.isPieceSelected = false;
     this.isDraggingPiece = false;
     this.draggingSquare = -1;
     this.lastMove = INVALID_MOVE;
@@ -206,6 +207,7 @@ class BoardGUI {
 
   dragPieceAtSquare(square) {
     this.isDraggingPiece = true;
+    this.isPieceSelected = true;
     this.draggingSquare = square;
   }
 
@@ -236,19 +238,24 @@ class BoardGUI {
 
     for (const move of this.pieceMoves) {
       if (move.targetSquare === mouseTargetSquare) {
+        this.playMoveSound();
         if (move.isPromotion) {
-          this.playMoveSound();
           this.promotePiece();
         } else {
-          this.playMoveSound();
           gameManager.makeMove(move);
         }
+
+        this.draggingSquare = -1;
+        this.pieceMoves = [];
         break;
       }
     }
-    this.draggingSquare = -1;
     this.isDraggingPiece = false;
-    this.pieceMoves = [];
+
     this.show();
+
+    if (this.draggingSquare !== -1) {
+      this.showPieceMoves(this.draggingSquare);
+    }
   }
 }

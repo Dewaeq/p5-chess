@@ -26,11 +26,23 @@ function mousePressed() {
     return;
   }
 
-  const squareIndex = getSquareUnderMouse();
-  if (squareIndex < 0) return;
+  gameManager.gui.show();
 
-  if (gameManager.board.squares[squareIndex] !== PIECE_NONE) {
-    gameManager.gui.dragPieceAtSquare(squareIndex);
+  const squareIndex = getSquareUnderMouse();
+  if (squareIndex < 0) {
+    gameManager.gui.draggingSquare = -1;
+    return;
+  }
+
+  if (gameManager.gui.draggingSquare !== -1 && gameManager.gui.pieceMoves.filter(m => m.targetSquare === squareIndex).length > 0) {
+    gameManager.gui.stopDraggingPiece();
+  }
+
+  else {
+    gameManager.gui.draggingSquare = -1;
+    if (gameManager.board.squares[squareIndex] !== PIECE_NONE) {
+      gameManager.gui.dragPieceAtSquare(squareIndex);
+    }
   }
 
   console.log(squareIndex, Piece.PieceToString(gameManager.board.squares[squareIndex]));
