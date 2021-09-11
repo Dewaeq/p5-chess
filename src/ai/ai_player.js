@@ -3,7 +3,6 @@ class AIPlayer {
         /**@type {Board} */
         this.board = board;
         this.search = new Search(board, this.moveFound);
-        this.searchDepth = 4;
         this.move = INVALID_MOVE;
         this.isBookMove = false;
     }
@@ -17,7 +16,7 @@ class AIPlayer {
             this.isBookMove = true;
             this.moveFound(bookMove);
         } else {
-            this.search.startMultiThreadedIterativeSearch(this.searchDepth);
+            this.search.startMultiThreadedIterativeSearch();
         }
 
     }
