@@ -8,7 +8,7 @@ const createBook = async () => {
     const data = await file.text();
     const lines = data.split("\n");
 
-    const step = Math.ceil(lines.length / CPU_CORES);
+    const step = Math.ceil(lines.length / CPU_CORES * 2);
     const workers = new Array(CPU_CORES / 2);
     let finishedWorkers = 0;
 
@@ -23,10 +23,10 @@ const createBook = async () => {
 
             finishedWorkers++;
             if (finishedWorkers === workers.length) {
+                
+                workers.forEach(worker => worker.terminate());
                 const book = onWorkersFinished(books);
                 bookToFile(book);
-
-                workers.forEach(worker => worker.terminate());
             }
         }
         workers[i].postMessage(workerLines);
