@@ -5,6 +5,7 @@ class AIPlayer {
         this.search = new Search(board, this.moveFound);
         this.move = INVALID_MOVE;
         this.isBookMove = false;
+        this.searchTime = 5000;
     }
 
     turnToMove() {
@@ -16,7 +17,7 @@ class AIPlayer {
             this.isBookMove = true;
             this.moveFound(bookMove);
         } else {
-            this.search.startMultiThreadedIterativeSearch();
+            this.search.startMultiThreadedIterativeSearch(this.searchTime);
         }
 
     }
@@ -24,10 +25,9 @@ class AIPlayer {
      * @param {Move} move 
      */
     moveFound(move) {
-        if (move.moveValue !== INVALID_MOVE) {
-            gameManager.aiPlayer.move = move;
-            move.printMove();
-            gameManager.makeMove(move);
-        }
+        if (move.moveValue === INVALID_MOVE.moveValue) return;
+        gameManager.aiPlayer.move = move;
+        move.printMove();
+        gameManager.makeMove(move);
     }
 }
