@@ -81,17 +81,27 @@
 
     <div class="settings-container">
       <h3 class="settings-title">Settings</h3>
-      <input id="include-quiet-input" type="checkbox" name="include-quiet" checked>
-      <label for="include-quiet">Quiescence search</label>
+      <input id="include-quiet-input" type="checkbox" checked>
+      <label for="include-quiet-input">Quiescence search</label>
       <br>
-      <input id="order-moves-input" type="checkbox" name="order-moves" checked>
-      <label for="order-moves">Order moves</label>
+      <input id="order-moves-input" type="checkbox" checked>
+      <label for="order-moves-input">Order moves</label>
       <br>
-      <input id="play-white-input" type="checkbox" name="play-white" checked>
-      <label for="play-white">Play as white</label>
+      <input id="play-white-input" type="checkbox" checked>
+      <label for="play-white-input">Play as white</label>
       <br>
       <label for="fen-input">Fen String:</label>
       <input id="fen-string-input" type="fen-input">
+      <br>
+      <label for="search-time-input">Search time:</label>
+      <select id="search-time-input">
+        <option value="3000">3s</option>
+        <option value="5000" selected>5s</option>
+        <option value="7000">7s</option>
+        <option value="10000">10s</option>
+        <option value="15000">15s</option>
+        <option value="20000">20s</option>
+      </select>
     </div>
 
     <div class="info-container">
