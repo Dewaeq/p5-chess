@@ -94,7 +94,10 @@ class MoveGenerator {
 			// Castle queenside
 			if ((targetSquare === D1 || targetSquare === D8) && this.hasCastleQueensideRight()) {
 				const castleSquare = targetSquare - 1;
-				if (this.board.squares[castleSquare] === PIECE_NONE && !this.isSquareAttacked(castleSquare)) {
+				const knightSquare = targetSquare - 2;
+				if (this.board.squares[castleSquare] === PIECE_NONE &&
+					this.board.squares[knightSquare] === PIECE_NONE &&
+					!this.isSquareAttacked(castleSquare)) {
 					this.moves.push(Move.MoveWithFlag(this.playerKingSquare, castleSquare, Move.Flag.Castling));
 				}
 			}
