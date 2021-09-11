@@ -88,9 +88,23 @@ const download = (filename, text) => {
   element.setAttribute('download', filename);
 
   element.style.display = 'none';
-  document.body.appendChild(element);
+
+  element.click();
+}
+
+const requestFile = () => {
+  const element = document.createElement('input');
+  element.setAttribute('type', 'file');
+  element.setAttribute('name', 'files[]');
+
+  element.style.display = 'none';
 
   element.click();
 
-  document.body.removeChild(element);
+  return new Promise((resolve, reject) => {
+    element.addEventListener("change", () => {
+      return resolve(element.files[0]);
+    });
+  });
+
 }

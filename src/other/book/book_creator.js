@@ -4,8 +4,8 @@ const createBook = async () => {
     const MIN_MOVE_COUNT = 20;
     const MIN_TIMES_PLAYED = 10;
 
-    const response = await fetch("../../../src/other/book/games-parsed.pgn");
-    const data = await response.text();
+    const file = await requestFile();
+    const data = await file.text();
 
     const lines = data.split("\n");
 
