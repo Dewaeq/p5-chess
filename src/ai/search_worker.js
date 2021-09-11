@@ -14,9 +14,9 @@ importScripts("../core/zobrist.js");
 importScripts("../core/board_representation.js");
 importScripts("../other/utils.js");
 
-onmessage = (message) => {
+onmessage = async (message) => {
     PrecomputedData.Init();
-    Zobrist.Init();
+    await Zobrist.Init();
 
     const searchSettings = message.data;
     const board = new Board();
@@ -76,6 +76,7 @@ onmessage = (message) => {
         search.numQNodes,
         search.numCutOffs,
         searchSettings.depth,
+        search.calcTime,
     );
 
     postMessage(result)

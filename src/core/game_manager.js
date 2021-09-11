@@ -10,7 +10,7 @@ class GameManager {
 
     async init() {
         PrecomputedData.Init();
-        Zobrist.Init();
+        await Zobrist.Init();
         await loadBookFromFile();
 
         this.board.init();
