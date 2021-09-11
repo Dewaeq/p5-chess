@@ -47,9 +47,7 @@ class GameManager {
         this.getGameState();
 
         if (this.whiteToMove !== this.humanPlaysWhite) {
-            setTimeout(() => {
-                this.aiPlayer.turnToMove();
-            }, 200);
+            this.aiPlayer.turnToMove();
         }
     }
 
