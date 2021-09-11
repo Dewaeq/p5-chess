@@ -58,7 +58,12 @@ class BoardGUI {
     $("#play-white-input").prop("checked", true);
 
     $("#play-white-input").on("click", function () {
-      gameManager.humanPlaysWhite = !gameManager.humanPlaysWhite
+      // Only switch sides when it's the human's turn to not 
+      // mess up aiPlayer's ongoing search
+      if (gameManager.board.whiteToMove === gameManager.humanPlaysWhite) {
+        gameManager.humanPlaysWhite = !gameManager.humanPlaysWhite;
+        gameManager.aiPlayer.turnToMove();
+      }
     });
 
     $("#include-quiet-input").on("click", function () {
