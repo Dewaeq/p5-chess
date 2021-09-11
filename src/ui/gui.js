@@ -89,11 +89,13 @@ class BoardGUI {
   }
 
   updateStats() {
+    const searchDepth = gameManager.aiPlayer.search.lastCompletedDepth;
     const numNodes = gameManager.aiPlayer.search.numNodes;
     const numQNodes = gameManager.aiPlayer.search.numQNodes;
     const numCutOffs = gameManager.aiPlayer.search.numCutOffs;
     const calcTime = gameManager.aiPlayer.search.calcTime;
 
+    $("#search-depth-count").text(searchDepth);
     $("#nodes-count").text(numNodes);
     $("#qnodes-count").text(numQNodes);
     $("#cuttofs-count").text(numCutOffs);
@@ -107,6 +109,10 @@ class BoardGUI {
 
   setGameState(gameState) {
     $("#game-state").text(gameState);
+  }
+
+  updateSearchDepthStat(newLastCompletedDepth) {
+    $("#search-depth-count").text(newLastCompletedDepth);
   }
 
   show() {

@@ -19,10 +19,92 @@ class Search {
         this.abortSearch = false;
         this.orderMoves = true;
         this.searchQuiescencent = true;
+        this.iterativeSearch = false;
+        this.searchTime = 5000;
+        this.lastCompletedDepth = 0;
         this.bestMoveThisIteration = INVALID_MOVE;
         this.bestEvalThisIteration = 0;
         this.bestMove = INVALID_MOVE;
         this.bestEval = 0;
+    }
+
+    startMultiThreadedIterativeSearch() {
+        const startTime = performance.now();
+        const START_DEPTH = 4;
+        const workers = new Array(5);
+        const searchSettings = new SearchWorkerInput(
+            this.board,
+            START_DEPTH,
+            this.searchQuiescencent,
+            this.orderMoves,
+            this.bestMoveThisIteration,
+            this.bestEvalThisIteration,
+        );
+
+        setTimeout(() => {
+            workers.forEach(worker => worker.terminate());
+            this.calcTime = performance.now() - startTime;
+            this.onMoveFound(this.bestMove);
+        }, this.searchTime);
+
+        for (let i = 0; i < workers.length; i++) {
+            workers[i] = new Worker("../src/ai/search_worker.js");
+
+            workers[i].onmessage = (message) => {
+                const searchResult = message.data;
+                this.bestMove = new Move(searchResult.bestMoveValue);
+                this.bestEval = searchResult.bestEval;
+                this.numNodes = searchResult.numNodes;
+                this.numQNodes = searchResult.numQNodes;
+                this.numCutOffs = searchResult.numCutOffs;
+                this.lastCompletedDepth = searchResult.searchDepth;
+
+                gameManager.gui.updateSearchDepthStat(this.lastCompletedDepth);
+                workers[i].terminate();
+            }
+            workers[i].postMessage(searchSettings);
+            searchSettings.depth++;
+        }
+    }
+
+    startIterativeSearch() {
+        const worker = new Worker("../src/ai/search_worker.js");
+        const START_DEPTH = 4;
+        const searchSettings = new SearchWorkerInput(
+            this.board,
+            START_DEPTH,
+            this.searchQuiescencent,
+            this.orderMoves,
+            this.bestMoveThisIteration,
+            this.bestEvalThisIteration,
+        );
+
+        const startTime = performance.now();
+
+        setTimeout(() => {
+            worker.terminate();
+            const endTime = performance.now();
+            this.calcTime = endTime - startTime;
+
+            this.onMoveFound(this.bestMove);
+        }, this.searchTime);
+
+        worker.onmessage = (message) => {
+            const searchResult = message.data;
+            this.bestMove = new Move(searchResult.bestMoveValue);
+            this.bestEval = searchResult.bestEval;
+            this.numNodes = searchResult.numNodes;
+            this.numQNodes = searchResult.numQNodes;
+            this.numCutOffs = searchResult.numCutOffs;
+            this.lastCompletedDepth = searchResult.depth;
+
+            gameManager.gui.updateSearchDepthStat(this.lastCompletedDepth);
+            searchSettings.depth++;
+            searchSettings.bestMoveThisIteration = this.bestMove;
+            searchSettings.bestEvalThisIteration = this.bestEval;
+            worker.postMessage(searchSettings);
+        }
+        worker.postMessage(searchSettings);
     }
 
     startSearch(depth) {
@@ -151,5 +233,27 @@ class Search {
 
     static NumPlyToMateFromScore(score) {
         return ((IMMEDIATE_MATE_SCORE - Math.abs(score)) / 2) | 0;
+    }
+}
+
+class SearchWorkerInput {
+    constructor(board, depth, searchQuiescencent, orderMoves, bestMoveThisIteration, bestEvalThisIteration) {
+        this.board = board;
+        this.depth = depth;
+        this.searchQuiescencent = searchQuiescencent;
+        this.orderMoves = orderMoves;
+        this.bestMoveThisIteration = bestMoveThisIteration;
+        this.bestEvalThisIteration = bestEvalThisIteration;
+    }
+}
+
+class SearchWorkerResult {
+    constructor(bestMoveValue, bestEval, numNodes, numQnodes, numCutoffs, searchDepth) {
+        this.bestMoveValue = bestMoveValue;
+        this.bestEval = bestEval;
+        this.numNodes = numNodes;
+        this.numQNodes = numQnodes;
+        this.numCutOffs = numCutoffs;
+        this.searchDepth = searchDepth;
     }
 }
