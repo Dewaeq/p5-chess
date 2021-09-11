@@ -25,7 +25,7 @@ class BoardGUI {
     this.moveGen.init(this.board);
     this.initUI();
 
-    this.moveSound = loadSound('../../assets/sounds/move_sound.wav');
+    this.moveSound = new Audio("../assets/sounds/move_sound.wav");
 
     const fileExt = ".png";
 
