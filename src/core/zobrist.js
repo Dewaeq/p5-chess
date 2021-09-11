@@ -12,25 +12,46 @@ class Zobrist {
 
     static SideToMove = Array(2);
 
-    static Init() {
-        const prng = Random.MersenneTwister19937.seed(this.Seed);
+    static async Init() {
+        const prng = await this.LoadRandomNumbersFromFile();
 
         for (let squareIndex = 0; squareIndex < 64; squareIndex++) {
             for (let pieceIndex = 0; pieceIndex < 8; pieceIndex++) {
-                this.PiecesArray[pieceIndex][WHITE_INDEX][squareIndex] = [prng.next(), prng.next()];
-                this.PiecesArray[pieceIndex][BLACK_INDEX][squareIndex] = [prng.next(), prng.next()];
+                this.PiecesArray[pieceIndex][WHITE_INDEX][squareIndex] = [prng.next().value, prng.next().value];
+                this.PiecesArray[pieceIndex][BLACK_INDEX][squareIndex] = [prng.next().value, prng.next().value];
             }
         }
 
         for (let i = 0; i < 16; i++) {
-            this.CastlingRights[i] = [prng.next(), prng.next()];
+            this.CastlingRights[i] = [prng.next().value, prng.next().value];
         }
 
         for (let i = 0; i < this.EPFile.length; i++) {
-            this.EPFile[i] = [prng.next(), prng.next()];
+            this.EPFile[i] = [prng.next().value, prng.next().value];
         }
 
-        this.SideToMove = [prng.next(), prng.next()];
+        this.SideToMove = [prng.next().value, prng.next().value];
+    }
+
+    static WriteRandomNumbersToFile() {
+        const prng = Random.MersenneTwister19937.seed(this.Seed);
+        const numNumbers = 2 * (64 * 8 * 2 + 16 + this.EPFile.length + 1);
+
+        let data = "";
+        for (let i = 0; i < numNumbers; i++) {
+            data += (prng.next() + "\n")
+        }
+
+        download("random-numbers.txt", data);
+    }
+
+    static async LoadRandomNumbersFromFile() {
+        const response = await fetch("../../../assets/random-numbers.txt");
+        const data = await response.text();
+        const numbersArray = data.split("\n");
+        
+        numbersArray.map(n => parseInt(n));
+        return numbersArray[Symbol.iterator]();
     }
 
     /**
