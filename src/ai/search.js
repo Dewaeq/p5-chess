@@ -55,6 +55,16 @@ class Search {
             this.bestEvalThisIteration,
         );
 
+        const postMessage = (worker) => {
+            worker.postMessage([
+                searchSettings,
+                Zobrist.PiecesArray,
+                Zobrist.CastlingRights,
+                Zobrist.EPFile,
+                Zobrist.SideToMove,
+            ]);
+        }
+
         const timer = setTimeout(() => {
             workers.forEach(worker => worker.terminate());
             this.onMoveFound(this.bestMove);
@@ -81,11 +91,11 @@ class Search {
                     this.onMoveFound(this.bestMove);
                 } else {
                     searchSettings.depth++;
-                    workers[i].postMessage(searchSettings);
+                    postMessage(workers[i]);
                 }
 
             }
-            workers[i].postMessage(searchSettings);
+            postMessage(workers[i]);
             searchSettings.depth++;
         }
     }

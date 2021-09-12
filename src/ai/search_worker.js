@@ -16,9 +16,15 @@ importScripts("../other/utils.js");
 
 onmessage = async (message) => {
     PrecomputedData.Init();
-    await Zobrist.Init();
 
-    const searchSettings = message.data;
+    const searchSettings = message.data[0];
+    [
+        Zobrist.PiecesArray,
+        Zobrist.CastlingRights,
+        Zobrist.EPFile,
+        Zobrist.SideToMove,
+    ] = message.data.slice(1);
+    
     const board = new Board();
     board.init()
 
