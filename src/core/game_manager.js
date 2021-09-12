@@ -28,9 +28,7 @@ class GameManager {
      * @param {Move} move 
      */
     makeMove(move) {
-        if (this.whiteToMove !== this.humanPlaysWhite) {
-            this.gui.updateStats();
-        }
+        this.gui.updateStats();
 
         this.board.makeMove(move);
         this.gui.lastMove = move;
@@ -86,11 +84,11 @@ class GameManager {
         this.gui.setEval(guiEvaluation);
 
         // Insufficient material
-        const numPawns = this.board.pawns[WHITE_INDEX] + this.board.pawns[BLACK_INDEX];
-        const numKnights = this.board.knights[WHITE_INDEX] + this.board.knights[BLACK_INDEX];
-        const numBishops = this.board.bishops[WHITE_INDEX] + this.board.bishops[BLACK_INDEX];
-        const numRooks = this.board.rooks[WHITE_INDEX] + this.board.rooks[BLACK_INDEX];
-        const numQueens = this.board.queens[WHITE_INDEX] + this.board.rooks[BLACK_INDEX];
+        const numPawns = this.board.pawns[WHITE_INDEX].numPieces + this.board.pawns[BLACK_INDEX].numPieces;
+        const numKnights = this.board.knights[WHITE_INDEX].numPieces + this.board.knights[BLACK_INDEX].numPieces;
+        const numBishops = this.board.bishops[WHITE_INDEX].numPieces + this.board.bishops[BLACK_INDEX].numPieces;
+        const numRooks = this.board.rooks[WHITE_INDEX].numPieces + this.board.rooks[BLACK_INDEX].numPieces;
+        const numQueens = this.board.queens[WHITE_INDEX].numPieces + this.board.rooks[BLACK_INDEX].numPieces;
 
         if ((numPawns + numRooks + numQueens === 0) && (numKnights === 1 || numBishops === 1)) {
             this.gui.setEval("Draw for insufficient material");
