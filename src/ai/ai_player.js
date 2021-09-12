@@ -25,7 +25,10 @@ class AIPlayer {
      * @param {Move} move 
      */
     moveFound(move) {
-        if (move.moveValue === INVALID_MOVE.moveValue) return;
+        if (move.moveValue === INVALID_MOVE.moveValue) {
+            alert("Search failed, please refresh the page and increase the search time.")
+            return;
+        }
         gameManager.aiPlayer.move = move;
         move.printMove();
         gameManager.makeMove(move);
