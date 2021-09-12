@@ -171,6 +171,10 @@ class Search {
         }
 
         if (plyFromRoot > 0) {
+            if (this.board.repetitionHistory.includes(keysToPosKey(...this.board.zobristKey))) {
+                return 0;
+            }
+
             // Skip this position if a mating sequence has already been found earlier in
             // the search, which would be shorter than any mate we could find from here.
             // This is done by observing that alpha can't possibly be worse (and likewise
@@ -201,9 +205,9 @@ class Search {
         }
 
         for (let i = 0; i < moves.length; i++) {
-            this.board.makeMove(moves[i]);
+            this.board.makeMove(moves[i], true);
             const evaluation = -this.searchMoves(depth - 1, plyFromRoot + 1, -beta, -alpha);
-            this.board.unMakeMove(moves[i]);
+            this.board.unMakeMove(moves[i], true);
             this.numNodes++;
 
             if (evaluation >= beta) {
@@ -238,9 +242,9 @@ class Search {
         if (this.orderMoves)
             this.moveOrdering.orderMoves(this.board, moves);
         for (let i = 0; i < moves.length; i++) {
-            this.board.makeMove(moves[i]);
+            this.board.makeMove(moves[i], true);
             evaluation = -this.quiescenceSearch(-beta, -alpha);
-            this.board.unMakeMove(moves[i]);
+            this.board.unMakeMove(moves[i], true);
             this.numQNodes++;
 
             if (evaluation >= beta) {

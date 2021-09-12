@@ -22,6 +22,9 @@ class Board {
     /**@type {Uint16Array} */
     this.gameStateHistory = new Uint16Array(400);
 
+    /**@type {string[]} */
+    this.repetitionHistory = Array();
+
     this.gameStateIndex = 1;
 
     this.zobristKey = [0, 0];
@@ -57,6 +60,7 @@ class Board {
     //TODO: Replace with proper game state
     this.currentGameState = 0b00000000001111;
     this.gameStateHistory = new Uint16Array(400);
+    this.repetitionHistory = Array();
     this.gameStateIndex = 1;
     this.zobristKey = [0, 0];
 
@@ -98,7 +102,7 @@ class Board {
   /**
    * @param {Move} move 
    */
-  makeMove(move) {
+  makeMove(move, inSearch = false) {
     const startSquare = move.startSquare;
     const targetSquare = move.targetSquare;
     const opponentColourIndex = 1 - this.colourToMoveIndex;
@@ -228,13 +232,21 @@ class Board {
     this.gameStateHistory[this.gameStateIndex] = this.currentGameState;
     this.gameStateIndex++;
 
+    if (!inSearch) {
+      if (movingPieceType === PIECE_PAWN || capturedPieceType !== PIECE_NONE) {
+        this.repetitionHistory = [];
+      } else {
+        this.repetitionHistory.push(keysToPosKey(...this.zobristKey));
+      }
+    }
+
     this.switchTurn();
   }
 
   /**
    * @param {Move} move 
    */
-  unMakeMove(move) {
+  unMakeMove(move, inSearch = false) {
     const startSquare = move.startSquare;
     const targetSquare = move.targetSquare;
     const opponentColourIndex = this.colourToMoveIndex;
@@ -321,6 +333,9 @@ class Board {
 
     this.gameStateIndex--;
     this.currentGameState = this.gameStateHistory[this.gameStateIndex - 1] ?? this.gameStateHistory[0];
+    if (!inSearch) {
+      this.repetitionHistory.pop()
+    }
 
     const newEpFile = (this.currentGameState >> 4) & 15;
     if (newEpFile !== 0) {
@@ -328,7 +343,7 @@ class Board {
     }
 
     const newCastleState = this.currentGameState & 15;
-    if(newCastleState !== originalCastleState) {
+    if (newCastleState !== originalCastleState) {
       this.applyHashes(Zobrist.CastlingRights[originalCastleState]);
       this.applyHashes(Zobrist.CastlingRights[newCastleState]);
     }
