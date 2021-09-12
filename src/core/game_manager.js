@@ -24,12 +24,6 @@ class GameManager {
         }, 1000);
     }
 
-    startGame() {
-        if (this.whiteToMove !== this.humanPlaysWhite) {
-            this.aiPlayer.turnToMove();
-        }
-    }
-
     /**
      * @param {Move} move 
      */
