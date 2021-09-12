@@ -24,6 +24,8 @@ const setCharAt = (str, index, chr) => {
   return str.substring(0, index) + chr + str.substring(index + 1);
 };
 
+const keysToPosKey = (lowKey, highKey) => `${lowKey}|${highKey}`;
+
 const download = (filename, text) => {
   const element = document.createElement('a');
   element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));

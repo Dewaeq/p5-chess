@@ -4,10 +4,8 @@ class Book {
         this.bookPositions = new Map();
     }
 
-    static KeysToPosKey = (lowKey, highKey) => `${lowKey}|${highKey}`;
-
     add(lowKey, highKey, move, numTimesPlayed) {
-        const posKey = Book.KeysToPosKey(lowKey, highKey);
+        const posKey = keysToPosKey(lowKey, highKey);
         if (!this.bookPositions.has(posKey)) {
             this.bookPositions.set(posKey, new BookPosition());
         }
@@ -16,12 +14,12 @@ class Book {
     }
 
     hasPosition(lowKey, highKey) {
-        const posKey = Book.KeysToPosKey(lowKey, highKey);
+        const posKey = keysToPosKey(lowKey, highKey);
         return this.bookPositions.has(posKey);
     }
 
     getRandomBookMove(lowKey, highKey) {
-        const posKey = Book.KeysToPosKey(lowKey, highKey);
+        const posKey = keysToPosKey(lowKey, highKey);
         const position = this.bookPositions.get(posKey);
 
         const prng = new Random.Random();
@@ -44,7 +42,7 @@ class Book {
             };
         }
 
-        const posKey = Book.KeysToPosKey(lowKey, highKey);
+        const posKey = keysToPosKey(lowKey, highKey);
         const position = this.bookPositions.get(posKey);
 
         const moveValues = Array.from(position.moves.keys());
@@ -76,7 +74,7 @@ class Book {
     }
 
     getBestBookMove(lowKey, highKey) {
-        const posKey = Book.KeysToPosKey(lowKey, highKey);
+        const posKey = keysToPosKey(lowKey, highKey);
         const position = this.bookPositions.get(posKey);
 
         const moveValue = Array.from(position.moves.keys()).sort().slice(-1)[0];
