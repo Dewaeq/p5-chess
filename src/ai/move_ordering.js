@@ -23,12 +23,16 @@ class MoveOrdering {
                 switch (flag) {
                     case Move.Flag.PromoteToKnight:
                         score += KNIGHT_VALUE;
+                        break;
                     case Move.Flag.PromoteToBishop:
                         score += BISHOP_VALUE;
+                        break;
                     case Move.Flag.promoteToRook:
                         score += ROOK_VALUE;
+                        break;
                     case Move.Flag.PromoteToQueen:
                         score += QUEEN_VALUE;
+                        break;
                     default:
                         break;
                 }
