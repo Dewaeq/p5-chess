@@ -233,11 +233,7 @@ class Board {
     this.gameStateIndex++;
 
     if (!inSearch) {
-      if (movingPieceType === PIECE_PAWN || capturedPieceType !== PIECE_NONE) {
-        this.repetitionHistory = [];
-      } else {
-        this.repetitionHistory.push(keysToPosKey(...this.zobristKey));
-      }
+      this.repetitionHistory.push(keysToPosKey(...this.zobristKey));
     }
 
     this.switchTurn();
