@@ -37,10 +37,12 @@ class GameManager {
         this.gui.show();
         this.gui.playMoveSound();
 
-        this.getGameState();
+        const gameOver = this.getGameState();
 
-        if (this.whiteToMove !== this.humanPlaysWhite) {
-            this.aiPlayer.turnToMove();
+        if (!gameOver) {
+            if (this.whiteToMove !== this.humanPlaysWhite) {
+                this.aiPlayer.turnToMove();
+            }
         }
     }
 
@@ -54,16 +56,23 @@ class GameManager {
 
             if (moveGenerator.inCheck) {
                 this.gui.setGameState((this.whiteToMove) ? "White is mated" : "Black is mated");
-                return;
+                return true;
             }
             this.gui.setGameState("Stalemate");
-            return;
+            return true;
+        }
+
+        const repCount = this.board.repetitionHistory.filter(p => p === keysToPosKey(...this.board.zobristKey)).length;
+        if (repCount >= 3) {
+            this.gui.setEval("0");
+            this.gui.setGameState("Draw: Threefold repetition");
+            return true;
         }
 
         if (this.aiPlayer.isBookMove) {
             this.gui.setEval("/");
             this.gui.setGameState("Book move");
-            return;
+            return false;
         }
 
         const evaluation = this.aiPlayer.search.bestEval;
@@ -94,7 +103,8 @@ class GameManager {
             this.gui.setEval("Draw for insufficient material");
             this.gui.setEval("");
 
-            this.whiteToMove = (this.humanPlaysWhite) ? false : true;
+            return true;
         }
+        return false;
     }
 }
