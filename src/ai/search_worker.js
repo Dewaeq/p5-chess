@@ -1,4 +1,4 @@
-importScripts(["../ai/search.js",]);
+importScripts("../ai/search.js");
 importScripts("../ai/move_generator.js");
 importScripts("../ai/evaluation.js");
 importScripts("../ai/precomputed_data.js");

@@ -254,7 +254,7 @@ class Board {
     const movedPiece = (isPromotion) ? (this.colourToMove | PIECE_PAWN) : this.squares[targetSquare];
     const movedPieceType = Piece.PieceType(movedPiece);
 
-    this.applyHashes(Zobrist.SideToMove);;
+    this.applyHashes(Zobrist.SideToMove);
     this.applyHashes(Zobrist.PiecesArray[movedPieceType][this.colourToMoveIndex][startSquare]);
     this.applyHashes(Zobrist.PiecesArray[movedPieceType][this.colourToMoveIndex][targetSquare]);
 
