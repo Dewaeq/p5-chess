@@ -37,6 +37,7 @@ class GameManager {
         this.whiteToMove = !this.whiteToMove;
 
         this.gui.show();
+        this.gui.playMoveSound();
 
         this.getGameState();
 

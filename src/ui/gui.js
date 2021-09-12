@@ -9,7 +9,6 @@ class BoardGUI {
     this.moveSound;
     /**@type {Move[]} */
     this.pieceMoves = [];
-    this.isPieceSelected = false;
     this.isDraggingPiece = false;
     this.draggingSquare = -1;
     this.lastMove = INVALID_MOVE;
@@ -27,6 +26,19 @@ class BoardGUI {
     this.initUI();
 
     this.moveSound = new Audio("../assets/sounds/move_sound.wav");
+
+    // Hacky trick to enable audio for IOS Safari
+    this.moveSound.addEventListener("play", () => {
+      if (!this.firstLaunch) {
+        this.moveSound.pause();
+        this.firstLaunch = true;
+      }
+    });
+
+    document.addEventListener("click", () => {
+      if (!this.firstLaunch)
+        this.moveSound.play();
+    });
 
     const fileExt = ".png";
 
@@ -207,7 +219,6 @@ class BoardGUI {
 
   dragPieceAtSquare(square) {
     this.isDraggingPiece = true;
-    this.isPieceSelected = true;
     this.draggingSquare = square;
   }
 
@@ -238,7 +249,6 @@ class BoardGUI {
 
     for (const move of this.pieceMoves) {
       if (move.targetSquare === mouseTargetSquare) {
-        this.playMoveSound();
         if (move.isPromotion) {
           this.promotePiece();
         } else {
