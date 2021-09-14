@@ -12,9 +12,10 @@ class GameManager {
         PrecomputedData.Init();
         await Zobrist.Init();
         await loadBookFromFile();
-
+        
         this.board.init();
         this.gui.init();
+        this.aiPlayer.init();
 
         this.board.fenToBoard(fenStartString);
 

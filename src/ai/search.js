@@ -25,6 +25,9 @@ class Search {
         this.bestEvalThisIteration = 0;
         this.bestMove = INVALID_MOVE;
         this.bestEval = 0;
+
+        /**@type {Worker[]} */
+        this.workers = [];
     }
 
     init() {
@@ -41,11 +44,14 @@ class Search {
         this.bestEval = 0;
     }
 
+    loadWorkers() {
+        this.workers = Array(5).fill(null).map(_ => new Worker("../src/ai/search_worker.js"));
+    }
+
     startMultiThreadedIterativeSearch(searchTime) {
         this.init();
 
         const START_DEPTH = 3;
-        const workers = new Array(5);
         const searchSettings = new SearchWorkerInput(
             this.board,
             START_DEPTH,
@@ -55,8 +61,8 @@ class Search {
             this.bestEvalThisIteration,
         );
 
-        const postMessage = (worker) => {
-            worker.postMessage([
+        const postMessage = (index) => {
+            this.workers[index].postMessage([
                 searchSettings,
                 Zobrist.PiecesArray,
                 Zobrist.CastlingRights,
@@ -66,14 +72,13 @@ class Search {
         }
 
         const timer = setTimeout(() => {
-            workers.forEach(worker => worker.terminate());
+            this.workers.forEach(worker => worker.terminate());
             this.onMoveFound(this.bestMove);
+            this.loadWorkers();
         }, searchTime);
 
-        for (let i = 0; i < workers.length; i++) {
-            workers[i] = new Worker("../src/ai/search_worker.js");
-
-            workers[i].onmessage = (message) => {
+        for (let i = 0; i < this.workers.length; i++) {
+            this.workers[i].onmessage = (message) => {
                 const searchResult = message.data;
                 this.bestMove = new Move(searchResult.bestMoveValue);
                 this.bestEval = searchResult.bestEval;
@@ -86,16 +91,16 @@ class Search {
                 gameManager.gui.updateSearchDepthStat(this.lastCompletedDepth);
 
                 if (Search.IsMateScore(this.bestEval)) {
-                    workers.forEach(worker => worker.terminate());
+                    this.workers.forEach(worker => worker.terminate());
                     clearTimeout(timer);
                     this.onMoveFound(this.bestMove);
                 } else {
                     searchSettings.depth++;
-                    postMessage(workers[i]);
+                    postMessage(i);
                 }
 
             }
-            postMessage(workers[i]);
+            postMessage(i);
             searchSettings.depth++;
         }
     }
@@ -137,9 +142,21 @@ class Search {
             searchSettings.depth++;
             searchSettings.bestMoveThisIteration = this.bestMove;
             searchSettings.bestEvalThisIteration = this.bestEval;
-            worker.postMessage(searchSettings);
+            worker.postMessage([
+                searchSettings,
+                Zobrist.PiecesArray,
+                Zobrist.CastlingRights,
+                Zobrist.EPFile,
+                Zobrist.SideToMove,
+            ]);
         }
-        worker.postMessage(searchSettings);
+        worker.postMessage([
+            searchSettings,
+            Zobrist.PiecesArray,
+            Zobrist.CastlingRights,
+            Zobrist.EPFile,
+            Zobrist.SideToMove,
+        ]);
     }
 
     startSearch(depth) {

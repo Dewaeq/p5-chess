@@ -8,6 +8,10 @@ class AIPlayer {
         this.searchTime = 5000;
     }
 
+    init() {
+        this.search.loadWorkers();
+    }
+
     turnToMove() {
         this.move = INVALID_MOVE;
         this.isBookMove = false;
@@ -26,7 +30,7 @@ class AIPlayer {
      */
     moveFound(move) {
         if (move.moveValue === INVALID_MOVE.moveValue) {
-            alert("Search failed, please refresh the page and increase the search time.")
+            alert("Search failed, please refresh the page and increase the search time.");
             return;
         }
         gameManager.aiPlayer.move = move;
