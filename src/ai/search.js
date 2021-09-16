@@ -43,8 +43,9 @@ class Search {
         this.bestMove = INVALID_MOVE;
         this.bestEval = 0;
     }
-
-    loadWorkers() {
+    
+    resetWorkers() {
+        this.workers.forEach(worker => worker?.terminate());
         this.workers = Array(5).fill(null).map(_ => new Worker("../src/ai/search_worker.js"));
     }
 
@@ -72,9 +73,8 @@ class Search {
         }
 
         const timer = setTimeout(() => {
-            this.workers.forEach(worker => worker.terminate());
+            this.resetWorkers();
             this.onMoveFound(this.bestMove);
-            this.loadWorkers();
         }, searchTime);
 
         for (let i = 0; i < this.workers.length; i++) {
@@ -90,8 +90,8 @@ class Search {
 
                 gameManager.gui.updateSearchDepthStat(this.lastCompletedDepth);
 
-                if (Search.IsMateScore(this.bestEval)) {
-                    this.workers.forEach(worker => worker.terminate());
+                if (Search.IsMateScore(this.bestEval) && this.bestMove.moveValue !== INVALID_MOVE.moveValue) {
+                    this.resetWorkers();
                     clearTimeout(timer);
                     this.onMoveFound(this.bestMove);
                 } else {
