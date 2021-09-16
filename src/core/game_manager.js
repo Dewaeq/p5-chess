@@ -77,7 +77,7 @@ class GameManager {
         }
 
         const evaluation = this.aiPlayer.search.bestEval;
-        const guiEvaluation = -evaluation / 100;
+        const guiEvaluation = evaluation / 100 * ((this.whiteToMove) ? -1 : 1);
 
         if (Search.IsMateScore(evaluation)) {
             this.gui.setGameState(`Mate in ${Search.NumPlyToMateFromScore(evaluation)} ply`);

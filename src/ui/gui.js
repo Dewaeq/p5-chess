@@ -69,25 +69,27 @@ class BoardGUI {
     $("#include-quiet-input").prop("checked", true);
     $("#order-moves-input").prop("checked", true);
     $("#play-white-input").prop("checked", true);
-
+    $("#search-time-input").val(gameManager.aiPlayer.searchTime);
+    $("#fen-string-input").val(fenStartString);
+    
     $("#play-white-input").on("click", function () {
       // Only switch sides when it's the human's turn to not 
       // mess up aiPlayer's ongoing search
       if (gameManager.board.whiteToMove === gameManager.humanPlaysWhite) {
         gameManager.humanPlaysWhite = !gameManager.humanPlaysWhite;
         gameManager.aiPlayer.turnToMove();
+      } else {
+        $("#play-white-input").prop("checked", gameManager.humanPlaysWhite);
       }
     });
 
     $("#include-quiet-input").on("click", function () {
-      gameManager.aiPlayer.search.searchQuiescencent = !gameManager.aiPlayer.search.searchQuiescencent
+      gameManager.aiPlayer.search.searchQuiescencent = !gameManager.aiPlayer.search.searchQuiescencent;
     });
 
     $("#order-moves-input").on("click", function () {
-      gameManager.aiPlayer.search.orderMoves = !gameManager.aiPlayer.search.orderMoves
+      gameManager.aiPlayer.search.orderMoves = !gameManager.aiPlayer.search.orderMoves;
     });
-
-    $("#fen-string-input").val(fenStartString);
 
     $("#fen-string-input").on("change", function () {
       gameManager.board.fenToBoard($(this).val());
