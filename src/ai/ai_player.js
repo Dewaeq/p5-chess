@@ -9,7 +9,7 @@ class AIPlayer {
     }
 
     init() {
-        this.search.loadWorkers();
+        this.search.resetWorkers();
     }
 
     turnToMove() {
