@@ -26,9 +26,9 @@ class PrecomputedData {
 	/**@type {number[][]} */
 	static PawnAttacksBlack = [];
 
-	static KingAttackBitboards = [];
-	static KnightAttackBitboards = [];
-	static PawnAttackBitboards = [];
+	static KingAttackBitboards = new BigUint64Array(64);
+	static KnightAttackBitboards = new BigUint64Array(64);
+	static PawnAttackBitboards = new Array(64).fill(null).map(_ => Array(2).fill(null).map(__ => new BigUint64Array(64)));
 
 	/**@type {number[]} */
 	static CentreManhattanDistance = [];
@@ -42,8 +42,7 @@ class PrecomputedData {
 	}
 
 	static Init() {
-		const emptyBitboard =
-			"0000000000000000000000000000000000000000000000000000000000000000";
+		const emptyBitboard = BigInt.asUintN(64, 0n);
 
 		for (let squareIndex = 0; squareIndex < 64; squareIndex++) {
 			const [x, y] = BoardRepresentation.IndexToCoord(squareIndex);
@@ -79,20 +78,24 @@ class PrecomputedData {
 			if (x > 0) {
 				if (y < 7) {
 					pawnCapturesWhite.push(squareIndex + 7);
-					whitePawnBitboard = setCharAt(whitePawnBitboard, squareIndex + 7, '1');
+					whitePawnBitboard |= (1n << BigInt(squareIndex + 7));
+					// whitePawnBitboard = setCharAt(whitePawnBitboard, squareIndex + 7, '1');
 				} if (y > 0) {
 					pawnCapturesBlack.push(squareIndex - 9);
-					blackPawnBitboard = setCharAt(blackPawnBitboard, squareIndex - 9, '1');
+					blackPawnBitboard |= (1n << BigInt(squareIndex - 9));
+					// blackPawnBitboard = setCharAt(blackPawnBitboard, squareIndex - 9, '1');
 				}
 			}
 			// Take east of pawn
 			if (x < 7) {
 				if (y < 7) {
 					pawnCapturesWhite.push(squareIndex + 9);
-					blackPawnBitboard = setCharAt(blackPawnBitboard, squareIndex + 9, '1');
+					whitePawnBitboard |= (1n << BigInt(squareIndex + 9));
+					// blackPawnBitboard = setCharAt(blackPawnBitboard, squareIndex + 9, '1');
 				} if (y > 0) {
 					pawnCapturesBlack.push(squareIndex - 7);
-					blackPawnBitboard = setCharAt(blackPawnBitboard, squareIndex - 7, '1');
+					blackPawnBitboard |= (1n << BigInt(squareIndex - 7));
+					// blackPawnBitboard = setCharAt(blackPawnBitboard, squareIndex - 7, '1');
 				}
 			}
 			this.PawnAttackBitboards[squareIndex][WHITE_INDEX] = whitePawnBitboard;
@@ -115,7 +118,8 @@ class PrecomputedData {
 
 				if (moveDist === 1) {
 					kingMoves.push(targetSquare);
-					kingBitboard = setCharAt(kingBitboard, targetSquare, "1");
+					kingBitboard |= (1n << BigInt(targetSquare));
+					// kingBitboard = setCharAt(kingBitboard, targetSquare, "1");
 				}
 			});
 			this.KingMoves[squareIndex] = kingMoves;
@@ -136,7 +140,8 @@ class PrecomputedData {
 
 				if (moveDist === 2) {
 					knightMoves.push(targetSquare);
-					knightBitboard = setCharAt(knightBitboard, targetSquare, "1");
+					knightBitboard |= (1n << BigInt(targetSquare));
+					// knightBitboard = setCharAt(knightBitboard, targetSquare, "1");
 				}
 			});
 			this.KnightMoves[squareIndex] = knightMoves;
