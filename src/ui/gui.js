@@ -71,7 +71,7 @@ class BoardGUI {
     $("#play-white-input").prop("checked", true);
     $("#search-time-input").val(gameManager.aiPlayer.searchTime);
     $("#fen-string-input").val(fenStartString);
-    
+
     $("#play-white-input").on("click", function () {
       // Only switch sides when it's the human's turn to not 
       // mess up aiPlayer's ongoing search
@@ -124,6 +124,19 @@ class BoardGUI {
 
   updateSearchDepthStat(newLastCompletedDepth) {
     $("#search-depth-count").text(newLastCompletedDepth);
+  }
+
+  updateBookModalStats(percentage) {
+    $("#book-download-progress").val(percentage);
+    $("#book-download-progress-text").text(percentage + "%");
+  }
+
+  showBookModal(open) {
+    if (open) {
+      $("#book-download-modal").modal("show");
+    } else {
+      $("#book-download-modal").modal("hide");
+    }
   }
 
   show() {

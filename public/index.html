@@ -28,15 +28,16 @@
   <!-- CUSTOM STYLES -->
   <link rel="stylesheet" href="./style.css">
 
+  <!-- jQuery -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"></link>
+  <!-- Bootstrap JS -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
   <!-- P5 JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
-
-  <!-- jQuery -->
-  <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
 
   <!-- Custom JS -->
   <script src="../src/ui/sketch.js"></script>
@@ -65,6 +66,30 @@
 </head>
 
 <body class="bg-transparent text-light">
+  <!-- Modal -->
+  <div class="modal fade" id="book-download-modal" tabindex="-1" role="dialog" aria-labelledby="book-download-modal-label"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content bg-dark">
+        <div class="modal-header">
+          <h5 class="modal-title" id="book-download-modal-label">Modal title</h5>
+          <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body text-light">
+          <p>Downloading opening book...</p>
+          <progress id="book-download-progress" max="100" value="0"></progress>
+          <p id="book-download-progress-text">0%</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="main-container">
     <div id="canvas"></div>
 

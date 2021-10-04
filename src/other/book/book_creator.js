@@ -23,7 +23,7 @@ const createBook = async () => {
 
             finishedWorkers++;
             if (finishedWorkers === workers.length) {
-                
+
                 workers.forEach(worker => worker.terminate());
                 const book = onWorkersFinished(books);
                 bookToFile(book);
@@ -102,8 +102,12 @@ const bookToFile = (book) => {
  * Load a book from a text file
  */
 const loadBookFromFile = async () => {
-    const response = await fetch("../../../assets/books/book1.txt");
-    const data = await response.text();
+    gameManager.gui.showBookModal(true);
+    
+    const data = await loadFile("../../assets/books/book1.txt", (e) => {
+        const percentage = (e.loaded / e.total) * 100;
+        gameManager.gui.updateBookModalStats(percentage);
+    });
 
     const lines = data.replaceAll("(", "").replaceAll(")", "").split("\n");
 
@@ -122,4 +126,7 @@ const loadBookFromFile = async () => {
             gameManager.book.add(lowKey, highKey, new Move(moveValue), numTimesPlayed);
         }
     }
+    setTimeout(() => {
+        gameManager.gui.showBookModal(false);
+    }, 1000);
 }
