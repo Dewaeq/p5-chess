@@ -21,6 +21,8 @@ const MAX_BOOK_MOVES = 30;
 const MIN_MOVE_COUNT = 20;
 const MIN_TIMES_PLAYED = 6;
 
+const BOOK_FILES_PATH = "https://chess-engine.netlify.app/public/../../assets/books/";
+
 const CPU_CORES = navigator.hardwareConcurrency;
 
 const A1 = 0;

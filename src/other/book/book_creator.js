@@ -103,9 +103,10 @@ const bookToFile = (book) => {
  */
 const loadBookFromFile = async () => {
     gameManager.gui.showBookModal(true);
-    
-    const data = await loadFile("../../assets/books/book1.txt", (e) => {
-        const percentage = Math.round((e.loaded / e.total) * 100);
+
+    const bookData = JSON.parse(await loadFile(BOOK_FILES_PATH + "book1.json"));
+    const data = await loadFile(BOOK_FILES_PATH + "book1.txt", (e) => {
+        const percentage = Math.round((e.loaded / bookData.size) * 100);
         gameManager.gui.updateBookModalStats(percentage);
     });
 

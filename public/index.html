@@ -67,15 +67,15 @@
 
 <body class="bg-transparent text-light">
   <!-- Modal -->
-  <div class="modal fade" id="book-download-modal" tabindex="-1" role="dialog" aria-labelledby="book-download-modal-label"
+  <div class="modal fade" data-backdrop="static" id="book-download-modal" tabindex="-1" role="dialog" aria-labelledby="book-download-modal-label"
     aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content bg-dark">
         <div class="modal-header">
-          <h5 class="modal-title" id="book-download-modal-label">Modal title</h5>
+          <h5 class="modal-title" id="book-download-modal-label">Downloading opening book</h5>
         </div>
         <div class="modal-body text-light">
-          <p>Downloading opening book...</p>
+          <p>Download in progress...</p>
           <progress id="book-download-progress" max="100" value="0"></progress>
           <p id="book-download-progress-text">0%</p>
         </div>
