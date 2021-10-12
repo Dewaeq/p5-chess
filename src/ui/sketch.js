@@ -22,7 +22,7 @@ function draw() {
 }
 
 function mousePressed() {
-  if (gameManager.humanPlaysWhite !== gameManager.whiteToMove) {
+  if (!gameManager.humansTurn) {
     return;
   }
 

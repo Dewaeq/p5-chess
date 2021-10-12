@@ -19,7 +19,8 @@ class Search {
         this.abortSearch = false;
         this.orderMoves = true;
         this.searchQuiescencent = true;
-        this.iterativeSearch = false;
+        this.numWorkers = 1;
+
         this.lastCompletedDepth = 0;
         this.bestMoveThisIteration = INVALID_MOVE;
         this.bestEvalThisIteration = 0;
@@ -46,13 +47,13 @@ class Search {
     
     resetWorkers() {
         this.workers.forEach(worker => worker?.terminate());
-        this.workers = Array(5).fill(null).map(_ => new Worker("../src/ai/search_worker.js"));
+        this.workers = Array(this.numWorkers).fill(null).map(_ => new Worker("../src/ai/search_worker.js"));
     }
 
     startMultiThreadedIterativeSearch(searchTime) {
         this.init();
 
-        const START_DEPTH = 3;
+        const START_DEPTH = 1;
         const searchSettings = new SearchWorkerInput(
             this.board,
             START_DEPTH,
@@ -109,7 +110,7 @@ class Search {
         this.init();
 
         const worker = new Worker("../src/ai/search_worker.js");
-        const START_DEPTH = 4;
+        const START_DEPTH = 1;
         const searchSettings = new SearchWorkerInput(
             this.board,
             START_DEPTH,
@@ -189,6 +190,7 @@ class Search {
 
         if (plyFromRoot > 0) {
             if (this.board.repetitionHistory.includes(keysToPosKey(...this.board.zobristKey))) {
+                console.log("hi")
                 return 0;
             }
 

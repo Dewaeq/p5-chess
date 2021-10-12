@@ -41,7 +41,7 @@ class GameManager {
         const gameOver = this.getGameState();
 
         if (!gameOver) {
-            if (this.whiteToMove !== this.humanPlaysWhite) {
+            if (!this.humansTurn) {
                 this.aiPlayer.turnToMove();
             }
         }
@@ -77,7 +77,7 @@ class GameManager {
         }
 
         const evaluation = this.aiPlayer.search.bestEval;
-        const guiEvaluation = evaluation / 100 * ((this.whiteToMove) ? -1 : 1);
+        const guiEvaluation = evaluation / 100 * ((this.humanPlaysWhite) ? -1 : 1);
 
         if (Search.IsMateScore(evaluation)) {
             this.gui.setGameState(`Mate in ${Search.NumPlyToMateFromScore(evaluation)} ply`);
@@ -107,5 +107,9 @@ class GameManager {
             return true;
         }
         return false;
+    }
+
+    get humansTurn() {
+        return (this.board.whiteToMove === this.humanPlaysWhite);
     }
 }

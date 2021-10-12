@@ -30,9 +30,10 @@
 
   <!-- jQuery -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  
+
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"></link>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  </link>
   <!-- Bootstrap JS -->
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
@@ -67,8 +68,8 @@
 
 <body class="bg-transparent text-light">
   <!-- Modal -->
-  <div class="modal fade" data-backdrop="static" id="book-download-modal" tabindex="-1" role="dialog" aria-labelledby="book-download-modal-label"
-    aria-hidden="true">
+  <div class="modal fade" data-backdrop="static" id="book-download-modal" tabindex="-1" role="dialog"
+    aria-labelledby="book-download-modal-label" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content bg-dark">
         <div class="modal-header">
@@ -108,8 +109,8 @@
       <input id="play-white-input" type="checkbox" checked>
       <label for="play-white-input">Play as white</label>
       <br>
-      <label for="fen-input">Fen String:</label>
-      <input id="fen-string-input" type="fen-input">
+      <label for="num-workers-input">Number of workers</label>
+      <input id="num-workers-input" min="1" max="5" type="number">
       <br>
       <label for="search-time-input">Search time:</label>
       <select id="search-time-input">
@@ -120,6 +121,9 @@
         <option value="15000">15s</option>
         <option value="20000">20s</option>
       </select>
+      <br>
+      <label for="fen-input">Fen String:</label>
+      <input id="fen-string-input" type="text">
     </div>
 
     <div class="info-container">

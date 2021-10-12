@@ -22,7 +22,6 @@ class BoardGUI {
   };
 
   init() {
-    this.moveGen.init(this.board);
     this.initUI();
 
     this.moveSound = new Audio("../assets/sounds/move_sound.wav");
@@ -71,11 +70,12 @@ class BoardGUI {
     $("#play-white-input").prop("checked", true);
     $("#search-time-input").val(gameManager.aiPlayer.searchTime);
     $("#fen-string-input").val(fenStartString);
+    $("#num-workers-input").val(gameManager.aiPlayer.search.numWorkers)
 
     $("#play-white-input").on("click", function () {
       // Only switch sides when it's the human's turn to not 
       // mess up aiPlayer's ongoing search
-      if (gameManager.board.whiteToMove === gameManager.humanPlaysWhite) {
+      if (gameManager.humansTurn) {
         gameManager.humanPlaysWhite = !gameManager.humanPlaysWhite;
         gameManager.aiPlayer.turnToMove();
       } else {
@@ -97,6 +97,16 @@ class BoardGUI {
 
     $("#search-time-input").on("change", function () {
       gameManager.aiPlayer.searchTime = parseInt($(this).val());
+    });
+
+    $("#num-workers-input").on("change", function () {
+      const value = parseInt($(this).val());
+      if (gameManager.humansTurn && value > 0 && value < 6) {
+        gameManager.aiPlayer.search.numWorkers = value;
+        gameManager.aiPlayer.search.resetWorkers();
+      } else {
+        $(this).val(gameManager.aiPlayer.search.numWorkers);
+      }
     });
   }
 
@@ -249,9 +259,9 @@ class BoardGUI {
     // Get the promotion type
     let promotionType = null;
     while (promotionType === null) {
-      const promptInput = parseInt(prompt('Promotion type: (1: Queen, 2: Rook, 3: Bishop, 4: Knight)'));
-      if (promptInput > 0 && promptInput < 5) {
-        promotionType = promptInput + 2;
+      const promptInput = parseInt(prompt('Promotion type: (1: Queen, 2: Knight)'));
+      if (promptInput > 0 && promptInput < 3) {
+        promotionType = (promptInput < 2) ? Move.Flag.PromoteToQueen : Move.Flag.PromoteToKnight;
       }
     }
 

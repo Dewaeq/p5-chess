@@ -25,7 +25,6 @@ class MoveGenerator {
 
 	init(board) {
 		this.board = board;
-		this.promotionsToGenerate = PROMOTION_MODE_ALL;
 		this.moves = [];
 		this.inCheck = false;
 		this.inDoubleCheck = false;
@@ -42,10 +41,11 @@ class MoveGenerator {
 	 * @param {Board} board
 	 * @param {boolean} includeQuietMoves
 	 */
-	generateMoves(board, includeQuietMoves = true) {
+	generateMoves(board, includeQuietMoves = true, promotionMode = PROMOTION_MODE_QUEEN_KNIGHT) {
+		this.init(board, promotionMode);
+		
 		this.genQuiets = includeQuietMoves;
-
-		this.init(board);
+		this.promotionsToGenerate = promotionMode;
 
 		const numOfChecks = this.isSquareAttacked(this.playerKingSquare, true, 2);
 		if (numOfChecks > 0) this.inCheck = true;

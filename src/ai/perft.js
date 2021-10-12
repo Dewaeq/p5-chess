@@ -19,7 +19,7 @@ class Perft {
             return 1;
         }
 
-        const moves = this.moveGen.generateMoves(this.board);
+        const moves = this.moveGen.generateMoves(this.board, PROMOTION_MODE_ALL);
         let numPositions = 0;
 
         for (let i = 0; i < moves.length; i++) {
