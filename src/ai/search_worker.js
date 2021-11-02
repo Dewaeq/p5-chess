@@ -66,6 +66,7 @@ onmessage = async (message) => {
     board.currentGameState = searchSettings.board.currentGameState;
     board.gameStateIndex = searchSettings.board.gameStateIndex;
     board.gameStateHistory = searchSettings.board.gameStateHistory;
+    board.repetitionHistory = searchSettings.board.repetitionHistory;
 
     const search = new Search(board, function () { });
     search.searchQuiescencent = searchSettings.searchQuiescencent;
