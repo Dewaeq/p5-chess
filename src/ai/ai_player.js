@@ -5,7 +5,7 @@ class AIPlayer {
         this.search = new Search(board, this.moveFound);
         this.move = INVALID_MOVE;
         this.isBookMove = false;
-        this.searchTime = 5000;
+        this.searchTime = 4000;
     }
 
     init() {
@@ -30,7 +30,9 @@ class AIPlayer {
      */
     moveFound(move) {
         if (move.moveValue === INVALID_MOVE.moveValue) {
-            alert("Search failed, please refresh the page and increase the search time.");
+            alert("Search failed, new search with more time will start.");
+            $("#search-time-input").val(this.searchTime * ((this.searchTime === 32000) ? 1 : 2)).change();
+            gameManager.aiPlayer.turnToMove();
             return;
         }
         gameManager.aiPlayer.move = move;
