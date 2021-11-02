@@ -44,7 +44,7 @@ class Search {
         this.bestMove = INVALID_MOVE;
         this.bestEval = 0;
     }
-    
+
     resetWorkers() {
         this.workers.forEach(worker => worker?.terminate());
         this.workers = Array(this.numWorkers).fill(null).map(_ => new Worker("../src/ai/search_worker.js"));
@@ -106,60 +106,6 @@ class Search {
         }
     }
 
-    startIterativeSearch(searchTime) {
-        this.init();
-
-        const worker = new Worker("../src/ai/search_worker.js");
-        const START_DEPTH = 1;
-        const searchSettings = new SearchWorkerInput(
-            this.board,
-            START_DEPTH,
-            this.searchQuiescencent,
-            this.orderMoves,
-            this.bestMoveThisIteration,
-            this.bestEvalThisIteration,
-        );
-
-        const startTime = performance.now();
-
-        setTimeout(() => {
-            worker.terminate();
-            const endTime = performance.now();
-            this.calcTime = endTime - startTime;
-
-            this.onMoveFound(this.bestMove);
-        }, searchTime);
-
-        worker.onmessage = (message) => {
-            const searchResult = message.data;
-            this.bestMove = new Move(searchResult.bestMoveValue);
-            this.bestEval = searchResult.bestEval;
-            this.numNodes = searchResult.numNodes;
-            this.numQNodes = searchResult.numQNodes;
-            this.numCutOffs = searchResult.numCutOffs;
-            this.lastCompletedDepth = searchResult.depth;
-
-            gameManager.gui.updateSearchDepthStat(this.lastCompletedDepth);
-            searchSettings.depth++;
-            searchSettings.bestMoveThisIteration = this.bestMove;
-            searchSettings.bestEvalThisIteration = this.bestEval;
-            worker.postMessage([
-                searchSettings,
-                Zobrist.PiecesArray,
-                Zobrist.CastlingRights,
-                Zobrist.EPFile,
-                Zobrist.SideToMove,
-            ]);
-        }
-        worker.postMessage([
-            searchSettings,
-            Zobrist.PiecesArray,
-            Zobrist.CastlingRights,
-            Zobrist.EPFile,
-            Zobrist.SideToMove,
-        ]);
-    }
-
     startSearch(depth) {
         this.init();
 
@@ -189,8 +135,14 @@ class Search {
         }
 
         if (plyFromRoot > 0) {
+
+            // More expensive, but also more accurate approach
+            /* const curKey = keysToPosKey(...this.board.zobristKey);
+            if (this.board.repetitionHistory.reduce((p, c) => c === curKey ? p + 1 : p, 0) >= 3) {
+                return 0;
+            } */
+
             if (this.board.repetitionHistory.includes(keysToPosKey(...this.board.zobristKey))) {
-                console.log("hi")
                 return 0;
             }
 
