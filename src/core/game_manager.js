@@ -12,7 +12,7 @@ class GameManager {
         PrecomputedData.Init();
         await Zobrist.Init();
         await loadBookFromFile();
-        
+
         this.board.init();
         this.gui.init();
         this.aiPlayer.init();
@@ -95,12 +95,20 @@ class GameManager {
 
         // Insufficient material
         const numPawns = this.board.pawns[WHITE_INDEX].numPieces + this.board.pawns[BLACK_INDEX].numPieces;
-        const numKnights = this.board.knights[WHITE_INDEX].numPieces + this.board.knights[BLACK_INDEX].numPieces;
-        const numBishops = this.board.bishops[WHITE_INDEX].numPieces + this.board.bishops[BLACK_INDEX].numPieces;
         const numRooks = this.board.rooks[WHITE_INDEX].numPieces + this.board.rooks[BLACK_INDEX].numPieces;
         const numQueens = this.board.queens[WHITE_INDEX].numPieces + this.board.rooks[BLACK_INDEX].numPieces;
 
-        if ((numPawns + numRooks + numQueens === 0) && (numKnights === 1 || numBishops === 1)) {
+        const numWhiteKnights = this.board.knights[WHITE_INDEX].numPieces;
+        const numBlackKnights = this.board.knights[BLACK_INDEX].numPieces;
+        const numWhiteBishops = this.board.bishops[WHITE_INDEX].numPieces;
+        const numBlackBishops = this.board.bishops[BLACK_INDEX].numPieces;
+
+        if (numPawns + numRooks + numQueens === 0) {
+            // Mate is still possible
+            if ((numWhiteBishops + numWhiteKnights === 2) || (numBlackBishops + numBlackKnights === 2)) {
+                return false;
+            }
+
             this.gui.setEval("Draw for insufficient material");
             this.gui.setEval("");
 
