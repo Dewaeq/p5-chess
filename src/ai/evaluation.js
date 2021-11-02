@@ -62,17 +62,18 @@ class Evaluation {
         let value = 0;
         const isWhite = (colourIndex === WHITE_INDEX);
 
-        value += this.countPieceListPositionalValue(PAWN_POSITIONAL_VALUE, this.board.pawns[colourIndex], isWhite);
         value += this.countPieceListPositionalValue(KNIGHT_POSITIONAL_VALUE, this.board.knights[colourIndex], isWhite);
         value += this.countPieceListPositionalValue(BISHOP_POSITIONAL_VALUE, this.board.bishops[colourIndex], isWhite);
         value += this.countPieceListPositionalValue(ROOK_POSITIONAL_VALUE, this.board.rooks[colourIndex], isWhite);
         value += this.countPieceListPositionalValue(QUEEN_POSITIONAL_VALUE, this.board.queens[colourIndex], isWhite);
-
+        
         const materialDifference = whiteMaterialNoPawns - blackMaterialNoPawns * ((isWhite) ? 1 : -1);
         if (materialDifference > 0 && whiteMaterialNoPawns + blackMaterialNoPawns < QUEEN_VALUE + KNIGHT_VALUE) {
             value += this.getPstValue(KING_ENDGAME_POSITIONAL_VALUE, this.board.kingSquares[colourIndex], isWhite);
+            value += this.countPieceListPositionalValue(PAWN_ENDGAME_POSITIONAL_VALUE, this.board.pawns[colourIndex], isWhite);
         } else {
             value += this.getPstValue(KING_POSITIONAL_VALUE, this.board.kingSquares[colourIndex], isWhite);
+            value += this.countPieceListPositionalValue(PAWN_POSITIONAL_VALUE, this.board.pawns[colourIndex], isWhite);
         }
 
         return value;
