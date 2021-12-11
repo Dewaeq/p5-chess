@@ -22,9 +22,6 @@ class Board {
     /**@type {Uint16Array} */
     this.gameStateHistory = new Uint16Array(400);
 
-    /**@type {string[]} */
-    this.repetitionHistory = Array();
-
     this.gameStateIndex = 1;
 
     this.zobristKey = [0, 0];
@@ -60,7 +57,6 @@ class Board {
     //TODO: Replace with proper game state
     this.currentGameState = 0b00000000001111;
     this.gameStateHistory = new Uint16Array(400);
-    this.repetitionHistory = Array();
     this.gameStateIndex = 1;
     this.zobristKey = [0, 0];
 
@@ -232,10 +228,6 @@ class Board {
     this.gameStateHistory[this.gameStateIndex] = this.currentGameState;
     this.gameStateIndex++;
 
-    if (!inSearch) {
-      this.repetitionHistory.push(keysToPosKey(...this.zobristKey));
-    }
-
     this.switchTurn();
   }
 
@@ -329,9 +321,6 @@ class Board {
 
     this.gameStateIndex--;
     this.currentGameState = this.gameStateHistory[this.gameStateIndex - 1] ?? this.gameStateHistory[0];
-    if (!inSearch) {
-      this.repetitionHistory.pop()
-    }
 
     const newEpFile = (this.currentGameState >> 4) & 15;
     if (newEpFile !== 0) {

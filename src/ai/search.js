@@ -135,17 +135,6 @@ class Search {
         }
 
         if (plyFromRoot > 0) {
-
-            // More expensive, but also more accurate approach
-            /* const curKey = keysToPosKey(...this.board.zobristKey);
-            if (this.board.repetitionHistory.reduce((p, c) => c === curKey ? p + 1 : p, 0) >= 3) {
-                return 0;
-            } */
-
-            if (this.board.repetitionHistory.includes(keysToPosKey(...this.board.zobristKey))) {
-                return 0;
-            }
-
             // Skip this position if a mating sequence has already been found earlier in
             // the search, which would be shorter than any mate we could find from here.
             // This is done by observing that alpha can't possibly be worse (and likewise

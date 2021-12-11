@@ -63,13 +63,6 @@ class GameManager {
             return true;
         }
 
-        const repCount = this.board.repetitionHistory.filter(p => p === keysToPosKey(...this.board.zobristKey)).length;
-        if (repCount >= 3) {
-            this.gui.setEval("0");
-            this.gui.setGameState("Draw: Threefold repetition");
-            return true;
-        }
-
         if (this.aiPlayer.isBookMove) {
             this.gui.setEval("/");
             this.gui.setGameState("Book move");
