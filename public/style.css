@@ -46,3 +46,7 @@ body {
 .progress {
     margin: 0 10% 40px 10%;
 }
+
+#num-workers-input {
+    width: 4em;
+}
