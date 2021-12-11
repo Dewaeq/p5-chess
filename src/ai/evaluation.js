@@ -37,8 +37,10 @@ class Evaluation {
             const friendlyKingSquare = this.board.kingSquares[friendlyIndex];
             const opponentKingSquare = this.board.kingSquares[opponentIndex];
 
+            // Drive enemy king away from center
             mopupScore += PrecomputedData.CentreManhattanDistance[opponentKingSquare] * 10;
-            mopupScore -= (14 - PrecomputedData.NumRookMovesToSquare(friendlyKingSquare, opponentKingSquare)) * 4;
+            // Come closer to enemy king
+            mopupScore += (14 - PrecomputedData.NumRookMovesToSquare(friendlyKingSquare, opponentKingSquare)) * 8;
 
             // Bitwise OR to round to int
             return ((mopupScore * endgameWeight) | 0);
@@ -66,13 +68,19 @@ class Evaluation {
         value += this.countPieceListPositionalValue(BISHOP_POSITIONAL_VALUE, this.board.bishops[colourIndex], isWhite);
         value += this.countPieceListPositionalValue(ROOK_POSITIONAL_VALUE, this.board.rooks[colourIndex], isWhite);
         value += this.countPieceListPositionalValue(QUEEN_POSITIONAL_VALUE, this.board.queens[colourIndex], isWhite);
-        
+
+        const totalMaterial = whiteMaterialNoPawns + blackMaterialNoPawns;
         const materialDifference = whiteMaterialNoPawns - blackMaterialNoPawns * ((isWhite) ? 1 : -1);
-        if (materialDifference > 0 && whiteMaterialNoPawns + blackMaterialNoPawns < QUEEN_VALUE + KNIGHT_VALUE) {
-            value += this.getPstValue(KING_ENDGAME_POSITIONAL_VALUE, this.board.kingSquares[colourIndex], isWhite);
+
+        if (totalMaterial < ENDGAME_MATERIAL_START) {
             value += this.countPieceListPositionalValue(PAWN_ENDGAME_POSITIONAL_VALUE, this.board.pawns[colourIndex], isWhite);
+
+            if (materialDifference > 0 && totalMaterial < QUEEN_VALUE + ROOK_VALUE) {
+                value += this.getPstValue(KING_ENDGAME_POSITIONAL_VALUE, this.board.kingSquares[colourIndex], isWhite);
+            } else {
+                value += this.getPstValue(KING_POSITIONAL_VALUE, this.board.kingSquares[colourIndex], isWhite);
+            }
         } else {
-            value += this.getPstValue(KING_POSITIONAL_VALUE, this.board.kingSquares[colourIndex], isWhite);
             value += this.countPieceListPositionalValue(PAWN_POSITIONAL_VALUE, this.board.pawns[colourIndex], isWhite);
         }
 
