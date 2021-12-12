@@ -38,6 +38,7 @@ body {
 }
 
 .board-container {
+    touch-action: none;
     display: flex;
 }
 
