@@ -25,8 +25,6 @@
     }; sessionStorage.setItem("_swa", "1");
   </script>
 
-  <!-- CUSTOM STYLES -->
-  <link rel="stylesheet" href="./style.css">
 
   <!-- jQuery -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -36,6 +34,9 @@
   </link>
   <!-- Bootstrap JS -->
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <!-- CUSTOM STYLES -->
+  <link rel="stylesheet" href="./style.css">
 
   <!-- P5 JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
@@ -84,55 +85,62 @@
     </div>
   </div>
 
-  <div class="main-container">
-    <div id="canvas"></div>
+  <div class="wrapper">
+    <div class="column spacer">
+    </div>
 
-    <h2 id="game-eval" class="advantage-text">0</h2>
-    <p id="game-state">Neither side has the advantage</p>
-    <div class="progress">
-      <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar"
-        aria-valuenow="0" style="width: 50%" aria-valuemin="-1000" aria-valuemax="1000" id='advantageBar'>
+    <div class="column main-container">
+      <div class="board-container">
+        <div class="evalbar">
+          <p class="game-eval">0</p>
+          <div class="progress progress-bar-vertical">
+            <div id="advantageBar" class="progress-bar progress-striped" role="progressbar" aria-valuenow="60"
+              aria-valuemin="0" aria-valuemax="100" style="height: 50%;"> </div>
+          </div>
+          <p class="game-eval">0</p>
+        </div>
+        <div id="canvas"></div>
       </div>
-    </div>
-  </div>
-
-  <div class="side-data">
-
-    <div class="settings-container">
-      <h3 class="settings-title">Settings</h3>
-      <input id="include-quiet-input" type="checkbox" checked>
-      <label for="include-quiet-input">Quiescence search</label>
-      <br>
-      <input id="order-moves-input" type="checkbox" checked>
-      <label for="order-moves-input">Order moves</label>
-      <br>
-      <input id="play-white-input" type="checkbox" checked>
-      <label for="play-white-input">Play as white</label>
-      <br>
-      <label for="num-workers-input">Number of workers</label>
-      <input id="num-workers-input" min="1" max="5" type="number">
-      <br>
-      <label for="search-time-input">Search time:</label>
-      <select id="search-time-input">
-        <option value="1000">1s</option>
-        <option value="2000">2s</option>
-        <option value="4000">4s</option>
-        <option value="8000" selected>8s</option>
-        <option value="16000">16s</option>
-        <option value="32000">32s</option>
-      </select>
-      <br>
-      <label for="fen-input">Fen String:</label>
-      <input id="fen-string-input" type="text">
+      <h2 id="game-state">Neither side has the advantage</h2>
     </div>
 
-    <div class="info-container">
-      <h3 class="info-title">Stats</h3>
-      <p>Search Depth: <span id="search-depth-count">0</span></p>
-      <p>Nodes: <span id="nodes-count">0</span></p>
-      <p>QNodes: <span id="qnodes-count">0</span></p>
-      <p>Cutoffs: <span id="cuttofs-count">0</span></p>
-      <p>Nodes/s: <span id="nodes-per-second-count">0</span></p>
+    <div class="column engine-container">
+      <div class="settings-container">
+        <h3 class="settings-title">Settings</h3>
+        <input id="include-quiet-input" type="checkbox" checked>
+        <label for="include-quiet-input">Quiescence search</label>
+        <br>
+        <input id="order-moves-input" type="checkbox" checked>
+        <label for="order-moves-input">Order moves</label>
+        <br>
+        <input id="play-white-input" type="checkbox" checked>
+        <label for="play-white-input">Play as white</label>
+        <br>
+        <label for="num-workers-input">Number of workers</label>
+        <input id="num-workers-input" min="1" max="5" type="number">
+        <br>
+        <label for="search-time-input">Search time:</label>
+        <select id="search-time-input">
+          <option value="1000">1s</option>
+          <option value="2000">2s</option>
+          <option value="4000">4s</option>
+          <option value="8000" selected>8s</option>
+          <option value="16000">16s</option>
+          <option value="32000">32s</option>
+        </select>
+        <br>
+        <label for="fen-input">Fen String:</label>
+        <input id="fen-string-input" type="text">
+      </div>
+
+      <div class="info-container">
+        <h3 class="info-title">Stats</h3>
+        <p>Search Depth: <span id="search-depth-count">0</span></p>
+        <p>Nodes: <span id="nodes-count">0</span></p>
+        <p>QNodes: <span id="qnodes-count">0</span></p>
+        <p>Cutoffs: <span id="cuttofs-count">0</span></p>
+        <p>Nodes/s: <span id="nodes-per-second-count">0</span></p>
+      </div>
     </div>
   </div>
 </body>

@@ -1,18 +1,27 @@
 /**@type {GameManager} */
 let gameManager;
+let canvas;
 
 let tileSize = 90;
 
 function setup() {
+  setTileSize();
 
-  if (displayWidth >= displayHeight) tileSize = (displayHeight * 0.6) / 8;
-  else tileSize = (displayWidth * 0.6) / 8;
-
-  const canvas = createCanvas(tileSize * 8, tileSize * 8);
+  canvas = createCanvas(tileSize * 8, tileSize * 8);
   canvas.parent("#canvas");
 
   gameManager = new GameManager();
   gameManager.init();
+}
+
+function windowResized() {
+  setTileSize();
+  resizeCanvas(tileSize * 8, tileSize * 8);
+}
+
+function setTileSize() {
+  if (windowWidth >= windowHeight) tileSize = (windowHeight * 0.8) / 8;
+  else tileSize = (windowWidth * 0.85) / 8;
 }
 
 function draw() {
