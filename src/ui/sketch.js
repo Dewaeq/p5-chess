@@ -17,6 +17,8 @@ function setup() {
 function windowResized() {
   setTileSize();
   resizeCanvas(tileSize * 8, tileSize * 8);
+
+  gameManager.gui.show();
 }
 
 function setTileSize() {
