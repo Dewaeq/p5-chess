@@ -92,8 +92,8 @@ class Search {
                 gameManager.gui.updateSearchDepthStat(this.lastCompletedDepth);
 
                 if (Search.IsMateScore(this.bestEval) && this.bestMove.moveValue !== INVALID_MOVE.moveValue) {
-                    this.resetWorkers();
                     clearTimeout(timer);
+                    this.resetWorkers();
                     this.onMoveFound(this.bestMove);
                 } else {
                     searchSettings.depth++;
