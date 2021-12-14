@@ -77,6 +77,7 @@ class BoardGUI {
       gameManager.board.unMakeMove(gameManager.gui.lastMove);
       gameManager.gui.lastMove = INVALID_MOVE;
       gameManager.gui.show();
+      startEvaluation();
       $(this).prop("disabled", true);
     });
 
