@@ -29,7 +29,8 @@ function setTileSize() {
 }
 
 function startEvaluation() {
-    gameManager.aiPlayer.search.startMultiThreadedIterativeSearch(50000000);
+  gameManager.aiPlayer.search.resetWorkers();
+  gameManager.aiPlayer.search.startMultiThreadedIterativeSearch(50000000);
 }
 
 function draw() {

@@ -45,7 +45,6 @@ class Search {
         this.bestMove = INVALID_MOVE;
         this.bestEval = 0;
         this.moveEvaluations = new Map();
-        this.resetWorkers();
     }
 
     resetWorkers() {
