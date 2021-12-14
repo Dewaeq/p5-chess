@@ -83,6 +83,7 @@ onmessage = async (message) => {
         search.numCutOffs,
         searchSettings.depth,
         search.calcTime,
+        search.moveEvaluations,
     );
 
     postMessage(result)

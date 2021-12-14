@@ -24,6 +24,12 @@ class BoardRepresentation {
     return this.CoordToIndex(rank, file);
   }
 
+  static CoordToString = (square) => {
+    const file = this.FileNames[this.FileIndex(square)];
+    const rank = (this.RankIndex(square) + 1).toString();
+    return (file + rank);
+  }
+
   static CoordFromIndex = (square) => [this.FileIndex(square), this.RankIndex(square)];
 
   static IsSquareInBoard = (square) => square < 64 && square > -1;

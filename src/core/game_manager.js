@@ -22,6 +22,9 @@ class GameManager {
         this.whiteToMove = this.board.whiteToMove;
         setTimeout(() => {
             this.gui.show();
+            if (ANALYZING) {
+                startEvaluation();
+            }
         }, 1000);
     }
 
@@ -40,6 +43,12 @@ class GameManager {
 
         const gameOver = this.getGameState();
 
+        if (ANALYZING) {
+            startEvaluation();
+            $("#undo-move").prop("disabled", false);
+            return;
+        }
+
         if (!gameOver) {
             if (!this.humansTurn) {
                 this.aiPlayer.turnToMove();
@@ -53,9 +62,10 @@ class GameManager {
 
         // (Stale)mate
         if (moves.length === 0) {
-            this.gui.setEval("");
+            this.gui.setEval("1/2");
 
             if (moveGenerator.inCheck) {
+                this.gui.setEval("#");
                 this.gui.setGameState((this.whiteToMove) ? "White is mated" : "Black is mated");
                 return true;
             }
@@ -70,7 +80,7 @@ class GameManager {
         }
 
         const evaluation = this.aiPlayer.search.bestEval;
-        const guiEvaluation = evaluation / 100 * ((this.humanPlaysWhite) ? -1 : 1);
+        const guiEvaluation = evaluation / 100 * ((!this.board.whiteToMove) ? -1 : 1);
 
         if (Search.IsMateScore(evaluation)) {
             this.gui.setGameState(`Mate in ${Search.NumPlyToMateFromScore(evaluation)} ply`);

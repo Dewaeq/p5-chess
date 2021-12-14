@@ -1,0 +1,139 @@
+/* I HATE CSS */
+/* not proud of this */
+
+html,
+body {
+    height: 100%;
+    background-color: #181a1b;
+    margin: 0;
+}
+
+body {
+    background-color: #181a1b;
+}
+
+.wrapper {
+    padding-top: 15px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+.column {
+    float: left;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-container {
+    text-align: center;
+    width: 60%;
+}
+
+.engine-container {
+    align-items: flex-start;
+    justify-content: start;
+}
+
+.board-container {
+    display: flex;
+    touch-action: none;
+}
+
+.evalbar {
+    height: auto;
+    padding-right: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.engine-stats {
+    width: auto;
+    padding: 0 20px;
+    background-color: gray;
+}
+
+.wrapper:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.progress {
+    width: 3vw;
+    max-width: 25px;
+}
+
+.progress-bar-vertical {
+    height: 100%;
+
+    background: #d0cece;
+    display: flex;
+    align-items: flex-end;
+}
+
+.progress-bar-vertical .progress-bar {
+    transition: height 0.6s ease;
+}
+
+.progress-striped {
+    background-color: #ee5f5b;
+    width: 100%;
+
+    background-image: linear-gradient(
+        0deg,
+        rgba(255, 255, 255, 0.15) 20%,
+        transparent 20%,
+        transparent 40%,
+        rgba(255, 255, 255, 0.15) 40%,
+        rgba(255, 255, 255, 0.15) 60%,
+        transparent 60%,
+        transparent 80%,
+        rgba(255, 255, 255, 0.15) 80%,
+        rgba(255, 255, 255, 0.15) 100%,
+        transparent 100%,
+        transparent
+    );
+}
+
+@media (orientation: portrait) {
+    .main-container {
+        width: 100%;
+    }
+    .spacer {
+        min-height: 0;
+        width: 0;
+    }
+    .engine-container {
+        height: auto;
+        padding: 0 5vw;
+        width: 100%;
+    }
+    .wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: start;
+    }
+}
+
+@media (orientation: landscape) {
+    .main-container {
+        width: fit-content;
+    }
+    .spacer,
+    .engine-container {
+        flex: 1;
+        flex-shrink: 0;
+        height: 85vh;
+    }
+    .engine-container {
+        padding-left: 15px;
+    }
+    .wrapper {
+        align-items: center;
+    }
+}

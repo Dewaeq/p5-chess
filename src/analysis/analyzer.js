@@ -1,3 +1,5 @@
+const ANALYZING = true;
+
 /**@type {GameManager} */
 let gameManager;
 let canvas;
@@ -26,6 +28,10 @@ function setTileSize() {
   else tileSize = (windowWidth * 0.9) / 8;
 }
 
+function startEvaluation() {
+    gameManager.aiPlayer.search.startMultiThreadedIterativeSearch(50000000);
+}
+
 function draw() {
   if (gameManager.gui.isDraggingPiece) {
     gameManager.gui.showDraggingPiece();
@@ -33,10 +39,6 @@ function draw() {
 }
 
 function mousePressed() {
-  if (!gameManager.humansTurn) {
-    return;
-  }
-
   gameManager.gui.show();
 
   const squareIndex = getSquareUnderMouse();

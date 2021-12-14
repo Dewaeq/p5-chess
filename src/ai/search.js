@@ -10,6 +10,7 @@ class Search {
         this.moveOrdering = new MoveOrdering();
 
         this.onMoveFound = onMoveFound;
+        this.moveEvaluations = new Map();
 
         this.numNodes = 0;
         this.numQNodes = 0;
@@ -43,6 +44,8 @@ class Search {
         this.bestEvalThisIteration = 0;
         this.bestMove = INVALID_MOVE;
         this.bestEval = 0;
+        this.moveEvaluations = new Map();
+        this.resetWorkers();
     }
 
     resetWorkers() {
@@ -88,18 +91,23 @@ class Search {
                 this.numCutOffs = searchResult.numCutOffs;
                 this.lastCompletedDepth = searchResult.searchDepth;
                 this.calcTime = searchResult.searchTime;
+                this.moveEvaluations = searchResult.moveEvaluations;
 
                 gameManager.gui.updateSearchDepthStat(this.lastCompletedDepth);
+                if (ANALYZING) {
+                    gameManager.gui.showMoveEvaluations(this.moveEvaluations);
+                    gameManager.gui.updateStats();
+                    gameManager.getGameState();
+                }
 
                 if (Search.IsMateScore(this.bestEval) && this.bestMove.moveValue !== INVALID_MOVE.moveValue) {
                     clearTimeout(timer);
                     this.resetWorkers();
                     this.onMoveFound(this.bestMove);
                 } else {
-                    searchSettings.depth++;
+                    searchSettings.depth = this.lastCompletedDepth + 1;
                     postMessage(i);
                 }
-
             }
             postMessage(i);
             searchSettings.depth++;
@@ -167,6 +175,11 @@ class Search {
         for (let i = 0; i < moves.length; i++) {
             this.board.makeMove(moves[i], true);
             const evaluation = -this.searchMoves(depth - 1, plyFromRoot + 1, -beta, -alpha);
+
+            /* if (plyFromRoot === 0) {
+                this.moveEvaluations.set(moves[i].moveValue, evaluation);
+            } */
+
             this.board.unMakeMove(moves[i], true);
             this.numNodes++;
 
@@ -181,6 +194,8 @@ class Search {
                 if (plyFromRoot === 0) {
                     this.bestMoveThisIteration = moves[i];
                     this.bestEvalThisIteration = evaluation;
+
+                    this.moveEvaluations.set(moves[i].moveValue, evaluation);
                 }
             }
         }
@@ -239,7 +254,7 @@ class SearchWorkerInput {
 }
 
 class SearchWorkerResult {
-    constructor(bestMoveValue, bestEval, numNodes, numQnodes, numCutoffs, searchDepth, searchTime) {
+    constructor(bestMoveValue, bestEval, numNodes, numQnodes, numCutoffs, searchDepth, searchTime, moveEvaluations) {
         this.bestMoveValue = bestMoveValue;
         this.bestEval = bestEval;
         this.numNodes = numNodes;
@@ -247,5 +262,6 @@ class SearchWorkerResult {
         this.numCutOffs = numCutoffs;
         this.searchDepth = searchDepth;
         this.searchTime = searchTime;
+        this.moveEvaluations = moveEvaluations;
     }
 }

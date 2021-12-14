@@ -26,7 +26,7 @@ class Perft {
             const move = moves[i];
             this.board.makeMove(move);
             numPositions += this.countPossibleMoves(depth - 1);
-            this.board.unMakeMove(move);
+            this.board.unMakeMove(move, true);
         }
 
         return numPositions;

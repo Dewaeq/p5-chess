@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta name="description" content="Simple chess engine using the minimax algorithm">
+	<meta name="author" content="Dewaeq">
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+	<meta http-equiv="Pragma" content="no-cache" />
+	<meta http-equiv="Expires" content="0" />
+
+	<title>Chess Engine</title>
+
+	<link rel="shortcut icon" href="favicon.ico">
+
+	<!-- jQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+	</link>
+
+	<!-- Bootstrap JS -->
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+	<!-- P5 JS -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+
+	<!-- CUSTOM STYLES -->
+	<link rel="stylesheet" href="./analysis-style.css">
+
+	<!-- Custom JS -->
+	<script src="../src/analysis/analyzer.js"></script>
+	<script src="../src/ui/gui.js"></script>
+	<script src="../src/core/piece.js"></script>
+	<script src="../src/core/board.js"></script>
+	<script src="../src/core/piece_list.js"></script>
+	<script src="../src/core/move.js"></script>
+	<script src="../src/core/constants.js"></script>
+	<script src="../src/core/board_representation.js"></script>
+	<script src="../src/core/zobrist.js"></script>
+	<script src="../src/core/game_manager.js"></script>
+	<script src="../src/ai/precomputed_data.js"></script>
+	<script src="../src/ai/perft.js"></script>
+	<script src="../src/ai/values.js"></script>
+	<script src="../src/ai/move_generator.js"></script>
+	<script src="../src/ai/ai_player.js"></script>
+	<script src="../src/ai/evaluation.js"></script>
+	<script src="../src/ai/search.js"></script>
+	<script src="../src/ai/move_ordering.js"></script>
+	<script src="../src/other/random.js"></script>
+	<script src="../src/other/utils.js"></script>
+	<script src="../src/other/pgn_loader.js"></script>
+	<script src="../src/other/book/book.js"></script>
+	<script src="../src/other/book/book_creator.js"></script>
+</head>
+
+<body class="bg-transparent text-light">
+	<!-- Modal -->
+	<div class="modal fade" data-backdrop="static" id="book-download-modal" tabindex="-1" role="dialog"
+		aria-labelledby="book-download-modal-label" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content bg-dark">
+				<div class="modal-header">
+					<h5 class="modal-title" id="book-download-modal-label">Downloading opening book</h5>
+				</div>
+				<div class="modal-body text-light">
+					<p>Download in progress...</p>
+					<progress id="book-download-progress" max="100" value="0"></progress>
+					<p id="book-download-progress-text">0%</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="wrapper">
+		<div class="column spacer">
+		</div>
+
+		<div class="column main-container">
+			<div class="board-container">
+				<div class="evalbar">
+					<p class="game-eval">0</p>
+					<div class="progress progress-bar-vertical">
+						<div id="advantageBar" class="progress-bar progress-striped" role="progressbar"
+							aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="height: 50%;"> </div>
+					</div>
+					<p class="game-eval">0</p>
+				</div>
+				<div id="canvas"></div>
+			</div>
+			<h2 id="game-state">Neither side has the advantage</h2>
+		</div>
+
+		<div class="column engine-container">
+			<div class="engine-stats">
+				<h2 class="game-eval">0.0</h2>
+				<p>Depth
+					<span id="search-depth-count">0</span>
+					&nbsp
+					<span id="nodes-per-second-count">0</span>kn/s
+				</p>
+			</div>
+			<p id="best-move-0"></p>
+			<p id="best-move-1"></p>
+			<p id="best-move-2"></p>
+			<button id="undo-move">Undo last move</button>
+		</div>
+	</div>
+
+</body>
+
+</html>

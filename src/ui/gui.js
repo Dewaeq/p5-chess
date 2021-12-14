@@ -65,12 +65,20 @@ class BoardGUI {
   }
 
   initUI() {
+    $("#undo-move").prop("disabled", true);
     $("#include-quiet-input").prop("checked", true);
     $("#order-moves-input").prop("checked", true);
     $("#play-white-input").prop("checked", true);
     $("#search-time-input").val(gameManager.aiPlayer.searchTime);
     $("#fen-string-input").val(fenStartString);
     $("#num-workers-input").val(gameManager.aiPlayer.search.numWorkers)
+
+    $("#undo-move").on("click", function () {
+      gameManager.board.unMakeMove(gameManager.gui.lastMove);
+      gameManager.gui.lastMove = INVALID_MOVE;
+      gameManager.gui.show();
+      $(this).prop("disabled", true);
+    });
 
     $("#play-white-input").on("click", function () {
       // Only switch sides when it's the human's turn to not 
@@ -118,15 +126,15 @@ class BoardGUI {
     const calcTime = gameManager.aiPlayer.search.calcTime;
 
     $("#search-depth-count").text(searchDepth);
-    $("#nodes-count").text(numNodes);
-    $("#qnodes-count").text(numQNodes);
+    $("#nodes-count").text(Math.round(numNodes / 1000));
+    $("#qnodes-count").text(Math.round(numNodes / 1000));
     $("#cuttofs-count").text(numCutOffs);
-    $("#nodes-per-second-count").text(((numNodes + numQNodes) / calcTime * 1000) | 0);
+    $("#nodes-per-second-count").text(Math.round((numNodes + numQNodes) / calcTime));
   }
 
   setEval(gameEval) {
-    $("#advantageBar").css("height", `${50 + gameEval * 5}%`)
-    $(".game-eval").text(gameEval);
+    $("#advantageBar").css("height", `${50 + gameEval * 5}%`);
+    $(".game-eval").text(gameEval.toFixed(2));
   }
 
   setGameState(gameState) {
@@ -135,6 +143,64 @@ class BoardGUI {
 
   updateSearchDepthStat(newLastCompletedDepth) {
     $("#search-depth-count").text(newLastCompletedDepth);
+  }
+
+  /**
+   * @param {Map<number, number>} moveEvaluations 
+   */
+  showMoveEvaluations(moveEvaluations) {
+    this.show(false);
+
+    // Clear previous data
+    for (let i = 0; i < 3; i++) {
+      $(`#best-move-${i}`).text("");
+    }
+
+    const sortedEval = Array.from(moveEvaluations).sort((a, b) => b[1] - a[1]);
+    const maxLength = (sortedEval.length > 3) ? 3 : sortedEval.length;
+    for (let i = 0; i < maxLength; i++) {
+      const bestmove = sortedEval[i];
+      const move = new Move(bestmove[0]);
+      let moveScore;
+      if (Search.IsMateScore(bestmove[1])) {
+        moveScore = "#" + Search.NumPlyToMateFromScore(bestmove[1]);
+      } else {
+        moveScore = (bestmove[1] / 100 * ((this.board.whiteToMove) ? 1 : -1)).toFixed(2);
+      }
+      const startSquare = BoardRepresentation.CoordToString(move.startSquare);
+      const targetSquare = BoardRepresentation.CoordToString(move.targetSquare);
+
+      this.drawArrow(move.startSquare, move.targetSquare, (i + 1) * 50);
+
+      $(`#best-move-${i}`).text(`${moveScore} ${startSquare}${targetSquare}`);
+    }
+  }
+
+  drawArrow(startSquare, targetSquare, weight) {
+    stroke(weight, 300 - weight);
+    strokeWeight(tileSize / 10);
+    const from = BoardGUI.SquareToGuiCoord(startSquare);
+    const to = BoardGUI.SquareToGuiCoord(targetSquare);
+    const offset = tileSize / 2;
+
+    from[0] = from[0] * tileSize + offset;
+    from[1] = from[1] * tileSize + offset;
+    to[0] = to[0] * tileSize + offset;
+    to[1] = to[1] * tileSize + offset;
+
+    line(
+      from[0],
+      from[1],
+      to[0],
+      to[1],
+    );
+    // Arrow from https://stackoverflow.com/a/44892083
+    push();
+    var angle = atan2(from[1] - to[1], from[0] - to[0]); //gets the angle of the line
+    translate(to[0], to[1]); //translates to the destination vertex
+    rotate(angle - HALF_PI); //rotates the arrow point
+    triangle(-(tileSize / 10) * 0.5, (tileSize / 10), (tileSize / 10) * 0.5, (tileSize / 10), 0, -(tileSize / 10) / 2); //draws the arrow point as a triangle
+    pop();
   }
 
   updateBookModalStats(percentage) {
@@ -150,7 +216,7 @@ class BoardGUI {
     }
   }
 
-  show() {
+  show(showMoveEvaluations = true) {
     background(0);
     noStroke();
 
@@ -196,9 +262,14 @@ class BoardGUI {
         tileSize
       );
     }
+
+    if (ANALYZING && showMoveEvaluations) {
+      this.showMoveEvaluations(gameManager.aiPlayer.search.moveEvaluations);
+    }
   }
 
   showPieceMoves(startSquare) {
+    noStroke();
     const moves = this.moveGen.generateMoves(this.board);
 
     if (moves.length === 0) {
@@ -224,6 +295,7 @@ class BoardGUI {
     const pieceStr = Piece.PieceToString(piece);
     const [x, y] = BoardGUI.SquareToGuiCoord(this.draggingSquare);
 
+    noStroke();
     fill(221, 165, 118);
 
     rect(
@@ -232,6 +304,10 @@ class BoardGUI {
       tileSize,
       tileSize,
     );
+
+    if (ANALYZING) {
+      this.showMoveEvaluations(gameManager.aiPlayer.search.moveEvaluations);
+    }
 
     image(
       this.images[pieceStr],
