@@ -135,7 +135,12 @@ class BoardGUI {
 
   setEval(gameEval) {
     $("#advantageBar").css("height", `${50 + gameEval * 5}%`);
-    $(".game-eval").text(gameEval.toFixed(2));
+    if (typeof (gameEval) === "number") {
+      $(".game-eval").text(gameEval.toFixed(2));
+    }
+    else {
+      $(".game-eval").text(gameEval);
+    }
   }
 
   setGameState(gameState) {

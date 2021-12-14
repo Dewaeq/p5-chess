@@ -1,3 +1,5 @@
+ANALYZING = false;
+
 /**@type {GameManager} */
 let gameManager;
 let canvas;
