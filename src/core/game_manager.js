@@ -6,6 +6,7 @@ class GameManager {
         this.book = new Book();
         this.humanPlaysWhite = true;
         this.whiteToMove = true;
+        this.moveHistory = [];
     }
 
     async init() {
@@ -33,22 +34,21 @@ class GameManager {
      */
     makeMove(move) {
         this.gui.updateStats();
-
         this.board.makeMove(move);
-        this.gui.lastMove = move;
+        this.moveHistory.push(move);
+
         this.whiteToMove = !this.whiteToMove;
 
         this.gui.show();
         this.gui.playMoveSound();
-
-        const gameOver = this.getGameState();
 
         if (ANALYZING) {
             startEvaluation();
             $("#undo-move").prop("disabled", false);
             return;
         }
-
+        
+        const gameOver = this.getGameState();
         if (!gameOver) {
             if (!this.humansTurn) {
                 this.aiPlayer.turnToMove();
@@ -80,7 +80,7 @@ class GameManager {
         }
 
         const evaluation = this.aiPlayer.search.bestEval;
-        const guiEvaluation = evaluation / 100 * ((!this.board.whiteToMove) ? -1 : 1);
+        const guiEvaluation = evaluation / 100 * ((this.board.whiteToMove) ? 1 : -1);
 
         if (Search.IsMateScore(evaluation)) {
             this.gui.setGameState(`Mate in ${Search.NumPlyToMateFromScore(evaluation)} ply`);
