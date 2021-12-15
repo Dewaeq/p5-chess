@@ -11,7 +11,6 @@ class BoardGUI {
     this.pieceMoves = [];
     this.isDraggingPiece = false;
     this.draggingSquare = -1;
-    this.lastMove = INVALID_MOVE;
   }
 
   static SquareToGuiCoord = (square) => {
@@ -244,8 +243,9 @@ class BoardGUI {
       }
     }
 
-    if (this.lastMove.moveValue !== INVALID_MOVE.moveValue) {
-      const [startSquare, targetSquare] = [this.lastMove.startSquare, this.lastMove.targetSquare];
+    if (gameManager.moveHistory.length > 0) {
+      const lastMove = gameManager.moveHistory[gameManager.moveHistory.length - 1];
+      const [startSquare, targetSquare] = [lastMove.startSquare, lastMove.targetSquare];
 
       const [startX, startY] = BoardGUI.SquareToGuiCoord(startSquare);
       fill("#FFCE88");

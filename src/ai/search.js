@@ -93,10 +93,10 @@ class Search {
                 this.moveEvaluations = searchResult.moveEvaluations;
 
                 gameManager.gui.updateSearchDepthStat(this.lastCompletedDepth);
+                gameManager.gui.updateStats();
+                gameManager.getGameState();
                 if (ANALYZING) {
                     gameManager.gui.showMoveEvaluations(this.moveEvaluations);
-                    gameManager.gui.updateStats();
-                    gameManager.getGameState();
                 }
 
                 if (Search.IsMateScore(this.bestEval) && this.bestMove.moveValue !== INVALID_MOVE.moveValue) {

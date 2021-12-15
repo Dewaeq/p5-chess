@@ -88,7 +88,10 @@ class GameManager {
         }
 
         const evaluation = this.aiPlayer.search.bestEval;
-        const guiEvaluation = evaluation / 100 * ((this.board.whiteToMove) ? 1 : -1);
+        let guiEvaluation = evaluation / 100 * ((this.board.whiteToMove) ? 1 : -1);
+        if (!ANALYZING) {
+            guiEvaluation = evaluation / 100 * ((this.humanPlaysWhite) ? -1 : 1);
+        }
 
         if (Search.IsMateScore(evaluation)) {
             this.gui.setGameState(`Mate in ${Search.NumPlyToMateFromScore(evaluation)} ply`);
