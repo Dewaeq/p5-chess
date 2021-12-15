@@ -74,11 +74,12 @@ class BoardGUI {
     $("#num-workers-input").val(gameManager.aiPlayer.search.numWorkers)
 
     $("#undo-move").on("click", function () {
-      gameManager.board.unMakeMove(gameManager.gui.lastMove);
-      gameManager.gui.lastMove = INVALID_MOVE;
+      gameManager.board.unMakeMove(gameManager.moveHistory.pop());
       gameManager.gui.show();
       startEvaluation();
-      $(this).prop("disabled", true);
+      if (gameManager.moveHistory.length === 0) {
+        $(this).prop("disabled", true);
+      }
     });
 
     $("#play-white-input").on("click", function () {
@@ -128,8 +129,8 @@ class BoardGUI {
 
     $("#search-depth-count").text(searchDepth);
     $("#nodes-count").text(Math.round(numNodes / 1000));
-    $("#qnodes-count").text(Math.round(numNodes / 1000));
-    $("#cuttofs-count").text(numCutOffs);
+    $("#qnodes-count").text(Math.round(numQNodes / 1000));
+    $("#cuttofs-count").text(Math.round(numCutOffs / 1000));
     $("#nodes-per-second-count").text(Math.round((numNodes + numQNodes) / calcTime));
   }
 
