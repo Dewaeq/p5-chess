@@ -11,6 +11,7 @@ class Perft {
         return {
             numPositions: result,
             time: endTime - startTime,
+            "n/s": result / time * 1000,
         }
     }
 
@@ -19,12 +20,12 @@ class Perft {
             return 1;
         }
 
-        const moves = this.moveGen.generateMoves(this.board, PROMOTION_MODE_ALL);
+        const moves = this.moveGen.generateMoves(this.board, true, PROMOTION_MODE_ALL);
         let numPositions = 0;
 
         for (let i = 0; i < moves.length; i++) {
             const move = moves[i];
-            this.board.makeMove(move);
+            this.board.makeMove(move, true);
             numPositions += this.countPossibleMoves(depth - 1);
             this.board.unMakeMove(move, true);
         }
