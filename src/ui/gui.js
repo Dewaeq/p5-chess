@@ -103,6 +103,9 @@ class BoardGUI {
 
     $("#fen-string-input").on("change", function () {
       gameManager.board.fenToBoard($(this).val());
+      if(ANALYZING) {
+        startEvaluation();
+      }
     });
 
     $("#search-time-input").on("change", function () {
@@ -170,7 +173,7 @@ class BoardGUI {
       const move = new Move(bestmove[0]);
       let moveScore;
       if (Search.IsMateScore(bestmove[1])) {
-        moveScore = "#" + Search.NumPlyToMateFromScore(bestmove[1]);
+        moveScore = "#" + (Search.NumPlyToMateFromScore(bestmove[1]) + 1);
       } else {
         moveScore = (bestmove[1] / 100 * ((this.board.whiteToMove) ? 1 : -1)).toFixed(2);
       }

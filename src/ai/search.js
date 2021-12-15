@@ -102,7 +102,9 @@ class Search {
                 if (Search.IsMateScore(this.bestEval) && this.bestMove.moveValue !== INVALID_MOVE.moveValue) {
                     clearTimeout(timer);
                     this.resetWorkers();
-                    this.onMoveFound(this.bestMove);
+                    if (!ANALYZING) {
+                        this.onMoveFound(this.bestMove);
+                    }
                 } else {
                     searchSettings.depth = this.lastCompletedDepth + 1;
                     postMessage(i);

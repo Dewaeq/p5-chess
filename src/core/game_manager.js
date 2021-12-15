@@ -43,11 +43,19 @@ class GameManager {
         this.gui.playMoveSound();
 
         if (ANALYZING) {
-            startEvaluation();
+            const moveGenerator = new MoveGenerator();
+            const moves = moveGenerator.generateMoves(this.board);
+            if (!(moveGenerator.inCheck && moves.length === 0)) {
+                startEvaluation();
+            } else {
+                this.aiPlayer.search.moveEvaluations = new Map();
+                this.gui.show();
+                this.getGameState();
+            }
             $("#undo-move").prop("disabled", false);
             return;
         }
-        
+
         const gameOver = this.getGameState();
         if (!gameOver) {
             if (!this.humansTurn) {
