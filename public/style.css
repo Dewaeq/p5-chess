@@ -33,8 +33,8 @@ body {
 }
 
 .engine-container {
-    display: flex;
     align-items: flex-start;
+    justify-content: start;
 }
 
 .board-container {
@@ -48,6 +48,12 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.engine-stats {
+    width: auto;
+    padding: 0 20px;
+    background-color: gray;
 }
 
 .wrapper:after {
@@ -101,6 +107,11 @@ body {
         min-height: 0;
         width: 0;
     }
+    .engine-container {
+        height: auto;
+        padding: 0 5vw;
+        width: 100%;
+    }
     .wrapper {
         display: flex;
         flex-direction: column;
@@ -115,9 +126,12 @@ body {
     }
     .spacer,
     .engine-container {
-        padding-left: 30px;
         flex: 1;
         flex-shrink: 0;
+        height: 85vh;
+    }
+    .engine-container {
+        padding-left: 15px;
     }
     .wrapper {
         align-items: center;
