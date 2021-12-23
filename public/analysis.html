@@ -34,6 +34,7 @@
 
 	<!-- Custom JS -->
 	<script src="../src/analysis/analyzer.js"></script>
+	<script src="../src/analysis/pgn_analyzer.js"></script>
 	<script src="../src/ui/gui.js"></script>
 	<script src="../src/core/piece.js"></script>
 	<script src="../src/core/board.js"></script>
@@ -101,21 +102,31 @@
 			<h2 id="game-state">Neither side has the advantage</h2>
 		</div>
 
-		<div class="column engine-container">
-			<div class="engine-stats">
-				<h2 class="game-eval">0.0</h2>
-				<p>Depth
-					<span id="search-depth-count">0</span>
-					&nbsp
-					<span id="nodes-per-second-count">0</span>kn/s
-				</p>
+		<div class="column engine-container analysis-container">
+			<div class="engine-info">
+				<div class="engine-stats">
+					<h2 class="game-eval">0.0</h2>
+					<p>Depth
+						<span id="search-depth-count">0</span>
+						&nbsp
+						<span id="nodes-per-second-count">0</span>kn/s
+					</p>
+				</div>
+				<p id="best-move-0"></p>
+				<p id="best-move-1"></p>
+				<p id="best-move-2"></p>
 			</div>
-			<p id="best-move-0"></p>
-			<p id="best-move-1"></p>
-			<p id="best-move-2"></p>
-			<label for="fen-input">Fen String:</label>
-			<input id="fen-string-input" type="text">
-			<button id="undo-move">Undo last move</button>
+			<div class="engine-input">
+				<button id="undo-move">Undo last move</button>
+				<br>
+				<label for="pgn-input">PGN String:</label>
+				<input id="pgn-string-input" type="text">
+				<br>
+				<label for="fen-input">Fen String:</label>
+				<input id="fen-string-input" type="text">
+				<br>
+				<p id="pgn-input-display"></p>
+			</div>
 		</div>
 	</div>
 

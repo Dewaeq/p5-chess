@@ -30,13 +30,13 @@ class AIPlayer {
      */
     moveFound(move) {
         if (move.moveValue === INVALID_MOVE.moveValue) {
-            alert("Search failed, new search with more time will start.");
+            const e = new Error("Search failed");
+            alert("Search failed, new search with more time will start.\n" + e.stack);
             $("#search-time-input").val(this.searchTime * ((this.searchTime === 32000) ? 1 : 2)).change();
             gameManager.aiPlayer.turnToMove();
             return;
         }
         gameManager.aiPlayer.move = move;
-        move.printMove();
         gameManager.makeMove(move);
     }
 }

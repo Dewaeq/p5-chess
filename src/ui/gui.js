@@ -11,6 +11,7 @@ class BoardGUI {
     this.pieceMoves = [];
     this.isDraggingPiece = false;
     this.draggingSquare = -1;
+    this.lastMove = null;
   }
 
   static SquareToGuiCoord = (square) => {
@@ -102,7 +103,7 @@ class BoardGUI {
 
     $("#fen-string-input").on("change", function () {
       gameManager.board.fenToBoard($(this).val());
-      if(ANALYZING) {
+      if (ANALYZING) {
         startEvaluation();
       }
     });
@@ -139,7 +140,12 @@ class BoardGUI {
   setEval(gameEval) {
     $("#advantageBar").css("height", `${50 + gameEval * 5}%`);
     if (typeof (gameEval) === "number") {
-      $(".game-eval").text(gameEval.toFixed(2));
+      if (Search.IsMateScore(gameEval * 100)) {
+        gameEval = "#" + (Search.NumPlyToMateFromScore(gameEval * 100) + 1);
+        $(".game-eval").text(gameEval);
+      } else {
+        $(".game-eval").text(gameEval.toFixed(2));
+      }
     }
     else {
       $(".game-eval").text(gameEval);
@@ -243,8 +249,9 @@ class BoardGUI {
       }
     }
 
-    if (gameManager.moveHistory.length > 0) {
-      const lastMove = gameManager.moveHistory[gameManager.moveHistory.length - 1];
+    const lastMove = gameManager.moveHistory[gameManager.moveHistory.length - 1] ?? this.lastMove;
+
+    if (lastMove) {
       const [startSquare, targetSquare] = [lastMove.startSquare, lastMove.targetSquare];
 
       const [startX, startY] = BoardGUI.SquareToGuiCoord(startSquare);
@@ -335,7 +342,7 @@ class BoardGUI {
   }
 
   playMoveSound() {
-    this.moveSound.play();
+    // this.moveSound.play();
   }
 
   promotePiece() {

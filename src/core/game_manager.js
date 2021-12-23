@@ -32,27 +32,39 @@ class GameManager {
     /**
      * @param {Move} move 
      */
-    makeMove(move) {
+    makeMove(move, addToHistory = true, startEval = true) {
+        if (addToHistory) {
+            if (ANALYZING) {
+                const nextPgnMove = pgnAnalyzer.pgnMoves[pgnAnalyzer.pgnMoveIndex + 1];
+                if (nextPgnMove?.moveValue === move.moveValue && this.moveHistory.length === 0) {
+                    pgnAnalyzer.goToNextMove();
+                    return;
+                } else {
+                    this.moveHistory.push(move);
+                }
+            } else {
+                this.moveHistory.push(move);
+            }
+        }
+        if (this.moveHistory.length > 0)
+            $("#undo-move").prop("disabled", false);
+
         this.gui.updateStats();
         this.board.makeMove(move);
-        this.moveHistory.push(move);
-
         this.whiteToMove = !this.whiteToMove;
-
         this.gui.show();
         this.gui.playMoveSound();
 
         if (ANALYZING) {
             const moveGenerator = new MoveGenerator();
             const moves = moveGenerator.generateMoves(this.board);
-            if (!(moveGenerator.inCheck && moves.length === 0)) {
+            if (moves.length >0 && startEval) {
                 startEvaluation();
             } else {
                 this.aiPlayer.search.moveEvaluations = new Map();
                 this.gui.show();
                 this.getGameState();
             }
-            $("#undo-move").prop("disabled", false);
             return;
         }
 
@@ -94,7 +106,7 @@ class GameManager {
         }
 
         if (Search.IsMateScore(evaluation)) {
-            this.gui.setGameState(`Mate in ${Search.NumPlyToMateFromScore(evaluation)} ply`);
+            this.gui.setGameState(`Mate in ${Search.NumPlyToMateFromScore(evaluation) + 1} ply`);
         } else {
             if (guiEvaluation > 0) {
                 this.gui.setGameState("White has the advantage");

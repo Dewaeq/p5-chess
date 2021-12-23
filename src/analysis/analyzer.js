@@ -2,18 +2,23 @@ const ANALYZING = true;
 
 /**@type {GameManager} */
 let gameManager;
+/**@type {PGNAnalyzer} */
+let pgnAnalyzer;
 let canvas;
 
 let tileSize = 90;
 
-function setup() {
+async function setup() {
   setTileSize();
 
   canvas = createCanvas(tileSize * 8, tileSize * 8);
   canvas.parent("#canvas");
 
   gameManager = new GameManager();
-  gameManager.init();
+  await gameManager.init();
+
+  pgnAnalyzer = new PGNAnalyzer();
+  pgnAnalyzer.init();
 }
 
 function windowResized() {
@@ -25,7 +30,7 @@ function windowResized() {
 
 function setTileSize() {
   if (windowWidth >= windowHeight) tileSize = (windowHeight * 0.8) / 8;
-  else tileSize = (windowWidth * 0.9) / 8;
+  else tileSize = (windowWidth * 0.85) / 8;
 }
 
 function startEvaluation() {
@@ -65,6 +70,25 @@ function mousePressed() {
 function mouseReleased() {
   if (gameManager.gui.isDraggingPiece) {
     gameManager.gui.stopDraggingPiece();
+  }
+}
+
+function keyPressed() {
+  if (keyCode === LEFT_ARROW) {
+    if (gameManager.moveHistory.length > 0) {
+      $("#undo-move").click();
+    } else if (pgnAnalyzer.pgnString) {
+      pgnAnalyzer.goToPreviousMove();
+    }
+  }
+  if (!pgnAnalyzer.pgnString) return;
+
+  if (keyCode === RIGHT_ARROW) {
+    pgnAnalyzer.goToNextMove();
+  } else if (keyCode === UP_ARROW) {
+    pgnAnalyzer.goToPgnMove(0);
+  } else if (keyCode === DOWN_ARROW) {
+    pgnAnalyzer.goToPgnMove(pgnAnalyzer.pgnMoves.length - 1);
   }
 }
 

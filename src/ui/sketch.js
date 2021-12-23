@@ -25,7 +25,7 @@ function windowResized() {
 
 function setTileSize() {
   if (windowWidth >= windowHeight) tileSize = (windowHeight * 0.8) / 8;
-  else tileSize = (windowWidth * 0.9) / 8;
+  else tileSize = (windowWidth * 0.85) / 8;
 }
 
 function draw() {

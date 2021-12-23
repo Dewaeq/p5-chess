@@ -37,14 +37,24 @@ body {
     justify-content: start;
 }
 
+.analysis-container {
+    justify-content: space-between;
+}
+
+.spacer {
+    align-items: center;
+    justify-content: start;
+}
+
 .board-container {
     touch-action: none;
     display: flex;
 }
 
 .evalbar {
-    height: auto;
-    padding-right: 10px;
+    width: 4vw;
+    max-width: 25px;
+    padding-right: 1vw;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -97,6 +107,20 @@ body {
         transparent 100%,
         transparent
     );
+}
+
+.move-button {
+    font-weight: bold;
+    margin: 5px 3px;
+    color: white;
+    background-color: rgb(38, 36, 33);
+    border-color: transparent;
+    border-radius: 10%;
+    transition: 0.1s ease;
+}
+
+.move-button:hover {
+    background-color: rgb(54, 146, 231);
 }
 
 @media (orientation: portrait) {

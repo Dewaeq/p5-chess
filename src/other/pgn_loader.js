@@ -1,5 +1,58 @@
 class PGNLoader {
     /**
+     * Remove match data from a PGN string.
+     * Data between curly braces won't get removed
+     * TODO: Remove data between curly braces
+     * @param {String} pgn 
+     * @returns {String}
+     */
+    static RemoveExtraData(pgn) {
+        if (pgn.includes("[")) {
+            const extraDataStart = pgn.indexOf("[");
+            const extraDataEnd = pgn.lastIndexOf("]");
+            pgn = pgn.slice(0, extraDataStart) + pgn.slice(extraDataEnd + 1);
+        }
+        pgn = pgn.replaceAll("\n", " ");
+        return pgn;
+    }
+    /**
+     * Refactor a simple pgn string to one compatible with [PGNLoader.MovesFromPGN]
+     * The provided pgn can't contain any inline-data, eg. engine analysis, timestamps
+     * or variantions.
+     * Match data will be succesfully removed by [PGNLoader.RemoveExtraData]
+     * @param {String} pgn 
+     * @returns {String}
+     */
+    static RefactorSimplePGN(pgn, refactorMoves = true) {
+        // Not pretty or elegant, but it works
+        pgn = this.RemoveExtraData(pgn);
+        pgn = pgn.replaceAll(". ", ".");
+        pgn = pgn.replaceAll("+", "");
+        pgn = pgn.replaceAll("#", "");
+        pgn = pgn.replaceAll("1-0", "END")
+        pgn = pgn.replaceAll("0-1", "END")
+        pgn = pgn.replaceAll("0-1", "END")
+        pgn = pgn.replaceAll("1/2-1/2", "END")
+        pgn = pgn.replaceAll("*", "END")
+        pgn = pgn.replaceAll("  ", " ");
+        pgn = pgn.trim();
+
+        if (!refactorMoves)
+            return pgn;
+
+        const moves = pgn.split(" ");
+        for (const move of moves) {
+            if (move.includes(".")) {
+                const newMove = " " + move.split(".").pop() + " ";
+                pgn = pgn.replaceAll(move, newMove);
+            }
+        }
+
+        pgn = pgn.replaceAll("  ", " ");
+        pgn = pgn.trim();
+        return pgn;
+    }
+    /**
      * @param {string} pgn 
      * @param {number} maxMoveCount 
      * @returns {Move[]}
