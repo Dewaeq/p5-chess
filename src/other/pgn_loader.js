@@ -1,8 +1,6 @@
 class PGNLoader {
     /**
-     * Remove match data from a PGN string.
-     * Data between curly braces won't get removed
-     * TODO: Remove data between curly braces
+     * Remove match data from a PGN string, only moves will remain.
      * @param {String} pgn 
      * @returns {String}
      */
@@ -12,18 +10,34 @@ class PGNLoader {
             const extraDataEnd = pgn.lastIndexOf("]");
             pgn = pgn.slice(0, extraDataStart) + pgn.slice(extraDataEnd + 1);
         }
+        while (pgn.includes("{")) {
+            const extraDataStart = pgn.indexOf("{");
+            const extraDataEnd = pgn.indexOf("}");
+            pgn = pgn.slice(0, extraDataStart) + pgn.slice(extraDataEnd + 1);
+        }
+        while (pgn.includes("(")) {
+            const extraDataStart = pgn.indexOf("(");
+            const extraDataEnd = pgn.indexOf(")");
+            pgn = pgn.slice(0, extraDataStart) + pgn.slice(extraDataEnd + 1);
+        }
+        while (pgn.includes("...")) {
+            const extraDataStart = pgn.indexOf("...");
+            pgn = pgn.slice(0, extraDataStart - 1) + pgn.slice(extraDataStart + 3);
+        }
         pgn = pgn.replaceAll("\n", " ");
+        pgn = pgn.replaceAll("?", "");
+        pgn = pgn.replaceAll("!", "");
+        pgn = pgn.replaceAll("  ", " ");
+
         return pgn;
     }
     /**
-     * Refactor a simple pgn string to one compatible with [PGNLoader.MovesFromPGN]
-     * The provided pgn can't contain any inline-data, eg. engine analysis, timestamps
-     * or variantions.
-     * Match data will be succesfully removed by [PGNLoader.RemoveExtraData]
+     * Refactor a pgn string to one compatible with [PGNLoader.MovesFromPGN]
+     * Extra data will be succesfully removed by [PGNLoader.RemoveExtraData]
      * @param {String} pgn 
      * @returns {String}
      */
-    static RefactorSimplePGN(pgn, refactorMoves = true) {
+    static RefactorPGN(pgn, refactorMoves = true) {
         // Not pretty or elegant, but it works
         pgn = this.RemoveExtraData(pgn);
         pgn = pgn.replaceAll(". ", ".");
