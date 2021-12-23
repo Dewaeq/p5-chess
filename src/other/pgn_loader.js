@@ -5,11 +5,6 @@ class PGNLoader {
      * @returns {String}
      */
     static RemoveExtraData(pgn) {
-        if (pgn.includes("[")) {
-            const extraDataStart = pgn.indexOf("[");
-            const extraDataEnd = pgn.lastIndexOf("]");
-            pgn = pgn.slice(0, extraDataStart) + pgn.slice(extraDataEnd + 1);
-        }
         while (pgn.includes("{")) {
             const extraDataStart = pgn.indexOf("{");
             const extraDataEnd = pgn.indexOf("}");
@@ -22,7 +17,13 @@ class PGNLoader {
         }
         while (pgn.includes("...")) {
             const extraDataStart = pgn.indexOf("...");
-            pgn = pgn.slice(0, extraDataStart - 1) + pgn.slice(extraDataStart + 3);
+            const padding = pgn.slice(0, extraDataStart).lastIndexOf(" ");
+            pgn = pgn.slice(0, padding + 1) + pgn.slice(extraDataStart + 3);
+        }
+        if (pgn.includes("[")) {
+            const extraDataStart = pgn.indexOf("[");
+            const extraDataEnd = pgn.lastIndexOf("]");
+            pgn = pgn.slice(0, extraDataStart) + pgn.slice(extraDataEnd + 1);
         }
         pgn = pgn.replaceAll("\n", " ");
         pgn = pgn.replaceAll("?", "");

@@ -16,13 +16,14 @@ class PGNAnalyzer {
                 pgnAnalyzer.pgnString = null;
                 $("#pgn-input-display").children().remove();
                 gameManager.board.fenToBoard(fenStartString);
+                return;
             }
             try {
                 const parsed = PGNLoader.RefactorPGN(pgn);
                 const moves = PGNLoader.MovesFromPGN(parsed);
             } catch (e) {
                 console.error(e);
-                alert("Failed to parse PGN string!");
+                alert("Failed to parse PGN string!\n" + e.stack);
                 $(this).val("");
                 return;
             }
@@ -33,16 +34,13 @@ class PGNAnalyzer {
     showPGNString(pgn) {
         // Remove the old event listeners
         $(".move-button").off("click");
-
-        pgn = PGNLoader.RemoveExtraData(pgn);
-        
         const parsed = PGNLoader.RefactorPGN(pgn);
         const moves = PGNLoader.MovesFromPGN(parsed);
-        this.pgnString = pgn;
+        this.pgnString = PGNLoader.RemoveExtraData(pgn);
         this.pgnMoves = moves;
 
         let moveIndex = 0;
-        for (let move of pgn.split(" ")) {
+        for (let move of this.pgnString.split(" ")) {
             if (isEmptyString(move)) continue;
 
             const filter = move.replace(".", "").replace("-", "").replace("/", "");
