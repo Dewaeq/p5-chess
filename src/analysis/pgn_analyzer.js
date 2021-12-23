@@ -14,9 +14,11 @@ class PGNAnalyzer {
             const pgn = $(this).val();
             if (isEmptyString(pgn)) {
                 pgnAnalyzer.pgnString = null;
+                $("#pgn-input-display").children().remove();
+                gameManager.board.fenToBoard(fenStartString);
             }
             try {
-                const parsed = PGNLoader.RefactorSimplePGN(pgn);
+                const parsed = PGNLoader.RefactorPGN(pgn);
                 const moves = PGNLoader.MovesFromPGN(parsed);
             } catch (e) {
                 console.error(e);
@@ -34,7 +36,7 @@ class PGNAnalyzer {
 
         pgn = PGNLoader.RemoveExtraData(pgn);
         
-        const parsed = PGNLoader.RefactorSimplePGN(pgn);
+        const parsed = PGNLoader.RefactorPGN(pgn);
         const moves = PGNLoader.MovesFromPGN(parsed);
         this.pgnString = pgn;
         this.pgnMoves = moves;
