@@ -11,7 +11,7 @@ class Perft {
         return {
             numPositions: result,
             time: endTime - startTime,
-            "n/s": result / time * 1000,
+            "n/s": result / (endTime - startTime) * 1000,
         }
     }
 

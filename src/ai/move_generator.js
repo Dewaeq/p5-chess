@@ -42,7 +42,7 @@ class MoveGenerator {
 	 * @param {boolean} includeQuietMoves
 	 */
 	generateMoves(board, includeQuietMoves = true, promotionMode = PROMOTION_MODE_QUEEN_KNIGHT) {
-		this.init(board, promotionMode);
+		this.init(board);
 		
 		this.genQuiets = includeQuietMoves;
 		this.promotionsToGenerate = promotionMode;

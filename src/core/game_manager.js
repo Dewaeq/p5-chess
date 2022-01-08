@@ -58,7 +58,7 @@ class GameManager {
         if (ANALYZING) {
             const moveGenerator = new MoveGenerator();
             const moves = moveGenerator.generateMoves(this.board);
-            if (moves.length >0 && startEval) {
+            if (moves.length > 0 && startEval) {
                 startEvaluation();
             } else {
                 this.aiPlayer.search.moveEvaluations = new Map();
@@ -122,7 +122,7 @@ class GameManager {
         // Insufficient material
         const numPawns = this.board.pawns[WHITE_INDEX].numPieces + this.board.pawns[BLACK_INDEX].numPieces;
         const numRooks = this.board.rooks[WHITE_INDEX].numPieces + this.board.rooks[BLACK_INDEX].numPieces;
-        const numQueens = this.board.queens[WHITE_INDEX].numPieces + this.board.rooks[BLACK_INDEX].numPieces;
+        const numQueens = this.board.queens[WHITE_INDEX].numPieces + this.board.queens[BLACK_INDEX].numPieces;
 
         const numWhiteKnights = this.board.knights[WHITE_INDEX].numPieces;
         const numBlackKnights = this.board.knights[BLACK_INDEX].numPieces;

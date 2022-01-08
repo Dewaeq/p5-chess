@@ -78,7 +78,7 @@ class Zobrist {
         }
 
         if (board.colourToMove === PIECE_BLACK) {
-            applyHashes(...Zobrist.sideToMove);
+            applyHashes(...Zobrist.SideToMove);
         }
 
         applyHashes(...Zobrist.CastlingRights[board.currentGameState & 0b1111]);
