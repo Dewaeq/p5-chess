@@ -6,6 +6,7 @@ importScripts("../ai/move_ordering.js");
 importScripts("../ai/values.js");
 importScripts("../core/piece_list.js");
 importScripts("../core/move.js");
+importScripts("../core/bitboard.js");
 importScripts("../core/board.js");
 importScripts("../core/constants.js");
 importScripts("../core/piece.js");

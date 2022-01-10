@@ -46,6 +46,9 @@ class Board {
 
     /**@type {PieceList[]} */
     this.allPieceLists = [];
+
+    /**@type {BitboardList} */
+    this.bbList = new BitboardList();
   }
 
   init() {
@@ -59,6 +62,8 @@ class Board {
     this.gameStateHistory = new Uint16Array(400);
     this.gameStateIndex = 1;
     this.zobristKey = [0, 0];
+
+    this.bbList = new BitboardList();
 
     this.pawns = [new PieceList(8), new PieceList(8)];
     this.knights = [new PieceList(10), new PieceList(10)];
@@ -110,19 +115,27 @@ class Board {
 
     const movingPiece = this.squares[startSquare];
     const capturedPiece = this.squares[targetSquare];
-
     const movingPieceType = Piece.PieceType(movingPiece);
     const capturedPieceType = Piece.PieceType(capturedPiece);
+
     const moveFlag = move.flag;
     const isPromotion = move.isPromotion;
-    const isEnPassant = (moveFlag === Move.Flag.EnPassantCapture)
+    const isEnPassant = (moveFlag === Move.Flag.EnPassantCapture);
+    const bbPcIndex = this.bbList.getBitboardIndex(movingPieceType, this.colourToMoveIndex);
 
     // Captures
     this.currentGameState |= (capturedPieceType << 8);
     if (capturedPieceType !== PIECE_NONE && !isEnPassant) {
       this.applyHashes(Zobrist.PiecesArray[capturedPieceType][opponentColourIndex][targetSquare])
       this.getPieceList(capturedPieceType, opponentColourIndex).removePieceAtSquare(targetSquare);
+
+      const bbCapturedPcIndex = this.bbList.getBitboardIndex(capturedPieceType, opponentColourIndex);
+      this.bbList.popBit(bbCapturedPcIndex, targetSquare);
     }
+
+    // Move piece in bitboard
+    this.bbList.popBit(bbPcIndex, startSquare);
+    this.bbList.setBit(bbPcIndex, targetSquare);
 
     // Move piece in pieceList
     if (movingPieceType === PIECE_KING) {
@@ -158,6 +171,10 @@ class Board {
       }
       pieceOnTargetSquare = (this.colourToMove | promoteType);
       this.pawns[this.colourToMoveIndex].removePieceAtSquare(targetSquare);
+
+      const bbPromotePcIndex = this.bbList.getBitboardIndex(promoteType, this.colourToMoveIndex);
+      this.bbList.setBit(bbPromotePcIndex, targetSquare);
+      this.bbList.popBit(bbPcIndex, targetSquare);
     }
     else {
       switch (moveFlag) {
@@ -176,6 +193,9 @@ class Board {
 
           this.squares[epPawnSquare] = PIECE_NONE;
           this.pawns[opponentColourIndex].removePieceAtSquare(epPawnSquare);
+
+          const bbEpPcIndex = this.bbList.getBitboardIndex(PIECE_PAWN, opponentColourIndex);
+          this.bbList.popBit(bbEpPcIndex, epPawnSquare);
           break;
         case Move.Flag.Castling:
           const kingSideCastle = (targetSquare === G1) || (targetSquare === G8);
@@ -184,8 +204,12 @@ class Board {
 
           this.squares[rookStartSquare] = PIECE_NONE;
           this.squares[rookTargetSquare] = (this.colourToMove | PIECE_ROOK);
-
           this.rooks[this.colourToMoveIndex].movePiece(rookStartSquare, rookTargetSquare);
+
+          const bbCastlePcIndex = this.bbList.getBitboardIndex(PIECE_ROOK, this.colourToMoveIndex);
+          this.bbList.popBit(bbCastlePcIndex, rookStartSquare);
+          this.bbList.setBit(bbCastlePcIndex, targetSquare);
+
           this.applyHashes(Zobrist.PiecesArray[PIECE_ROOK][this.colourToMoveIndex][rookStartSquare]);
           this.applyHashes(Zobrist.PiecesArray[PIECE_ROOK][this.colourToMoveIndex][rookTargetSquare]);
 
@@ -253,6 +277,7 @@ class Board {
 
     const movedPiece = (isPromotion) ? (this.colourToMove | PIECE_PAWN) : this.squares[targetSquare];
     const movedPieceType = Piece.PieceType(movedPiece);
+    const bbPcIndex = this.bbList.getBitboardIndex(movedPieceType, this.colourToMoveIndex);
 
     this.applyHashes(Zobrist.SideToMove);
     this.applyHashes(Zobrist.PiecesArray[movedPieceType][this.colourToMoveIndex][startSquare]);
@@ -266,7 +291,16 @@ class Board {
     if (capturedPieceType !== PIECE_NONE && !isEnPassant) {
       this.applyHashes(Zobrist.PiecesArray[capturedPieceType][opponentColourIndex][targetSquare]);
       this.getPieceList(capturedPieceType, opponentColourIndex).addPieceAtSquare(targetSquare);
+
+      const bbCapturedPcIndex = this.bbList.getBitboardIndex(capturedPieceType, opponentColourIndex);
+      this.bbList.setBit(bbCapturedPcIndex, targetSquare);
     }
+
+    // Move piece in bitboard
+    if (!isPromotion)
+      this.bbList.popBit(bbPcIndex, targetSquare);
+    this.bbList.setBit(bbPcIndex, startSquare);
+
 
     // Move in pieceList
     if (movedPieceType === PIECE_KING) {
@@ -280,20 +314,29 @@ class Board {
 
     if (isPromotion) {
       this.pawns[this.colourToMoveIndex].addPieceAtSquare(startSquare);
+      let promoteType = 0
+
       switch (moveFlag) {
         case Move.Flag.PromoteToKnight:
+          promoteType = PIECE_KNIGHT;
           this.knights[this.colourToMoveIndex].removePieceAtSquare(targetSquare);
           break;
         case Move.Flag.PromoteToBishop:
+          promoteType = PIECE_BISHOP;
           this.bishops[this.colourToMoveIndex].removePieceAtSquare(targetSquare);
           break;
         case Move.Flag.PromoteToRook:
+          promoteType = PIECE_ROOK;
           this.rooks[this.colourToMoveIndex].removePieceAtSquare(targetSquare);
           break;
         case Move.Flag.PromoteToQueen:
+          promoteType = PIECE_QUEEN;
           this.queens[this.colourToMoveIndex].removePieceAtSquare(targetSquare);
           break;
       }
+      const bbPromotePcIndex = this.bbList.getBitboardIndex(promoteType, this.colourToMoveIndex);
+      this.bbList.popBit(bbPromotePcIndex, targetSquare);
+
     } else {
       switch (moveFlag) {
         case Move.Flag.EnPassantCapture:
@@ -301,6 +344,10 @@ class Board {
           this.squares[targetSquare] = PIECE_NONE;
           this.squares[epPawnSquare] = (this.opponentColour | PIECE_PAWN);
           this.pawns[opponentColourIndex].addPieceAtSquare(epPawnSquare);
+
+          const bbEpPcIndex = this.bbList.getBitboardIndex(PIECE_PAWN, opponentColourIndex);
+          this.bbList.setBit(bbEpPcIndex, epPawnSquare);
+
           this.applyHashes(Zobrist.PiecesArray[PIECE_PAWN][opponentColourIndex][epPawnSquare]);
           break;
 
@@ -311,8 +358,12 @@ class Board {
 
           this.squares[rookTargetSquare] = PIECE_NONE;
           this.squares[rookStartSquare] = (this.colourToMove | PIECE_ROOK);
-
           this.rooks[this.colourToMoveIndex].movePiece(rookTargetSquare, rookStartSquare);
+
+          const bbCastlePcIndex = this.bbList.getBitboardIndex(PIECE_ROOK, this.colourToMoveIndex);
+          this.bbList.popBit(bbCastlePcIndex, targetSquare);
+          this.bbList.setBit(bbCastlePcIndex, startSquare);
+
           this.applyHashes(Zobrist.PiecesArray[PIECE_ROOK][this.colourToMoveIndex][rookStartSquare]);
           this.applyHashes(Zobrist.PiecesArray[PIECE_ROOK][this.colourToMoveIndex][rookTargetSquare]);
           break;
@@ -372,8 +423,11 @@ class Board {
       }
       const pieceColour = isUppercase(symbol) ? PIECE_WHITE : PIECE_BLACK;
       const pieceType = pieceTypeFromSymbol[symbol.toLowerCase()];
+      const square = rank * 8 + file;
 
-      this.squares[rank * 8 + file] = (pieceType | pieceColour);
+      this.squares[square] = (pieceType | pieceColour);
+      const bbIndex = this.bbList.getBitboardIndex(pieceType, pieceColour / 8 - 1);
+      this.bbList.setBit(bbIndex, square);
       file++;
     });
 
